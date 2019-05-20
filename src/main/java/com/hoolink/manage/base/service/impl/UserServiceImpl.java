@@ -519,4 +519,9 @@ public class UserServiceImpl implements UserService {
 		AbstractDict dict = SpringUtils.getBean(key + "Dict", AbstractDict.class);
 		return dict.getDictInfo(param);
 	}
+
+	@Override
+	public ManagerUserBO getById(Long id) {
+		return CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
+	}
 }

@@ -136,4 +136,11 @@ public interface UserService {
      * @throws Exception
      */
     DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception;
+    
+    /**
+     * 根据id获取用户
+     * @param id
+     * @return
+     */
+    ManagerUserBO getById(Long id);
 }
