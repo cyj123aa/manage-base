@@ -1,0 +1,17 @@
+server:
+  port: 9102
+spring:
+  application:
+    name: manage-base
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://192.168.1.153:8888}
+      profile: ${CONFIG_PROFILE:local}
+      label: ${CONFIG_LABEL:master}
+  main:
+    web-application-type: none
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health

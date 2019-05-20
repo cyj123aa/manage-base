@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!-- 引入配置文件 -->
+    <properties resource="generator/generator.properties"/>
+
+    <!-- 一个数据库一个context -->
+    <context id="showPro" targetRuntime="MyBatis3">
+        <!-- JavaBean 实现 序列化Serializable 接口 -->
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+        <!--如果想要通过mapperExt直接调用mapper中的方法，可以使用该插件-->
+        <!--<plugin type="com.hoolink.datamodels.plugins.ExtPlugin"/>-->
+
+        <!-- 注释 -->
+        <commentGenerator type="org.mybatis.generator.internal.HairyCommentGenerator">
+            <property name="javaFileEncoding" value="UTF-8"/>
+            <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+            <property name="suppressAllComments" value="false" />
+            <property name="suppressDate" value="true" />
+            <property name="mergeable" value="false"/><!--是否覆盖生成-->
+        </commentGenerator>
+
+
+        <!-- jdbc连接 -->
+        <jdbcConnection
+                driverClass="${jdbc.driver.class}"
+                connectionURL="${jdbc.url}"
+                userId="${jdbc.username}"
+                password="${jdbc.password}"/>
+
+        <!-- 类型转换 -->
+        <javaTypeResolver>
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!-- 生成实体类地址 -->
+        <javaModelGenerator targetPackage="${model.package}" targetProject="${jdbc.project}">
+            <!-- 是否在当前路径下新加一层schema,eg：fase路径cn.reqe.demo.pojo， true:cn.reqe.demo.pojo.[schemaName] -->
+            <property name="enableSubPackages" value="false"/>
+            <!-- 是否针对string类型的字段在set的时候进行trim调用 -->
+            <property name="trimStrings" value="true"/>
+            <property name="useActualColumnNames" value="true"/>
+        </javaModelGenerator>
+
+        <!-- 生成mapperxml映射文件 -->
+        <sqlMapGenerator targetPackage="${mapper.package}" targetProject="${jdbc.project}">
+            <!-- 是否在当前路径下新加一层schema,eg：fase路径mybatis.mappers， true:mybatis.mappers.[schemaName] -->
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+
+        <!-- 生成mapxml对应client，也就是接口dao -->
+        <javaClientGenerator targetPackage="${mapper.package}" targetProject="${jdbc.project}" type="XMLMAPPER">
+            <!-- 是否在当前路径下新加一层schema,eg：fase路径cn.reqe.demo.mapper， true:cn.reqe.demo.mapper.[schemaName] -->
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <!-- 表配置的地方，按字母排序定义 -->
+        <!-- 客户 -->
+        <!--<table tableName="manager_customer" domainObjectName="Customer">-->
+            <!--<property name="useActualColumnNames" value="false"></property>-->
+            <!--<generatedKey column="id" sqlStatement="JDBC"></generatedKey>-->
+            <!--<columnOverride column="customer_name" property="name"/>-->
+            <!--<columnOverride column="customer_no" property="no"/>-->
+            <!--<columnOverride column="customer_status" property="status"/>-->
+            <!--<columnOverride column="customer_address" property="address"/>-->
+        <!--</table>-->
+        <!-- 用户 -->
+<!--       	<table tableName="manage_user" domainObjectName="User">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="user_accent" property="accent"/>
+            <columnOverride column="user_name" property="name"/>
+            <columnOverride column="user_status" property="status"/>
+        </table> -->
+        <!-- 固件版本 -->
+        <!--<table tableName="firmware_version" domainObjectName="FirmwareVersion">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>-->
+        <!-- 设备版本升级历史表 -->
+    <!--    <table tableName="device_version_upgrade_history" domainObjectName="DeviceVersionUpgradeHistory">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>-->
+        <!-- 设备版本升级历史详情表 -->
+        <!--<table tableName="device_version_upgrade_detail" domainObjectName="DeviceVersionUpgradeDetail">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>-->
+        <!-- 设备延保记录表 -->
+      <!--  <table tableName="device_extension_warranty_record" domainObjectName="DeviceExtensionWarrantyRecord">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>-->
+        <!-- 设备录入记录表 -->
+          <!--<table tableName="device_entry_record" domainObjectName="DeviceEntryRecord">
+              <property name="useActualColumnNames" value="false"></property>
+              <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+              <columnOverride column="entry_status" property="status"/>
+          </table>-->
+        <!-- 角色表 -->
+        <!--<table tableName="manage_role" domainObjectName="ManageRole">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="entry_status" property="status"/>
+        </table>-->
+        <!-- 角色菜单表 -->
+       <!-- <table tableName="middle_role_menu" domainObjectName="MiddleRoleMenu">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="entry_status" property="status"/>
+        </table>-->
+        <!-- 菜单表 -->
+        <!-- <table tableName="manage_menu" domainObjectName="ManageMenu">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="entry_status" property="status"/>
+        </table>-->
+       <table tableName="device_entry_detail" domainObjectName="DeviceEntryDetail">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>
+        <!--<table tableName="device_entry_record" domainObjectName="DeviceEntryRecord">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="entry_status" property="status"/>
+        </table>-->
+  <!--      <table tableName="manage_user" domainObjectName="User">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="user_accent" property="accent"/>
+            <columnOverride column="user_name" property="name"/>
+            <columnOverride column="user_status" property="status"/>
+        </table>-->
+        <!-- 部门表 -->
+<!--         <table tableName="manage_department" domainObjectName="ManageDepartment">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+            <columnOverride column="dept_name" property="name"/>
+        </table> -->
+        <!-- 用户部门表 -->
+<!--       	<table tableName="middle_user_department" domainObjectName="MiddleUserDepartment">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>-->
+    </context>
+</generatorConfiguration>
