@@ -1,6 +1,5 @@
 package com.hoolink.manage.base.bo;
 
-import java.util.List;
 import lombok.Data;
 /**
  * @author lijunling
