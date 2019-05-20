@@ -6,6 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.hoolink.manage.base.bo.DictPairBO;
+import com.hoolink.manage.base.bo.ManageRoleBO;
+import com.hoolink.manage.base.service.RoleService;
+
 /**
  * 角色字典值
  * @author lijunling

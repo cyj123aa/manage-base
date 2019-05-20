@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.bo;
 
+import java.util.List;
+
 import lombok.Data;
 /**
  * @author lijunling
@@ -8,4 +10,5 @@ import lombok.Data;
  */
 @Data
 public class DictInfoBO<K, V> {
+	private List<DictPairBO<K, V>> dictPairList;
 }

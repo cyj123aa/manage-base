@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoolink.manage.base.dao.mapper.ManageMenuMapper">
+  <resultMap id="BaseResultMap" type="com.hoolink.manage.base.dao.model.ManageMenu">
+    <!--
+    @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="menu_code" jdbcType="VARCHAR" property="menuCode" />
+    <result column="priority" jdbcType="INTEGER" property="priority" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="creator" jdbcType="BIGINT" property="creator" />
+    <result column="updator" jdbcType="BIGINT" property="updator" />
+    <result column="created" jdbcType="BIGINT" property="created" />
+    <result column="updated" jdbcType="BIGINT" property="updated" />
+    <result column="enabled" jdbcType="BIT" property="enabled" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+    @mbggenerated
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <!--
+    @mbggenerated
+    -->
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+    @mbggenerated
+    -->
+    id, menu_name, url, menu_code, priority, parent_id, creator, updator, created, updated, 
+    enabled
+  </sql>
+  <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageMenuExample" resultMap="BaseResultMap">
+    <!--
+    @mbggenerated
+    -->
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from manage_menu
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--
+    @mbggenerated
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    from manage_menu
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--
+    @mbggenerated
+    -->
+    delete from manage_menu
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.hoolink.manage.base.dao.model.ManageMenuExample">
+    <!--
+    @mbggenerated
+    -->
+    delete from manage_menu
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageMenu" useGeneratedKeys="true">
+    <!--
+    @mbggenerated
+    -->
+    insert into manage_menu (menu_name, url, menu_code, 
+      priority, parent_id, creator, 
+      updator, created, updated, 
+      enabled)
+    values (#{menuName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{menuCode,jdbcType=VARCHAR}, 
+      #{priority,jdbcType=INTEGER}, #{parentId,jdbcType=BIGINT}, #{creator,jdbcType=BIGINT}, 
+      #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, 
+      #{enabled,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageMenu" useGeneratedKeys="true">
+    <!--
+    @mbggenerated
+    -->
+    insert into manage_menu
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="menuName != null">
+        menu_name,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+      <if test="menuCode != null">
+        menu_code,
+      </if>
+      <if test="priority != null">
+        priority,
+      </if>
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="updator != null">
+        updator,
+      </if>
+      <if test="created != null">
+        created,
+      </if>
+      <if test="updated != null">
+        updated,
+      </if>
+      <if test="enabled != null">
+        enabled,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="menuName != null">
+        #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="menuCode != null">
+        #{menuCode,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=BIGINT},
+      </if>
+      <if test="updator != null">
+        #{updator,jdbcType=BIGINT},
+      </if>
+      <if test="created != null">
+        #{created,jdbcType=BIGINT},
+      </if>
+      <if test="updated != null">
+        #{updated,jdbcType=BIGINT},
+      </if>
+      <if test="enabled != null">
+        #{enabled,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.hoolink.manage.base.dao.model.ManageMenuExample" resultType="java.lang.Integer">
+    <!--
+    @mbggenerated
+    -->
+    select count(*) from manage_menu
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+    @mbggenerated
+    -->
+    update manage_menu
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.menuName != null">
+        menu_name = #{record.menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.url != null">
+        url = #{record.url,jdbcType=VARCHAR},
+      </if>
+      <if test="record.menuCode != null">
+        menu_code = #{record.menuCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.priority != null">
+        priority = #{record.priority,jdbcType=INTEGER},
+      </if>
+      <if test="record.parentId != null">
+        parent_id = #{record.parentId,jdbcType=BIGINT},
+      </if>
+      <if test="record.creator != null">
+        creator = #{record.creator,jdbcType=BIGINT},
+      </if>
+      <if test="record.updator != null">
+        updator = #{record.updator,jdbcType=BIGINT},
+      </if>
+      <if test="record.created != null">
+        created = #{record.created,jdbcType=BIGINT},
+      </if>
+      <if test="record.updated != null">
+        updated = #{record.updated,jdbcType=BIGINT},
+      </if>
+      <if test="record.enabled != null">
+        enabled = #{record.enabled,jdbcType=BIT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+    @mbggenerated
+    -->
+    update manage_menu
+    set id = #{record.id,jdbcType=BIGINT},
+      menu_name = #{record.menuName,jdbcType=VARCHAR},
+      url = #{record.url,jdbcType=VARCHAR},
+      menu_code = #{record.menuCode,jdbcType=VARCHAR},
+      priority = #{record.priority,jdbcType=INTEGER},
+      parent_id = #{record.parentId,jdbcType=BIGINT},
+      creator = #{record.creator,jdbcType=BIGINT},
+      updator = #{record.updator,jdbcType=BIGINT},
+      created = #{record.created,jdbcType=BIGINT},
+      updated = #{record.updated,jdbcType=BIGINT},
+      enabled = #{record.enabled,jdbcType=BIT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hoolink.manage.base.dao.model.ManageMenu">
+    <!--
+    @mbggenerated
+    -->
+    update manage_menu
+    <set>
+      <if test="menuName != null">
+        menu_name = #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="menuCode != null">
+        menu_code = #{menuCode,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        priority = #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=BIGINT},
+      </if>
+      <if test="updator != null">
+        updator = #{updator,jdbcType=BIGINT},
+      </if>
+      <if test="created != null">
+        created = #{created,jdbcType=BIGINT},
+      </if>
+      <if test="updated != null">
+        updated = #{updated,jdbcType=BIGINT},
+      </if>
+      <if test="enabled != null">
+        enabled = #{enabled,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hoolink.manage.base.dao.model.ManageMenu">
+    <!--
+    @mbggenerated
+    -->
+    update manage_menu
+    set menu_name = #{menuName,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      menu_code = #{menuCode,jdbcType=VARCHAR},
+      priority = #{priority,jdbcType=INTEGER},
+      parent_id = #{parentId,jdbcType=BIGINT},
+      creator = #{creator,jdbcType=BIGINT},
+      updator = #{updator,jdbcType=BIGINT},
+      created = #{created,jdbcType=BIGINT},
+      updated = #{updated,jdbcType=BIGINT},
+      enabled = #{enabled,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

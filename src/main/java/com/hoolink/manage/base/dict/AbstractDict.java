@@ -3,6 +3,7 @@ package com.hoolink.manage.base.dict;
 import java.util.List;
 
 import com.hoolink.manage.base.bo.DictInfoBO;
+import com.hoolink.manage.base.bo.DictPairBO;
 
 /**
  * 抽象字典值

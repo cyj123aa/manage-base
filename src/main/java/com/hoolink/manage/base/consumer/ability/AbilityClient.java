@@ -22,5 +22,48 @@ public class AbilityClient {
     @Resource
     private RestTemplate restTemplate;
 
+    /**
+     * 从ability读取上传的固件文件
+     * @return
+     */
+    public BackBO<byte[]> readFile(Long fileId) {
+        BackBO<byte[]> backBO = restTemplate.postForObject("cse://ability/obs/downloadBytes", fileId, BackBO.class);
+        if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.READ_FIRMWARE_FILE_ERROR);
+        }
+        return backBO;
+    }
 
+    /**
+     * 从ability读取上传的固件文件信息
+     * @return
+     */
+    public BackBO<ObsBO> getObs(Long fileId) {
+        BackBO<ObsBO> backBO = restTemplate.postForObject("cse://ability/obs/getObs", fileId, BackBO.class);
+        if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.READ_FIRMWARE_FILE_ERROR);
+        }
+        return backBO;
+    }
+
+    public BackBO sendMsg(SmsBO smsBO) {
+        BackBO backBO = restTemplate.postForObject("cse://ability/sms/sendMsg", smsBO, BackBO.class);
+        if(backBO == null || !backBO.getStatus()){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_SEND_ERROR);
+        }
+        return backBO;
+    }
+
+    /**
+     * 创建桶
+     * @param bucketBO
+     * @return
+     */
+    public BackBO<Long> createBucket(BucketBO bucketBO) {
+        BackBO<Long> backBO = restTemplate.postForObject("cse://ability/bucket/create", bucketBO, BackBO.class);
+        if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.CREATE_BUCKET_ERROR);
+        }
+        return backBO;
+    }
 }

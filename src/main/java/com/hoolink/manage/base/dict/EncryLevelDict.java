@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.hoolink.manage.base.bo.DictPairBO;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 /**
  * 加密等级字典值
