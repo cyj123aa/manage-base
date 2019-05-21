@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.service.impl;
 import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.ManagerUserBO;
-import com.hoolink.manage.base.bo.ManagerUserBO.UserDepartmentBO;
+
 import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO.UserDeptBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
@@ -35,6 +34,8 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;

@@ -5,7 +5,6 @@ import com.hoolink.manage.base.bo.DictInfoBO;
 import com.hoolink.manage.base.bo.DictParamBO;
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
-import com.hoolink.manage.base.bo.ManagerUserBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
@@ -14,6 +13,7 @@ import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
 
 /**
  * @Author: xuli
