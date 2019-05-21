@@ -1,7 +1,5 @@
 package com.hoolink.manage.base.service.impl;
 import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.ManagerUserBO;
-import com.hoolink.manage.base.bo.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO.UserDeptBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
@@ -35,6 +33,8 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;
@@ -63,7 +63,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 
 /**
@@ -286,7 +285,6 @@ public class UserServiceImpl implements UserService {
         CurrentUserBO currentUserBO=new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
-        currentUserBO.setRoleId(user.getRoleId());
         return sessionService.cacheCurrentUser(currentUserBO);
     }
 
@@ -318,203 +316,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_PHONE_EXISTS);
         }
     }
-
-	@Override
-	public PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception {
-		UserExample example = new UserExample();
-		UserExample.Criteria criteria = example.createCriteria();
-		buildUserCriteria(criteria, userPageParamBO);
-		
-		//员工列表根据组织架构，全员可见
-		User currentUser = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
-		if(ContextUtil.getManageCurrentUser().getRoleLevel() != Constant.LEVEL_ONE){
-			criteria.andCompanyEqualTo(currentUser.getCompany());
-		}
-		PageInfo<User> userPageInfo = PageHelper
-				.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
-				.doSelectPageInfo(() -> userMapper.selectByExample(example));
-		List<User> userList = userPageInfo.getList();
-		
-		//查询用户对应部门
-		List<Long> userIdList = userList.stream().map(user -> user.getId()).collect(Collectors.toList());
-		List<MiddleUserDepartmentBO> middleUserDepartmentBOList = middleUserDepartmentService.listByUserIdList(userIdList);
-		Map<Long, List<MiddleUserDepartmentBO>> middleUserDepartmentMap = middleUserDepartmentBOList.stream().collect(Collectors.groupingBy(MiddleUserDepartmentBO::getUserId));
-		
-		//根据部门id查询部门信息
-		List<Long> deptIdList = middleUserDepartmentBOList.stream().map(ud -> ud.getDeptId()).collect(Collectors.toList());
-		List<ManageDepartmentBO> departmentList = departmentService.listByIdList(deptIdList);
-		
-		//查询用户对应角色
-		List<Long> roleIdList = userList.stream().map(user -> user.getRoleId()).collect(Collectors.toList());
-		List<ManageRoleBO> roleList = roleService.listByIdList(roleIdList);
-		
-		List<ManagerUserBO> userBoList = new ArrayList<>();
-		userList.stream().forEach(user -> {
-			ManagerUserBO userBO = new ManagerUserBO();
-			userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
-			userBO.setStatusName(StatusEnum.getValue(user.getStatus()));
-			ManageRoleBO role = roleList.stream().filter(r -> r.getId().longValue() == user.getRoleId().longValue()).findFirst().orElseGet(ManageRoleBO::new);
-			userBO.setRoleName(role.getRoleName());
-			
-			List<MiddleUserDepartmentBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
-			List<UserDepartmentBO> userDeptPairList = new ArrayList<>();
-			userBO.setUserDeptPairList(userDeptPairList);
-			
-			if(CollectionUtils.isNotEmpty(userDepartmentList)) {
-				userDepartmentList.stream().forEach(up -> {
-					UserDepartmentBO userDeptPair = userBO.new UserDepartmentBO();
-					ManageDepartmentBO department = departmentList.stream().filter(d -> d.getId().longValue() == up.getDeptId().longValue()).findFirst().orElseGet(ManageDepartmentBO::new); 
-					userDeptPair.setDeptName(department.getName());
-					BeanUtils.copyProperties(up, userDeptPair);
-					userDeptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(up.getEncryLevelDept()));
-					userDeptPairList.add(userDeptPair);
-				});
-			}
-			
-			BeanUtils.copyProperties(user, userBO);
-			userBoList.add(userBO);
-		});
-		
-		PageInfo<ManagerUserBO> userBOPageInfo = new PageInfo<>();
-		userBOPageInfo.setList(userBoList);
-		userBOPageInfo.setTotal(userPageInfo.getTotal());
-		return userBOPageInfo;
-	}
-
-	private void buildUserCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(StringUtils.isNotBlank(userPageParamBO.getName())) {
-			criteria.andNameLike("%" + userPageParamBO.getName() + "%");
-		}
-		if(StringUtils.isNotBlank(userPageParamBO.getPosition())) {
-			criteria.andPositionLike("%" + userPageParamBO.getPosition() + "%");
-		}
-		if(userPageParamBO.getDeptId() != null) {
-			List<MiddleUserDepartmentBO> userDeptList = middleUserDepartmentService.listByDeptId(userPageParamBO.getDeptId());
-			List<Long> userIdList = userDeptList.stream().map(ud -> ud.getUserId()).collect(Collectors.toList());
-			if(CollectionUtils.isEmpty(userIdList)) {
-				criteria.andIdIsNull();
-			}else {
-				criteria.andIdIn(userIdList);
-			}
-		}
-		if(userPageParamBO.getRoleId() != null) {
-			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
-		}
-		if(userPageParamBO.getStatus() != null) {
-			criteria.andStatusEqualTo(userPageParamBO.getStatus());
-		}
-		if(StringUtils.isNotBlank(userPageParamBO.getPhone())) {
-			criteria.andPhoneEqualTo(userPageParamBO.getPhone());
-		}
-		if(StringUtils.isNotBlank(userPageParamBO.getUserAccount())) {
-			criteria.andUserAccountLike("%" + userPageParamBO.getUserAccount() + "%");
-		}
-		criteria.andEnabledEqualTo(true);
-	}
-
-	@Override
-	public ManagerUserInfoBO getManagerUserInfo(ManagerUserInfoParamBO userParamBO) throws Exception {
-		User user = userMapper.selectByPrimaryKey(userParamBO.getUserId());
-		if(user == null) {
-			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
-		}
-		
-		ManagerUserInfoBO userInfoBO = new ManagerUserInfoBO();
-		BeanUtils.copyProperties(user, userInfoBO);
-		if(user.getImgId() != null) {
-			try {
-				BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
-				ObsBO obsBO = obsBackBo.getData();
-				userInfoBO.setImgUrl(obsBO.getObjectUrl());
-			}catch(Exception e) {
-				throw new BusinessException(HoolinkExceptionMassageEnum.ACCESS_OBS_FAILED);
-			}
-		}
-		
-		//查询用户对应部门
-		List<MiddleUserDepartmentBO> userDeptPairList = middleUserDepartmentService.listByUserId(user.getId());
-		//只有上级管理员或者文控中心人员可以查看密保等级等敏感信息
-		if(ContextUtil.getManageCurrentUser().getRoleLevel() != Constant.LEVEL_ONE && ContextUtil.getManageCurrentUser().getRoleLevel() != Constant.LEVEL_TWO) {
-			userInfoBO.setEncryLevelCompany(null);
-			userDeptPairList.stream().forEach(udp -> udp.setEncryLevelDept(null));
-		}
-		userInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDeptBO.class));
-		return userInfoBO;
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public boolean createUser(ManagerUserParamBO userBO) throws Exception {
-		//校验
-		List<UserDeptVO> userDeptPairList = userBO.getUserDeptPairList();
-		if(CollectionUtils.isEmpty(userDeptPairList) || userDeptPairList.get(0).getDeptId()==null || userDeptPairList.get(0).getEncryLevelDept()==null) {
-			throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
-		}
-		//创建用户
-		User user = CopyPropertiesUtil.copyBean(userBO, User.class);
-		user.setStatus(true);
-		user.setCreator(ContextUtil.getManageCurrentUser().getUserId());
-		user.setCreated(System.currentTimeMillis());
-		user.setEnabled(true);
-		user.setFirstLogin(false);
-		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
-		userMapper.insertSelective(user);
-		
-		//用户部门对应关系
-		List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
-		userDeptPairList.stream().forEach(udp -> {
-			MiddleUserDepartmentBO middleUserDept = CopyPropertiesUtil.copyBean(udp, MiddleUserDepartmentBO.class);
-			middleUserDept.setUserId(user.getId());
-			middleUserDeptList.add(middleUserDept);
-		});
-		return middleUserDepartmentService.batchInsert(middleUserDeptList);
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public boolean updateUser(ManagerUserParamBO userBO) throws Exception {
-		boolean flag = false;
-		//更新用户
-		User user = CopyPropertiesUtil.copyBean(userBO, User.class);
-		user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
-		user.setUpdated(System.currentTimeMillis());
-		flag = userMapper.updateByPrimaryKeySelective(user)==1;
-		
-		List<UserDeptVO> userDeptPairList = userBO.getUserDeptPairList();
-		if(CollectionUtils.isNotEmpty(userDeptPairList)) {
-			for(UserDeptVO userDeptVO : userDeptPairList) {
-				if(userDeptVO.getDeptId()==null || userDeptVO.getEncryLevelDept()==null) {
-					throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
-				}
-			}
-			//删除原有用户部门对应关系
-			middleUserDepartmentService.removeByUserId(userBO.getId());
-			//新增用户部门关系
-			List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
-			userDeptPairList.stream().forEach(udp -> {
-				MiddleUserDepartmentBO middleUserDept = CopyPropertiesUtil.copyBean(udp, MiddleUserDepartmentBO.class);
-				middleUserDept.setUserId(userBO.getId());
-				middleUserDeptList.add(middleUserDept);
-			});
-			flag = middleUserDepartmentService.batchInsert(middleUserDeptList);
-		}
-		return flag;
-	}
-
-	@Override
-	public DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception {
-		String key = dictParamBO.getKey();
-		Object param = null;
-		if(DEPT.equals(key)) {
-			Integer code = dictParamBO.getCompanyCode();
-			param = CompanyEnum.getValue(code);
-			if(param == null) {
-				throw new BusinessException(HoolinkExceptionMassageEnum.COMPANY_CODE_ERROR);
-			}
-		}
-		AbstractDict dict = SpringUtils.getBean(key + "Dict", AbstractDict.class);
-		return dict.getDictInfo(param);
-	}
 
 	@Override
 	public ManagerUserBO getById(Long id) {
