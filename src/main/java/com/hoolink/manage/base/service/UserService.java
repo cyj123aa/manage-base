@@ -20,11 +20,12 @@ import com.hoolink.sdk.bo.base.UserBO;
  * @Date: 2019/4/15 19:24
  */
 public interface UserService {
+
     /**
      * 用户登录
-     *
      * @param loginParam
      * @return
+     * @throws Exception
      */
     LoginResultBO login(LoginParamBO loginParam) throws Exception;
 
@@ -43,8 +44,8 @@ public interface UserService {
 
     /**
      * 重置密码
-     * @param
-     * @return
+     * @param loginParam
+     * @throws Exception
      */
     void resetPassword(LoginParamBO loginParam) throws Exception ;
 
@@ -52,6 +53,7 @@ public interface UserService {
      * 获取手机验证码
      * @param phone
      * @return
+     * @throws Exception
      */
     String getPhoneCode(String phone) throws Exception;
 
@@ -64,6 +66,7 @@ public interface UserService {
 
     /**
      * 绑定手机号
+     * @param bindPhoneParam
      * @throws Exception
      */
     void bindPhone(PhoneParamBO bindPhoneParam) throws Exception;
@@ -85,7 +88,7 @@ public interface UserService {
 
     /**
      * 修改手机号
-     * @param
+     * @param phoneParam
      * @throws Exception
      */
     void updatePhone(PhoneParamBO phoneParam) throws Exception;
