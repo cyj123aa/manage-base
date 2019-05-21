@@ -82,14 +82,14 @@ public class AuthFilter implements HttpServerFilter{
 			}else {
 				//权限级别 1-只读 2-全部(读、写)
 				Integer permissionFlag = roleMenuPermission.getPermissionFlag();
-				if(permissionFlag == PermissionEnum.READ_ONLY.getKey()) {
+				if(PermissionEnum.READ_ONLY.getKey().equals(permissionFlag)) {
 					//按钮级别修改的话默认判断create、remove、update
 					if(uri.contains(CREATE_PREFIX) || uri.contains(REMOVE_PREFIX) || uri.contains(UPDATE_PREFIX)) {
 						//没有权限
 						return Response.succResp(
 			                    BackVOUtil.operateError(HoolinkExceptionMassageEnum.FORBIDDEN.getMassage()));
 					}
-				}else if(permissionFlag == PermissionEnum.ALL.getKey()) {
+				}else if(PermissionEnum.ALL.getKey().equals(permissionFlag)) {
 					//放行
 					return null;
 				}
