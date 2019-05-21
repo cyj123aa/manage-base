@@ -1,25 +1,13 @@
 package com.hoolink.manage.base.controller.web;
 
 import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
-import com.hoolink.manage.base.bo.ManagerUserParamBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
-import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DictParamBO;
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.ValidatorUtil;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
 import com.hoolink.manage.base.vo.req.PhoneParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserPageParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
-import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
-import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
-import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
-import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.manage.base.vo.res.UserInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -145,53 +133,5 @@ public class UserController {
     @LogAndParam(value = "查询Session用户失败")
     public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token) {
         return userService.getSessionUser(token);
-    }
-    
-    @PostMapping(value = "list")
-    @ApiOperation(value = "获取用户列表带分页")
-    @LogAndParam(value = "获取用户列表失败")
-    public BackVO<PageInfo<ManagerUserVO>> list(@RequestBody ManagerUserPageParamVO userPageParamVO) throws Exception{
-    	ManagerUserPageParamBO userPageParamBO = CopyPropertiesUtil.copyBean(userPageParamVO, ManagerUserPageParamBO.class);
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyPageInfo(userService.list(userPageParamBO), ManagerUserVO.class));
-    }
-    
-    @PostMapping(value = "getManagerUserInfo")
-    @ApiOperation(value = "获取用户基础信息")
-    @LogAndParam(value = "获取用户基础信息失败")
-    public BackVO<ManagerUserInfoVO> getManagerUserInfo(@RequestBody @Valid ManagerUserInfoParamVO userParamVO) throws Exception{
-    	ManagerUserInfoParamBO userParamBO = CopyPropertiesUtil.copyBean(userParamVO, ManagerUserInfoParamBO.class);
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getManagerUserInfo(userParamBO), ManagerUserInfoVO.class));
-    }
-    
-    @PostMapping(value = "createUser")
-    @ApiOperation(value = "创建用户")
-    @LogAndParam(value = "创建用户失败")
-    public BackVO<Void> createUser(@RequestBody ManagerUserParamVO userVO) throws Exception{
-        BackVO validateParameter = ValidatorUtil.validateParameter(userVO, ManagerBaseGroup.CreateUser.class);
-        if (validateParameter != null) {
-            return validateParameter;
-        }
-    	userService.createUser(CopyPropertiesUtil.copyBean(userVO, ManagerUserParamBO.class));
-    	return BackVOUtil.operateAccess();
-    }
-    
-    @PostMapping(value = "updateUser")
-    @ApiOperation(value = "更新用户")
-    @LogAndParam(value = "更新用户失败")
-    public BackVO<Void> updateUser(@RequestBody ManagerUserParamVO userVO) throws Exception{
-        BackVO validateParameter = ValidatorUtil.validateParameter(userVO, ManagerBaseGroup.UpdateUser.class);
-        if (validateParameter != null) {
-            return validateParameter;
-        }
-    	userService.updateUser(CopyPropertiesUtil.copyBean(userVO, ManagerUserParamBO.class));
-    	return BackVOUtil.operateAccess();
-    }
-    
-    @PostMapping(value = "getDictInfo")
-    @ApiOperation(value = "获取字典值数据")
-    @LogAndParam(value = "获取字典值数据失败")
-    public BackVO<DictInfoVO> getDictInfo(@RequestBody @Valid DictParamVO dictParamVO) throws Exception{
-    	DictParamBO dictParamBO = CopyPropertiesUtil.copyBean(dictParamVO, DictParamBO.class);
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getDictInfo(dictParamBO), DictInfoVO.class));
     }
 }

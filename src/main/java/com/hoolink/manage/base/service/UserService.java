@@ -5,7 +5,6 @@ import com.hoolink.manage.base.bo.DictInfoBO;
 import com.hoolink.manage.base.bo.DictParamBO;
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
-import com.hoolink.manage.base.bo.ManagerUserBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
@@ -14,6 +13,7 @@ import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
 
 /**
  * @Author: xuli
@@ -99,46 +99,6 @@ public interface UserService {
      * @throws Exception
      */
     UserBO getUser() throws Exception;
-    
-    /**
-     * 获取用户列表（带分页）
-     * @param userPageParamBO
-     * @return
-     * @throws Exception
-     */
-    PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception;
-    
-    /**
-     * 获取用户基础信息
-     * @param userParamBO
-     * @return
-     * @throws Exception
-     */
-    ManagerUserInfoBO getManagerUserInfo(ManagerUserInfoParamBO userParamBO) throws Exception;
-    
-    /**
-     * 创建用户
-     * @param userBO
-     * @return
-     * @throws Exception
-     */
-    boolean createUser(ManagerUserParamBO userBO) throws Exception;
-    
-    /**
-     * 更新用户
-     * @param userBO
-     * @return
-     * @throws Exception
-     */
-    boolean updateUser(ManagerUserParamBO userBO) throws Exception;
-    
-    /**
-     * 获取字典值数据
-     * @param dictParamBO
-     * @return
-     * @throws Exception
-     */
-    DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception;
     
     /**
      * 根据id获取用户
