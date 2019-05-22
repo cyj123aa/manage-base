@@ -34,7 +34,7 @@
         manage_role.id, role_name, role_desc, parent_id, role_level, role_status, manage_role.creator, manage_role.updator, manage_role.created, 
     manage_role.updated, manage_role.enabled
     from manage_role join manage_user on manage_role.id=manage_user.role_id
-    where manage_user.id = #{userId} and manage_user.enabled=true and manage_role.enabled=true
+    where manage_role.id = #{userId} and manage_role.enabled=true
   </select>
 
   <select id="getRoleByOne" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -44,7 +44,6 @@
     <if test="searchValue!=null and searchValue!=''">
     and locate(#{searchValue}, role_name)>0
     </if>
-    order by created desc
   </select>
 
   <select id="getRoleByTwo" resultMap="BaseResultMap">
@@ -55,6 +54,5 @@
     <if test="searchValue!=null and searchValue!=''">
       and locate(#{searchValue}, role_name)>0
     </if>
-    order by created desc
   </select>
 </mapper>
