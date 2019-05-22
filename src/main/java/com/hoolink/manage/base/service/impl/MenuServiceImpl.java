@@ -126,9 +126,6 @@ public class MenuServiceImpl implements MenuService {
             }else if (EdmResourceRepertory.PUBLIC_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //公共库 暂不做
                 initMenuBO.setPublicVO(edmMenuBO);
-            }else if (Constants.COLLECT_RESOURCE_CODE.equals(edmMenuBO.getMenuCode())){
-                //收藏夹
-                initMenuBO.setCollectVO(edmMenuBO);
             }
         }
         return initMenuBO;
