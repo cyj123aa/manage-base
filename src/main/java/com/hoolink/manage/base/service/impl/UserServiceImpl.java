@@ -1,6 +1,6 @@
 package com.hoolink.manage.base.service.impl;
+
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.bo.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO.UserDeptBO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -15,13 +15,14 @@ import com.hoolink.manage.base.service.MiddleUserDepartmentService;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.SpringUtils;
-import com.hoolink.manage.base.vo.req.RoleParamVO;
 import com.hoolink.manage.base.vo.res.ManagerUserInfoVO.UserDeptVO;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;

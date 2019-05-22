@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hoolink.manage.base.bo.ManagerUserBO;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 
