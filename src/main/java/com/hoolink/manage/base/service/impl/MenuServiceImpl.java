@@ -14,8 +14,6 @@ import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.manager.EdmMenuBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
-import com.hoolink.sdk.constants.Constants;
-import com.hoolink.sdk.enums.edm.EdmResourceRepertory;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
@@ -75,7 +73,6 @@ public class MenuServiceImpl implements MenuService {
         if(CollectionUtils.isEmpty(menus)||CollectionUtils.isEmpty(middleRoleMenus)){
             return null;
         }
-        //EDM系统用户权限菜单
         List<EdmMenuBO> menuBOS = new ArrayList<>();
         for (ManageMenu menu:menus) {
             for (MiddleRoleMenu middleRoleMenu:middleRoleMenus) {
@@ -87,12 +84,11 @@ public class MenuServiceImpl implements MenuService {
             }
         }
         //EDM展示 二级菜单 三级菜单
-        //所属公司 部门
+        //部门资源
         UserDeptBO deptMenu = middleUserDepartmentMapperExt.getDeptMenu(userId);
         InitMenuBO initMenuBO = new InitMenuBO();
         for (EdmMenuBO edmMenuBO:menuBOS) {
-            if (EdmResourceRepertory.DEPT_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
-                //部门资源
+            if ("".equals(edmMenuBO.getMenuCode())){
                 if(deptMenu!=null){
                     //下级菜单
                     List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
@@ -112,33 +108,19 @@ public class MenuServiceImpl implements MenuService {
                     edmMenuBO.setEdmMenuVOList(twoMenuBOS);
                 }
                 initMenuBO.setDeptVO(edmMenuBO);
-            }else if (EdmResourceRepertory.CACHE_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
-                //缓冲库
+            }else if ("".equals(edmMenuBO.getMenuCode())){
                 initMenuBO.setCacheVO(edmMenuBO);
-            }else if (EdmResourceRepertory.COMPANY_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
-                //资源库 二级菜单
-                List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
-                EdmMenuBO twoMenu = new EdmMenuBO();
-                twoMenu.setMenuName(deptMenu.getCompanyName());
-                twoMenuBOS.add(twoMenu);
-                edmMenuBO.setEdmMenuVOList(twoMenuBOS);
+            }else if ("".equals(edmMenuBO.getMenuCode())){
                 initMenuBO.setCompanyVO(edmMenuBO);
-            }else if (EdmResourceRepertory.PUBLIC_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
-                //公共库 暂不做
+            }else if ("".equals(edmMenuBO.getMenuCode())){
                 initMenuBO.setPublicVO(edmMenuBO);
-            }else if (Constants.COLLECT_RESOURCE_CODE.equals(edmMenuBO.getMenuCode())){
-                //收藏夹
+            }else if ("".equals(edmMenuBO.getMenuCode())){
                 initMenuBO.setCollectVO(edmMenuBO);
             }
         }
         return initMenuBO;
     }
 
-    /**
-     * 用户权限下菜单
-     * @param roleId
-     * @return
-     */
     private List<MiddleRoleMenu> listByRole(Long roleId){
         MiddleRoleMenuExample example = new MiddleRoleMenuExample();
         example.createCriteria().andRoleIdEqualTo(roleId);
