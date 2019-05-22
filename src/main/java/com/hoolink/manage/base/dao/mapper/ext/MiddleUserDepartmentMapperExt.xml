@@ -23,7 +23,14 @@
   </resultMap>
 
   <select id="getDeptMenu" resultMap="UserDeptMap">
-    select mu.company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
+    select mu.company,mu.id,md.dept_name from manage_user mu left join middle_user_department mud
+    left join manage_department md on mud.department_id=md.id
+    on mu.id=mud.user_id
+    where mu.enabled=true and mu.id=#{user_id}
+  </select>
+
+  <select id="getUserSecurity" resultMap="UserDeptMap">
+    select mu.encry_level_company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
     on mu.id=mud.user_id
     where mu.enabled=true and mu.id=#{user_id}
   </select>
