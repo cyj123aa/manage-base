@@ -77,8 +77,15 @@ public class UserController {
     @PostMapping(value = "getPhoneCode")
     @ApiOperation(value = "获取手机验证码")
     @LogAndParam(value = "获取手机验证码失败，请稍后重试")
-    public BackVO<String> getPhoneCode(@RequestBody BaseParam<String> newPassword)throws Exception  {
-        return BackVOUtil.operateAccess(userService.getPhoneCode(newPassword.getData()));
+    public BackVO<String> getPhoneCode(@RequestBody BaseParam<String> phone)throws Exception  {
+        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),false));
+    }
+
+    @PostMapping(value = "bindPhoneGetCode")
+    @ApiOperation(value = "绑定手机号时获取手机验证码")
+    @LogAndParam(value = "获取手机验证码失败，请稍后重试")
+    public BackVO<String> bindPhoneGetCode(@RequestBody BaseParam<String> phone)throws Exception  {
+        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),true));
     }
 
     @PostMapping(value = "verifyPhoneCode")

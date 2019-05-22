@@ -166,7 +166,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getPhoneCode(String phone) throws Exception {
+    public String getPhoneCode(String phone,Boolean flag) throws Exception {
+        //为true表示需要校验手机号是否存在
+        if(flag){
+            checkPhoneExist(phone);
+        }
         //生成随机6位数字
         String code= RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //调用ability发送验证码
