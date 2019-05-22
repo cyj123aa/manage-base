@@ -1,14 +1,7 @@
 package com.hoolink.manage.base.service;
 
-import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DictInfoBO;
-import com.hoolink.manage.base.bo.DictParamBO;
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
-import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
-import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -55,7 +48,7 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    String getPhoneCode(String phone) throws Exception;
+    String getPhoneCode(String phone,Boolean flag) throws Exception;
 
     /**
      * 验证手机验证码
