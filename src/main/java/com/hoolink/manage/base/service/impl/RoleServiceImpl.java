@@ -82,12 +82,7 @@ public class RoleServiceImpl implements RoleService {
         }
         roleMapper.insertSelective(role);
         //權限
-        List<MiddleRoleMenu> middleRoleMenus = CopyPropertiesUtil.copyList(roleMenuVOList, MiddleRoleMenu.class);
-        middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(role.getId()));
-        //批量創建
-        roleMenuMapperExt.bulkInsert(middleRoleMenus);
-        //保存角色对应权限到redis
-        saveRoleMenuPermissionToRedis(middleRoleMenus);
+        createMiddleRoleMenuList(roleMenuVOList, role.getId());
         return role.getId();
     }
     
@@ -140,8 +135,17 @@ public class RoleServiceImpl implements RoleService {
         if(CollectionUtils.isEmpty(roleMenuVOList)){
             return;
         }
+        createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
+    }
+
+    /**
+     * 创建用户角色联系
+     * @param roleMenuVOList
+     * @param id
+     */
+    private void createMiddleRoleMenuList(List<MiddleRoleMenuBO> roleMenuVOList, Long id) {
         List<MiddleRoleMenu> middleRoleMenus = CopyPropertiesUtil.copyList(roleMenuVOList, MiddleRoleMenu.class);
-        middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(roleParamBO.getId()));
+        middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(id));
         //批量創建
         roleMenuMapperExt.bulkInsert(middleRoleMenus);
         //保存角色对应权限到redis
@@ -150,7 +154,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void updateStatus(RoleParamBO roleParamBO) throws Exception {
-        if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()!=null){
+        if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         updateRole(roleParamBO);
@@ -206,12 +210,10 @@ public class RoleServiceImpl implements RoleService {
         if(pageParamBO.getPageNo()==null || pageParamBO.getPageSize()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        //一级用户(全部角色) 二级用户(自己及创建的角色)  三级用户不能查看
-        PageHelper.startPage(pageParamBO.getPageNo(), pageParamBO.getPageSize());
-        ManageRoleExample example=new ManageRoleExample();
-        example.setOrderByClause("created desc");
         //获得用户角色
         ManageRole userRole = getUserRole();
+        //一级用户(全部角色) 二级用户(自己及创建的角色)  三级用户不能查看
+        PageHelper.startPage(pageParamBO.getPageNo(), pageParamBO.getPageSize());
         List<ManageRole> roles=null;
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();

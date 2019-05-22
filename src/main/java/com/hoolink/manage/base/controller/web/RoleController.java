@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 /**
  * @description: 角色管理
@@ -76,7 +78,9 @@ public class RoleController {
     public BackVO<PageInfo<RoleParamVO>> listByPage(@RequestBody SearchPageParamVO pageParamVO) throws Exception {
         SearchPageParamBO pageParamBO = CopyPropertiesUtil.copyBean(pageParamVO, SearchPageParamBO.class);
         PageInfo<RoleParamBO> roleParamBOPageInfo = roleService.listByPage(pageParamBO);
+        List<RoleParamVO> roleParamVOS = CopyPropertiesUtil.copyList(roleParamBOPageInfo.getList(), RoleParamVO.class);
         PageInfo<RoleParamVO> pageInfo = CopyPropertiesUtil.copyBean(roleParamBOPageInfo, PageInfo.class);
+        pageInfo.setList(roleParamVOS);
         return BackVOUtil.operateAccess(pageInfo);
     }
 }
