@@ -1,22 +1,9 @@
 package com.hoolink.manage.base.service.impl;
-import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.ManagerUserBO;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.bo.ManagerUserBO.UserDepartmentBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO.UserDeptBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
-import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
-import com.hoolink.manage.base.bo.ManagerUserParamBO;
-import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DictInfoBO;
-import com.hoolink.manage.base.bo.DictParamBO;
-import com.hoolink.manage.base.bo.LoginParamBO;
-import com.hoolink.manage.base.bo.LoginResultBO;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
-import com.hoolink.manage.base.bo.ManageRoleBO;
-import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
@@ -287,7 +274,7 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
         currentUserBO.setRoleId(user.getRoleId());
-        RoleParamVO role = roleService.getById(user.getRoleId());
+        RoleParamBO role = roleService.getById(user.getRoleId());
         if(role!=null && role.getRoleStatus()) {
         	currentUserBO.setRoleLevel(role.getRoleLevel());
         }

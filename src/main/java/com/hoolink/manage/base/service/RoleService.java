@@ -5,6 +5,8 @@ import java.util.List;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.ManageRoleBO;
 import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
+import com.hoolink.manage.base.bo.RoleParamBO;
+import com.hoolink.manage.base.bo.SearchPageParamBO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
 
@@ -17,18 +19,25 @@ public interface RoleService {
 
     /**
      * 创建角色
-     * @param roleParamVO
+     * @param roleParamBO
      * @return
      * @throws Exception
      */
-    Long create(RoleParamVO roleParamVO) throws Exception;
+    Long create(RoleParamBO roleParamBO) throws Exception;
 
     /**
      * 修改角色
-     * @param roleParamVO
+     * @param roleParamBO
      * @throws Exception
      */
-    void update(RoleParamVO roleParamVO) throws Exception;
+    void update(RoleParamBO roleParamBO) throws Exception;
+
+    /**
+     * 修改角色状态
+     * @param roleParamBO
+     * @throws Exception
+     */
+    void updateStatus(RoleParamBO roleParamBO) throws Exception;
 
     /**
      * 获得角色信息
@@ -36,15 +45,15 @@ public interface RoleService {
      * @return
      * @throws Exception
      */
-    RoleParamVO getById(Long roleId) throws Exception;
+    RoleParamBO getById(Long roleId) throws Exception;
 
     /**
      * 分页获得角色列表
-     * @param pageParamVO
+     * @param pageParamBO
      * @return
      * @throws Exception
      */
-    PageInfo<RoleParamVO> listByPage(PageParamVO pageParamVO) throws Exception;
+    PageInfo<RoleParamBO> listByPage(SearchPageParamBO pageParamBO) throws Exception;
     
     /**
      * 获取id集合获取角色
