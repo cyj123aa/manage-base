@@ -24,5 +24,5 @@ public interface MenuService {
      * @param code
      * @return
      */
-    InitMenuBO listByCode(String code);
+    InitMenuBO listByCode(String code) throws Exception;
 }

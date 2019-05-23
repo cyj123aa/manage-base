@@ -1,5 +1,5 @@
 package com.hoolink.manage.base.dao.mapper.ext;
-import com.hoolink.manage.base.bo.UserDeptBO;
+import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
 import java.util.List;
 
@@ -20,11 +20,11 @@ public interface MiddleUserDepartmentMapperExt {
     int batchInsert(@Param("middleUserDeptList") List<MiddleUserDepartment> middleUserDeptList);
 
 	/**
-	 * 用户所属信息
+	 * 用户绑定组织架构信息
 	 * @param userId
 	 * @return
 	 */
-	UserDeptBO getDeptMenu(@Param("userId")Long userId);
+	List<DeptPositionBO> getDept(@Param("userId")Long userId);
 
 	/**
 	 * 用户密保等级

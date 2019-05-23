@@ -29,7 +29,7 @@ public class MenuController {
     @PostMapping(value = "listByCode")
     @ApiOperation(value = "获得初始化菜单")
     @LogAndParam(value = "获得初始化菜单失败",check = CheckEnum.STRING_NOT_BLANK)
-    public BackBO<InitMenuBO> listByCode(String code){
+    public BackBO<InitMenuBO> listByCode(String code) throws Exception {
         return BackBOUtil.defaultBackBO(menuService.listByCode(code));
     }
 }

@@ -2,7 +2,7 @@ package com.hoolink.manage.base.service.impl;
 
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.bo.ManageMenuBO;
-import com.hoolink.manage.base.bo.UserDeptBO;
+import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.dao.mapper.ManageMenuMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleRoleMenuMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
@@ -12,10 +12,12 @@ import com.hoolink.manage.base.dao.model.ManageMenuExample;
 import com.hoolink.manage.base.dao.model.MiddleRoleMenu;
 import com.hoolink.manage.base.dao.model.MiddleRoleMenuExample;
 import com.hoolink.manage.base.service.MenuService;
+import com.hoolink.manage.base.service.UserService;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.manager.EdmMenuBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
-import com.hoolink.sdk.constants.Constants;
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.enums.edm.EdmResourceRepertory;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
@@ -24,12 +26,12 @@ import com.hoolink.sdk.utils.CopyPropertiesUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @description: 菜单
@@ -46,6 +48,8 @@ public class MenuServiceImpl implements MenuService {
     private MiddleRoleMenuMapper middleRoleMenuMapper;
     @Resource
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<ManageMenuBO> listByIdList(List<Long> idList) {
@@ -59,7 +63,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public InitMenuBO listByCode(String code) {
+    public InitMenuBO listByCode(String code) throws Exception {
         if(StringUtils.isEmpty(code)){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
@@ -88,22 +92,41 @@ public class MenuServiceImpl implements MenuService {
             }
         }
         //EDM展示 二级菜单 三级菜单
-        //所属公司 部门(部门资源库存在四级菜单 岗级菜单)
-        UserDeptBO deptMenu = middleUserDepartmentMapperExt.getDeptMenu(userId);
+        //部门资源库存在四级菜单 岗级菜单
+        //用户权限下所有组织架构列表
+        List<DeptPositionBO> deptAllList = middleUserDepartmentMapperExt.getDept(userId);
+        DeptPositionBO company= null;
+        List<DeptPositionBO> deptList = new ArrayList<>();
+        List<DeptPositionBO> positionList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(deptAllList)){
+            for (DeptPositionBO deptPositionBO : deptAllList){
+                if(EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue())){
+                    company=deptPositionBO;
+                }else if(EdmDeptEnum.DEPT.getKey().equals(deptPositionBO.getDeptType().intValue())){
+                    deptList.add(deptPositionBO);
+                }else if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
+                    positionList.add(deptPositionBO);
+                }
+            }
+        }
         InitMenuBO initMenuBO = new InitMenuBO();
         for (EdmMenuBO edmMenuBO:menuBOS) {
             if (EdmResourceRepertory.DEPT_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //部门资源
-                getDeptInitMenu(deptMenu, edmMenuBO);
+                getDeptInitMenu(company,deptList,positionList, edmMenuBO);
                 initMenuBO.setDeptVO(edmMenuBO);
             }else if (EdmResourceRepertory.CACHE_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //缓冲库
                 initMenuBO.setCacheVO(edmMenuBO);
             }else if (EdmResourceRepertory.COMPANY_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //资源库 二级菜单
+                if(company==null){
+                    continue;
+                }
                 List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
                 EdmMenuBO twoMenu = new EdmMenuBO();
-                twoMenu.setMenuName(deptMenu.getCompanyName());
+                twoMenu.setId(company.getId());
+                twoMenu.setMenuName(company.getDeptName());
                 twoMenuBOS.add(twoMenu);
                 edmMenuBO.setEdmMenuVOList(twoMenuBOS);
                 initMenuBO.setCompanyVO(edmMenuBO);
@@ -112,31 +135,38 @@ public class MenuServiceImpl implements MenuService {
                 initMenuBO.setPublicVO(edmMenuBO);
             }
         }
+        //查询用户密保等级 岗级
+        UserDeptInfoBO userSecurity = userService.getUserSecurity(userId);
+        if(userSecurity!=null){
+            initMenuBO.setEncryLevelCompany(userSecurity.getEncryLevelCompany());
+            initMenuBO.setPositionList(userSecurity.getPositionList());
+        }
         return initMenuBO;
     }
 
     /**
      * 部门资源菜单初始化
-     * @param deptMenu
+     * @param company
+     * @param deptList
+     * @param positionList
      * @param edmMenuBO
      */
-    private void getDeptInitMenu(UserDeptBO deptMenu, EdmMenuBO edmMenuBO) {
-        if(deptMenu!=null){
+    private void getDeptInitMenu(DeptPositionBO company,List<DeptPositionBO> deptList,List<DeptPositionBO> positionList, EdmMenuBO edmMenuBO) {
+        if(company!=null){
             //下级菜单
             List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
             EdmMenuBO twoMenu = new EdmMenuBO();
-            twoMenu.setMenuName(deptMenu.getCompanyName());
-            List<DeptPositionBO> deptPositionBOS = deptMenu.getDeptPositionBOS();
-            if(!org.springframework.util.CollectionUtils.isEmpty(deptPositionBOS)){
+            twoMenu.setId(company.getId());
+            twoMenu.setMenuName(company.getDeptName());
+            if(!org.springframework.util.CollectionUtils.isEmpty(deptList)){
                 List<EdmMenuBO> threeMenuBOS = new ArrayList<>();
-                for (DeptPositionBO deptPositionBO:deptPositionBOS) {
+                for (DeptPositionBO deptPositionBO:deptList) {
                     EdmMenuBO threeMenu = new EdmMenuBO();
                     threeMenu.setId(deptPositionBO.getId());
                     threeMenu.setMenuName(deptPositionBO.getDeptName());
-                    List<DeptPositionBO> deptPositionBOList = deptPositionBO.getDeptPositionBOList();
-                    if(!org.springframework.util.CollectionUtils.isEmpty(deptPositionBOList)) {
+                    if(!org.springframework.util.CollectionUtils.isEmpty(positionList)) {
                         List<EdmMenuBO> fourMenuBOS = new ArrayList<>();
-                        for (DeptPositionBO positionBO : deptPositionBOS) {
+                        for (DeptPositionBO positionBO : positionList) {
                             EdmMenuBO fourMenu = new EdmMenuBO();
                             fourMenu.setId(positionBO.getId());
                             fourMenu.setMenuName(positionBO.getDeptName());

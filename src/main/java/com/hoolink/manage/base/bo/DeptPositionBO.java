@@ -15,8 +15,12 @@ public class DeptPositionBO {
     private Long id;
 
     private String deptName;
+
     /**
-     * 部门 岗级
+     * <pre>
+     * 1-公司 2-部门 3-小组
+     * 表字段 : manage_department.dept_type
+     * </pre>
      */
-    private List<DeptPositionBO> deptPositionBOList;
+    private Byte deptType;
 }
