@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.service;
 
+import java.util.List;
+
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
@@ -99,4 +101,11 @@ public interface UserService {
      * @return
      */
     ManagerUserBO getById(Long id);
+    
+    /**
+     * 根据id集合获取用户
+     * @param idList
+     * @return
+     */
+    List<ManagerUserBO> listByIdList(List<Long> idList);
 }

@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
+import java.util.List;
+
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,5 +36,12 @@ public class UserController {
     @LogAndParam(value = "根据id获取用户失败，请稍后重试")
 	public BackBO<ManagerUserBO> getById(@RequestBody Long id)throws Exception{
 		return BackBOUtil.defaultBackBO(userService.getById(id));
+	}
+    
+    @PostMapping(value = "listByIdList")
+    @ApiOperation(value = "根据id集合获取用户")
+    @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")
+	public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
+		return BackBOUtil.defaultBackBO(userService.listByIdList(idList));
 	}
 }
