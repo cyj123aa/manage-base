@@ -4,17 +4,21 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.constant.Constant;
+import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleRoleMenuMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageRoleMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
 import com.hoolink.manage.base.dao.model.*;
+import com.hoolink.manage.base.service.ButtonService;
 import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.util.RedisUtil;
 import com.hoolink.manage.base.vo.req.MiddleRoleMenuVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
+import com.hoolink.sdk.enums.ButtonTypeEnum;
+import com.hoolink.sdk.enums.PermissionEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
@@ -23,6 +27,7 @@ import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,10 +35,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @description: 角色管理
@@ -54,6 +64,8 @@ public class RoleServiceImpl implements RoleService {
     private ManageRoleMapperExt manageRoleMapperExt;
     @Autowired
     private MenuService menuService;
+    @Autowired
+    private ButtonService buttonService;
     @Resource
     RedisUtil redisUtil;
 
@@ -270,5 +282,42 @@ public class RoleServiceImpl implements RoleService {
 			roleMenuPermissionList.add(roleMenuPermission);
 		});
 		return roleMenuPermissionList;
+	}
+
+	@Override
+	public Set<String> listAccessUrlByRoleId(Long roleId) {
+		String rolePermittedUrlKey = RedisConstant.ROLE_PERMITTED_URL_PREFIX + roleId;
+		if(redisUtil.hasKey(rolePermittedUrlKey)) {
+			return redisUtil.sGet(rolePermittedUrlKey).stream().map(u -> (String)u).collect(Collectors.toSet());
+		}else {
+			Set<String> urlSet = new HashSet<>();
+			/* 1.查询角色权限菜单url */
+	        MiddleRoleMenuExample example = new MiddleRoleMenuExample();
+	        example.createCriteria().andRoleIdEqualTo(roleId);
+	        List<MiddleRoleMenu> roleMenuList = roleMenuMapper.selectByExample(example);
+	        List<Long> menuIdList = roleMenuList.stream().map(rm -> rm.getMenuId()).collect(Collectors.toList());
+	        //如果没有权限菜单直接返回
+	        if(CollectionUtils.isEmpty(menuIdList)) {
+	        	return Collections.emptySet();
+	        }
+	        List<ManageMenuBO> menus = menuService.listByIdList(menuIdList);
+	        urlSet.addAll(menus.stream().map(m -> m.getUrl()).collect(Collectors.toList()));
+	        
+	        /* 2.获取权限按钮对应的url */
+	        List<ManageButtonBO> buttonList = buttonService.listByMenuIdList(menuIdList);
+	        roleMenuList.stream().forEach(rm -> {
+	        	Stream<ManageButtonBO> buttonStream = buttonList.stream().filter(b -> rm.getMenuId().equals(b.getMenuId()));
+	        	if(PermissionEnum.READ_ONLY.getKey().equals(rm.getPermissionFlag())) {
+	        		//只读菜单的话，把查询类别的按钮url加进来
+	        		urlSet.addAll(buttonStream.filter(b -> ButtonTypeEnum.READ_ONLY.getKey().equals(b.getButtonType())).map(b -> b.getButtonUrl()).collect(Collectors.toList()));
+	        	}else if(PermissionEnum.ALL.getKey().equals(rm.getPermissionFlag())) {
+	        		//可读写菜单的话，把所有的按钮url加进来
+	        		urlSet.addAll(buttonStream.map(b -> b.getButtonUrl()).collect(Collectors.toList()));
+	        	}
+	        });
+	        urlSet.removeIf(u -> u==null);
+	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
+	        return urlSet;
+		}
 	}
 }

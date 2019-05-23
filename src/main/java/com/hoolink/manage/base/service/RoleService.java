@@ -1,14 +1,13 @@
 package com.hoolink.manage.base.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.ManageRoleBO;
 import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
 import com.hoolink.manage.base.bo.RoleParamBO;
 import com.hoolink.manage.base.bo.SearchPageParamBO;
-import com.hoolink.manage.base.vo.req.PageParamVO;
-import com.hoolink.manage.base.vo.req.RoleParamVO;
 
 /**
  * @description: 角色管理
@@ -76,4 +75,10 @@ public interface RoleService {
      * @return
      */
     List<RoleMenuPermissionBO> listMenuAccessByRoleId(Long roleId);
+    /**
+     * 根据roleId获取权限url
+     * @param roleId
+     * @return
+     */
+    Set<String> listAccessUrlByRoleId(Long roleId);
 }

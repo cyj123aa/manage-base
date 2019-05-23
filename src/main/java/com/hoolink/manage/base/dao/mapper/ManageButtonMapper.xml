@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper">
-  <resultMap id="BaseResultMap" type="com.hoolink.manage.base.dao.model.ManageDepartment">
+<mapper namespace="com.hoolink.manage.base.dao.mapper.ManageButtonMapper">
+  <resultMap id="BaseResultMap" type="com.hoolink.manage.base.dao.model.ManageButton">
     <!--
     @mbggenerated
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="dept_name" jdbcType="VARCHAR" property="name" />
-    <result column="dept_type" jdbcType="TINYINT" property="deptType" />
-    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="menu_id" jdbcType="BIGINT" property="menuId" />
+    <result column="button_code" jdbcType="VARCHAR" property="buttonCode" />
+    <result column="button_name" jdbcType="VARCHAR" property="buttonName" />
+    <result column="button_url" jdbcType="VARCHAR" property="buttonUrl" />
+    <result column="button_desc" jdbcType="VARCHAR" property="buttonDesc" />
+    <result column="button_type" jdbcType="TINYINT" property="buttonType" />
     <result column="creator" jdbcType="BIGINT" property="creator" />
     <result column="updator" jdbcType="BIGINT" property="updator" />
     <result column="created" jdbcType="BIGINT" property="created" />
@@ -83,9 +86,10 @@
     <!--
     @mbggenerated
     -->
-    id, dept_name, dept_type, parent_id, creator, updator, created, updated, enabled
+    id, menu_id, button_code, button_name, button_url, button_desc, button_type, creator, 
+    updator, created, updated, enabled
   </sql>
-  <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageDepartmentExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageButtonExample" resultMap="BaseResultMap">
     <!--
     @mbggenerated
     -->
@@ -94,7 +98,7 @@
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from manage_department
+    from manage_button
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -108,50 +112,61 @@
     -->
     select 
     <include refid="Base_Column_List" />
-    from manage_department
+    from manage_button
     where id = #{id,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     <!--
     @mbggenerated
     -->
-    delete from manage_department
+    delete from manage_button
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.hoolink.manage.base.dao.model.ManageDepartmentExample">
+  <delete id="deleteByExample" parameterType="com.hoolink.manage.base.dao.model.ManageButtonExample">
     <!--
     @mbggenerated
     -->
-    delete from manage_department
+    delete from manage_button
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment" useGeneratedKeys="true">
+  <insert id="insert" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageButton" useGeneratedKeys="true">
     <!--
     @mbggenerated
     -->
-    insert into manage_department (dept_name, dept_type, parent_id, 
+    insert into manage_button (menu_id, button_code, button_name, 
+      button_url, button_desc, button_type, 
       creator, updator, created, 
       updated, enabled)
-    values (#{name,jdbcType=VARCHAR}, #{deptType,jdbcType=TINYINT}, #{parentId,jdbcType=BIGINT}, 
+    values (#{menuId,jdbcType=BIGINT}, #{buttonCode,jdbcType=VARCHAR}, #{buttonName,jdbcType=VARCHAR}, 
+      #{buttonUrl,jdbcType=VARCHAR}, #{buttonDesc,jdbcType=VARCHAR}, #{buttonType,jdbcType=TINYINT}, 
       #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, 
       #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT})
   </insert>
-  <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment" useGeneratedKeys="true">
+  <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageButton" useGeneratedKeys="true">
     <!--
     @mbggenerated
     -->
-    insert into manage_department
+    insert into manage_button
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="name != null">
-        dept_name,
+      <if test="menuId != null">
+        menu_id,
       </if>
-      <if test="deptType != null">
-        dept_type,
+      <if test="buttonCode != null">
+        button_code,
       </if>
-      <if test="parentId != null">
-        parent_id,
+      <if test="buttonName != null">
+        button_name,
+      </if>
+      <if test="buttonUrl != null">
+        button_url,
+      </if>
+      <if test="buttonDesc != null">
+        button_desc,
+      </if>
+      <if test="buttonType != null">
+        button_type,
       </if>
       <if test="creator != null">
         creator,
@@ -170,14 +185,23 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="name != null">
-        #{name,jdbcType=VARCHAR},
+      <if test="menuId != null">
+        #{menuId,jdbcType=BIGINT},
       </if>
-      <if test="deptType != null">
-        #{deptType,jdbcType=TINYINT},
+      <if test="buttonCode != null">
+        #{buttonCode,jdbcType=VARCHAR},
       </if>
-      <if test="parentId != null">
-        #{parentId,jdbcType=BIGINT},
+      <if test="buttonName != null">
+        #{buttonName,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonUrl != null">
+        #{buttonUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonDesc != null">
+        #{buttonDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonType != null">
+        #{buttonType,jdbcType=TINYINT},
       </if>
       <if test="creator != null">
         #{creator,jdbcType=BIGINT},
@@ -196,11 +220,11 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.hoolink.manage.base.dao.model.ManageDepartmentExample" resultType="java.lang.Integer">
+  <select id="countByExample" parameterType="com.hoolink.manage.base.dao.model.ManageButtonExample" resultType="java.lang.Integer">
     <!--
     @mbggenerated
     -->
-    select count(*) from manage_department
+    select count(*) from manage_button
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -209,19 +233,28 @@
     <!--
     @mbggenerated
     -->
-    update manage_department
+    update manage_button
     <set>
       <if test="record.id != null">
         id = #{record.id,jdbcType=BIGINT},
       </if>
-      <if test="record.name != null">
-        dept_name = #{record.name,jdbcType=VARCHAR},
+      <if test="record.menuId != null">
+        menu_id = #{record.menuId,jdbcType=BIGINT},
       </if>
-      <if test="record.deptType != null">
-        dept_type = #{record.deptType,jdbcType=TINYINT},
+      <if test="record.buttonCode != null">
+        button_code = #{record.buttonCode,jdbcType=VARCHAR},
       </if>
-      <if test="record.parentId != null">
-        parent_id = #{record.parentId,jdbcType=BIGINT},
+      <if test="record.buttonName != null">
+        button_name = #{record.buttonName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.buttonUrl != null">
+        button_url = #{record.buttonUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.buttonDesc != null">
+        button_desc = #{record.buttonDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.buttonType != null">
+        button_type = #{record.buttonType,jdbcType=TINYINT},
       </if>
       <if test="record.creator != null">
         creator = #{record.creator,jdbcType=BIGINT},
@@ -247,11 +280,14 @@
     <!--
     @mbggenerated
     -->
-    update manage_department
+    update manage_button
     set id = #{record.id,jdbcType=BIGINT},
-      dept_name = #{record.name,jdbcType=VARCHAR},
-      dept_type = #{record.deptType,jdbcType=TINYINT},
-      parent_id = #{record.parentId,jdbcType=BIGINT},
+      menu_id = #{record.menuId,jdbcType=BIGINT},
+      button_code = #{record.buttonCode,jdbcType=VARCHAR},
+      button_name = #{record.buttonName,jdbcType=VARCHAR},
+      button_url = #{record.buttonUrl,jdbcType=VARCHAR},
+      button_desc = #{record.buttonDesc,jdbcType=VARCHAR},
+      button_type = #{record.buttonType,jdbcType=TINYINT},
       creator = #{record.creator,jdbcType=BIGINT},
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
@@ -261,20 +297,29 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment">
+  <update id="updateByPrimaryKeySelective" parameterType="com.hoolink.manage.base.dao.model.ManageButton">
     <!--
     @mbggenerated
     -->
-    update manage_department
+    update manage_button
     <set>
-      <if test="name != null">
-        dept_name = #{name,jdbcType=VARCHAR},
+      <if test="menuId != null">
+        menu_id = #{menuId,jdbcType=BIGINT},
       </if>
-      <if test="deptType != null">
-        dept_type = #{deptType,jdbcType=TINYINT},
+      <if test="buttonCode != null">
+        button_code = #{buttonCode,jdbcType=VARCHAR},
       </if>
-      <if test="parentId != null">
-        parent_id = #{parentId,jdbcType=BIGINT},
+      <if test="buttonName != null">
+        button_name = #{buttonName,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonUrl != null">
+        button_url = #{buttonUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonDesc != null">
+        button_desc = #{buttonDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="buttonType != null">
+        button_type = #{buttonType,jdbcType=TINYINT},
       </if>
       <if test="creator != null">
         creator = #{creator,jdbcType=BIGINT},
@@ -294,14 +339,17 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment">
+  <update id="updateByPrimaryKey" parameterType="com.hoolink.manage.base.dao.model.ManageButton">
     <!--
     @mbggenerated
     -->
-    update manage_department
-    set dept_name = #{name,jdbcType=VARCHAR},
-      dept_type = #{deptType,jdbcType=TINYINT},
-      parent_id = #{parentId,jdbcType=BIGINT},
+    update manage_button
+    set menu_id = #{menuId,jdbcType=BIGINT},
+      button_code = #{buttonCode,jdbcType=VARCHAR},
+      button_name = #{buttonName,jdbcType=VARCHAR},
+      button_url = #{buttonUrl,jdbcType=VARCHAR},
+      button_desc = #{buttonDesc,jdbcType=VARCHAR},
+      button_type = #{buttonType,jdbcType=TINYINT},
       creator = #{creator,jdbcType=BIGINT},
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},

@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.consumer.ability;
 
+import com.hoolink.sdk.annotation.ClientException;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.ability.BucketBO;
 import com.hoolink.sdk.bo.ability.ObsBO;
@@ -38,6 +39,7 @@ public class AbilityClient {
      * 从ability读取上传的固件文件信息
      * @return
      */
+    @ClientException(message="访问OBS服务失败")
     public BackBO<ObsBO> getObs(Long fileId) {
         BackBO<ObsBO> backBO = restTemplate.postForObject("cse://hoolink-ability/obs/getObs", fileId, BackBO.class);
         if(backBO == null || !backBO.getStatus() || backBO.getData() == null){

@@ -1,6 +1,9 @@
 package com.hoolink.manage.base.service;
 
+import java.util.List;
+
 import com.github.pagehelper.PageInfo;
+import com.hoolink.manage.base.bo.DeptTreeBO;
 import com.hoolink.manage.base.bo.DictInfoBO;
 import com.hoolink.manage.base.bo.DictParamBO;
 import com.hoolink.manage.base.bo.LoginParamBO;
@@ -143,4 +146,10 @@ public interface UserService {
      * @return
      */
     ManagerUserBO getById(Long id);
+    
+    /**
+     *获取组织架构树 
+     * @return
+     */
+    List<DeptTreeBO> getDeptTree();
 }

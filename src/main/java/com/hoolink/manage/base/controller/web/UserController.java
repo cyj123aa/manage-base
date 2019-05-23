@@ -16,6 +16,7 @@ import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
+import com.hoolink.manage.base.vo.res.DeptTreeVO;
 import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
 import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
@@ -34,6 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -193,5 +196,12 @@ public class UserController {
     public BackVO<DictInfoVO> getDictInfo(@RequestBody @Valid DictParamVO dictParamVO) throws Exception{
     	DictParamBO dictParamBO = CopyPropertiesUtil.copyBean(dictParamVO, DictParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getDictInfo(dictParamBO), DictInfoVO.class));
+    }
+    
+    @PostMapping(value = "getDeptTree")
+    @ApiOperation(value = "获取组织架构tree数据")
+    @LogAndParam(value = "获取组织架构tree数据失败")
+    public BackVO<List<DeptTreeVO>> getDeptTree() throws Exception{
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(), DeptTreeVO.class));
     }
 }

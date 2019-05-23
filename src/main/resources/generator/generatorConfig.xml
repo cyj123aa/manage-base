@@ -118,10 +118,10 @@
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
             <columnOverride column="entry_status" property="status"/>
         </table>-->
-       <table tableName="device_entry_detail" domainObjectName="DeviceEntryDetail">
+<!--        <table tableName="device_entry_detail" domainObjectName="DeviceEntryDetail">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
-        </table>
+        </table> -->
         <!--<table tableName="device_entry_record" domainObjectName="DeviceEntryRecord">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
@@ -135,15 +135,20 @@
             <columnOverride column="user_status" property="status"/>
         </table>-->
         <!-- 部门表 -->
-<!--         <table tableName="manage_department" domainObjectName="ManageDepartment">
+        <table tableName="manage_department" domainObjectName="ManageDepartment">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
             <columnOverride column="dept_name" property="name"/>
-        </table> -->
+        </table> 
         <!-- 用户部门表 -->
-<!--       	<table tableName="middle_user_department" domainObjectName="MiddleUserDepartment">
+       	<table tableName="middle_user_department" domainObjectName="MiddleUserDepartment">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
-        </table>-->
+        </table>
+        <!-- 按钮表 -->
+        <table tableName="manage_button" domainObjectName="ManageButton">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>
     </context>
 </generatorConfiguration>

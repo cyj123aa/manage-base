@@ -14,4 +14,6 @@ public class Constant {
     public static final Byte LEVEL_ONE = 1;
     public static final Byte LEVEL_TWO = 2;
     public static final Byte LEVEL_THREE = 3;
+    
+    public static final String DICT = "Dict";
 }

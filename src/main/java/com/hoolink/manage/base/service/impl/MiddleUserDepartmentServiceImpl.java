@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -33,7 +34,7 @@ public class MiddleUserDepartmentServiceImpl implements MiddleUserDepartmentServ
 	@Override
 	public List<MiddleUserDepartmentBO> listByUserIdList(List<Long> userIdList) {
 		if(CollectionUtils.isEmpty(userIdList)) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 		MiddleUserDepartmentExample example = new MiddleUserDepartmentExample();
 		MiddleUserDepartmentExample.Criteria criteria = example.createCriteria();
