@@ -293,73 +293,123 @@ public class ManageDepartmentExample {
             return (Criteria) this;
         }
 
-        public Criteria andCompanyIsNull() {
-            addCriterion("company is null");
+        public Criteria andDeptTypeIsNull() {
+            addCriterion("dept_type is null");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyIsNotNull() {
-            addCriterion("company is not null");
+        public Criteria andDeptTypeIsNotNull() {
+            addCriterion("dept_type is not null");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyEqualTo(String value) {
-            addCriterion("company =", value, "company");
+        public Criteria andDeptTypeEqualTo(Byte value) {
+            addCriterion("dept_type =", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyNotEqualTo(String value) {
-            addCriterion("company <>", value, "company");
+        public Criteria andDeptTypeNotEqualTo(Byte value) {
+            addCriterion("dept_type <>", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyGreaterThan(String value) {
-            addCriterion("company >", value, "company");
+        public Criteria andDeptTypeGreaterThan(Byte value) {
+            addCriterion("dept_type >", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyGreaterThanOrEqualTo(String value) {
-            addCriterion("company >=", value, "company");
+        public Criteria andDeptTypeGreaterThanOrEqualTo(Byte value) {
+            addCriterion("dept_type >=", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyLessThan(String value) {
-            addCriterion("company <", value, "company");
+        public Criteria andDeptTypeLessThan(Byte value) {
+            addCriterion("dept_type <", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyLessThanOrEqualTo(String value) {
-            addCriterion("company <=", value, "company");
+        public Criteria andDeptTypeLessThanOrEqualTo(Byte value) {
+            addCriterion("dept_type <=", value, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyLike(String value) {
-            addCriterion("company like", value, "company");
+        public Criteria andDeptTypeIn(List<Byte> values) {
+            addCriterion("dept_type in", values, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyNotLike(String value) {
-            addCriterion("company not like", value, "company");
+        public Criteria andDeptTypeNotIn(List<Byte> values) {
+            addCriterion("dept_type not in", values, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyIn(List<String> values) {
-            addCriterion("company in", values, "company");
+        public Criteria andDeptTypeBetween(Byte value1, Byte value2) {
+            addCriterion("dept_type between", value1, value2, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyNotIn(List<String> values) {
-            addCriterion("company not in", values, "company");
+        public Criteria andDeptTypeNotBetween(Byte value1, Byte value2) {
+            addCriterion("dept_type not between", value1, value2, "deptType");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyBetween(String value1, String value2) {
-            addCriterion("company between", value1, value2, "company");
+        public Criteria andParentIdIsNull() {
+            addCriterion("parent_id is null");
             return (Criteria) this;
         }
 
-        public Criteria andCompanyNotBetween(String value1, String value2) {
-            addCriterion("company not between", value1, value2, "company");
+        public Criteria andParentIdIsNotNull() {
+            addCriterion("parent_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdEqualTo(Long value) {
+            addCriterion("parent_id =", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdNotEqualTo(Long value) {
+            addCriterion("parent_id <>", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdGreaterThan(Long value) {
+            addCriterion("parent_id >", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("parent_id >=", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdLessThan(Long value) {
+            addCriterion("parent_id <", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdLessThanOrEqualTo(Long value) {
+            addCriterion("parent_id <=", value, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdIn(List<Long> values) {
+            addCriterion("parent_id in", values, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdNotIn(List<Long> values) {
+            addCriterion("parent_id not in", values, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdBetween(Long value1, Long value2) {
+            addCriterion("parent_id between", value1, value2, "parentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdNotBetween(Long value1, Long value2) {
+            addCriterion("parent_id not between", value1, value2, "parentId");
             return (Criteria) this;
         }
 
