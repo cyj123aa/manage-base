@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import com.hoolink.manage.base.service.RoleService;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -72,8 +73,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-	private static final String DEPT = "dept";
-	
     @Autowired
     private SessionService sessionService;
 
@@ -324,5 +323,15 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ManagerUserBO getById(Long id) {
 		return CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
+	}
+
+	@Override
+	public List<ManagerUserBO> listByIdList(List<Long> idList) {
+		if (CollectionUtils.isEmpty(idList)) {
+			return Collections.emptyList();
+		}
+		UserExample example = new UserExample();
+		example.createCriteria().andEnabledEqualTo(true).andStatusEqualTo(true).andIdIn(idList);
+		return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
 	}
 }
