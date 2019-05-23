@@ -27,7 +27,7 @@ public class AbilityClient {
      * @return
      */
     public BackBO<byte[]> readFile(Long fileId) {
-        BackBO<byte[]> backBO = restTemplate.postForObject("cse://ability/obs/downloadBytes", fileId, BackBO.class);
+        BackBO<byte[]> backBO = restTemplate.postForObject("cse://hoolink-ability/obs/downloadBytes", fileId, BackBO.class);
         if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
             throw new BusinessException(HoolinkExceptionMassageEnum.READ_FIRMWARE_FILE_ERROR);
         }
@@ -39,7 +39,7 @@ public class AbilityClient {
      * @return
      */
     public BackBO<ObsBO> getObs(Long fileId) {
-        BackBO<ObsBO> backBO = restTemplate.postForObject("cse://ability/obs/getObs", fileId, BackBO.class);
+        BackBO<ObsBO> backBO = restTemplate.postForObject("cse://hoolink-ability/obs/getObs", fileId, BackBO.class);
         if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
             throw new BusinessException(HoolinkExceptionMassageEnum.READ_FIRMWARE_FILE_ERROR);
         }
@@ -47,7 +47,7 @@ public class AbilityClient {
     }
 
     public BackBO sendMsg(SmsBO smsBO) {
-        BackBO backBO = restTemplate.postForObject("cse://ability/sms/sendMsg", smsBO, BackBO.class);
+        BackBO backBO = restTemplate.postForObject("cse://hoolink-ability/sms/sendMsg", smsBO, BackBO.class);
         if(backBO == null || !backBO.getStatus()){
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_SEND_ERROR);
         }
@@ -60,7 +60,7 @@ public class AbilityClient {
      * @return
      */
     public BackBO<Long> createBucket(BucketBO bucketBO) {
-        BackBO<Long> backBO = restTemplate.postForObject("cse://ability/bucket/create", bucketBO, BackBO.class);
+        BackBO<Long> backBO = restTemplate.postForObject("cse://hoolink-ability/bucket/create", bucketBO, BackBO.class);
         if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
             throw new BusinessException(HoolinkExceptionMassageEnum.CREATE_BUCKET_ERROR);
         }
