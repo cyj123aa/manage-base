@@ -77,14 +77,6 @@ public class User implements Serializable {
 
     /**
      * <pre>
-     * 所属公司
-     * 表字段 : manage_user.company
-     * </pre>
-     */
-    private String company;
-
-    /**
-     * <pre>
      * 职位
      * 表字段 : manage_user.position
      * </pre>
@@ -122,6 +114,14 @@ public class User implements Serializable {
      * </pre>
      */
     private Boolean status;
+
+    /**
+     * <pre>
+     * 是否可见员工密保等级
+     * 表字段 : manage_user.view_encry_level_permitted
+     * </pre>
+     */
+    private Boolean viewEncryLevelPermitted;
 
     /**
      * <pre>
@@ -398,31 +398,6 @@ public class User implements Serializable {
 
     /**
      * <pre>
-     * 获取：所属公司
-     * 表字段：manage_user.company
-     * </pre>
-     *
-     * @return manage_user.company：所属公司
-     */
-    public String getCompany() {
-        return company;
-    }
-
-    /**
-     * <pre>
-     * 设置：所属公司
-     * 表字段：manage_user.company
-     * </pre>
-     *
-     * @param company
-     *            manage_user.company：所属公司
-     */
-    public void setCompany(String company) {
-        this.company = company == null ? null : company.trim();
-    }
-
-    /**
-     * <pre>
      * 获取：职位
      * 表字段：manage_user.position
      * </pre>
@@ -544,6 +519,31 @@ public class User implements Serializable {
      */
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    /**
+     * <pre>
+     * 获取：是否可见员工密保等级
+     * 表字段：manage_user.view_encry_level_permitted
+     * </pre>
+     *
+     * @return manage_user.view_encry_level_permitted：是否可见员工密保等级
+     */
+    public Boolean getViewEncryLevelPermitted() {
+        return viewEncryLevelPermitted;
+    }
+
+    /**
+     * <pre>
+     * 设置：是否可见员工密保等级
+     * 表字段：manage_user.view_encry_level_permitted
+     * </pre>
+     *
+     * @param viewEncryLevelPermitted
+     *            manage_user.view_encry_level_permitted：是否可见员工密保等级
+     */
+    public void setViewEncryLevelPermitted(Boolean viewEncryLevelPermitted) {
+        this.viewEncryLevelPermitted = viewEncryLevelPermitted;
     }
 
     /**
