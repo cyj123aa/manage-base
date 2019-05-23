@@ -73,18 +73,5 @@ public class ManagerUserInfoBO {
     /**
      * 用户部门关系
      */
-    private List<UserDeptBO> userDeptPairList;
-    
-    @Data
-    public static class UserDeptBO{
-    	/**
-    	 * 部门ID
-    	 */
-    	private Long deptId;
-    	
-    	/**
-    	 * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
-    	 */
-    	private Integer encryLevelDept;
-    } 
+    private List<UserInfoDeptTreeBO> userInfoDeptTreeList;
 }

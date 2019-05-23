@@ -148,10 +148,10 @@ public interface UserService {
     
     /**
      * 获取组织架构树
-     * @param companyId
+     * @param companyIdList
      * @return
      */
-    List<DeptTreeBO> getDeptTree(Long companyId);
+    List<DeptTreeBO> getDeptTree(List<Long> companyIdList);
     
     /**
      * 删除用户

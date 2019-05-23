@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -220,6 +221,6 @@ public class UserController {
     @ApiOperation(value = "获取组织架构tree数据")
     @LogAndParam(value = "获取组织架构tree数据失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody BaseParam<Long> companyId) throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(companyId.getData()), DeptTreeVO.class));
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(Arrays.asList(companyId.getData())), DeptTreeVO.class));
     }
 }

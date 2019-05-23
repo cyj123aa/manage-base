@@ -1,17 +1,11 @@
-package com.hoolink.manage.base.bo;
+package com.hoolink.manage.base.vo.res;
 
 import java.util.List;
 
 import lombok.Data;
 
-/**
- * 
- * @author lijunling
- *
- * @date 2019/05/22 20:34
- */
 @Data
-public class DeptTreeBO {
+public class UserInfoDeptTreeVO{
     /**
      * 主键
      */
@@ -30,7 +24,7 @@ public class DeptTreeBO {
     /**
      * 子节点
      */
-    private List<DeptTreeBO> children;
+    private List<UserInfoDeptTreeVO> children;
     
     /**
      * 是否选中

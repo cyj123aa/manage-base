@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.service.impl;
 
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.bo.ManagerUserInfoBO.UserDeptBO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.constant.Constant;
@@ -49,11 +48,13 @@ import javax.annotation.Resource;
 import com.hoolink.manage.base.service.RoleService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -457,14 +458,32 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
-		//查询用户对应部门
-		List<MiddleUserDepartmentBO> userDeptPairList = middleUserDepartmentService.listByUserId(user.getId());
+		// 获取组织树
+		List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList = middleUserDepartmentService.listWithMoreByUserIdList(Arrays.asList(user.getId()));
+		List<Long> companyIdList = middleUserDeptWithMoreList.stream()
+				.filter(mudwm -> DeptTypeEnum.COMPANY.getKey().equals(mudwm.getDeptType()))
+				.map(mudwm -> mudwm.getDeptId()).collect(Collectors.toList());
+		List<DeptTreeBO> deptTreeList = getDeptTree(companyIdList);
+		
+		List<UserInfoDeptTreeBO> userInfoDeptTreeList = new ArrayList<>();
+		//根据用户所属组织赋值
+		deptTreeList.stream().forEach(dt -> {
+			UserInfoDeptTreeBO userInfoDeptTree = new UserInfoDeptTreeBO();
+			BeanUtils.copyProperties(dt, userInfoDeptTree);
+			Optional<MiddleUserDeptWithMoreBO> middleUserDeptWithMore = middleUserDeptWithMoreList.stream().filter(mudwm -> dt.getId().equals(mudwm.getDeptId())).findFirst();
+			if(middleUserDeptWithMore.isPresent()) {
+				userInfoDeptTree.setChecked(true);
+				if(user.getViewEncryLevelPermitted()) {
+					userInfoDeptTree.setEncryLevelDept(middleUserDeptWithMore.get().getEncryLevelDept());	
+				}
+			}
+			userInfoDeptTreeList.add(userInfoDeptTree);
+		});
+		
 		//是否可见员工密保等级
 		if(!user.getViewEncryLevelPermitted()) {
 			userInfoBO.setEncryLevelCompany(null);
-			userDeptPairList.stream().forEach(udp -> udp.setEncryLevelDept(null));
 		}
-		userInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDeptBO.class));
 		return userInfoBO;
 	}
 
@@ -539,11 +558,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<DeptTreeBO> getDeptTree(Long companyId) {
+	public List<DeptTreeBO> getDeptTree(List<Long> companyIdList) {
 		List<ManageDepartmentBO> departmentList = departmentService.listAll();
 		List<ManageDepartmentBO> deptParentList = departmentList.stream()
-				.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && d.getId().equals(companyId)).collect(Collectors.toList());
-		return getChildren(deptParentList, departmentList);
+				.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
+		return getChildren(deptParentList, departmentList, Collections.emptyList());
 	}
 	
 	/**
@@ -552,13 +571,18 @@ public class UserServiceImpl implements UserService {
 	 * @param departmentList
 	 * @return
 	 */
-	private List<DeptTreeBO> getChildren(List<ManageDepartmentBO> deptParentList, List<ManageDepartmentBO> departmentList) {
+	private List<DeptTreeBO> getChildren(List<ManageDepartmentBO> deptParentList, List<ManageDepartmentBO> departmentList, List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList) {
 		List<DeptTreeBO> deptTreeList = new ArrayList<>();
 		deptParentList.stream().forEach(d -> {
 			DeptTreeBO deptTreeBO = new DeptTreeBO();
 			//找出子节点
 			List<ManageDepartmentBO> deptChildren = departmentList.stream().filter(c -> d.getId().equals(c.getParentId())).collect(Collectors.toList());
-			deptTreeBO.setChildren(getChildren(deptChildren, departmentList));
+			deptTreeBO.setChildren(getChildren(deptChildren, departmentList, middleUserDeptWithMoreList));
+			
+			Optional<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreOpt = middleUserDeptWithMoreList.stream().filter(mudwm -> d.getId().equals(mudwm.getDeptId())).findFirst();
+			if(middleUserDeptWithMoreOpt.isPresent()) {
+				deptTreeBO.setEncryLevelDept(middleUserDeptWithMoreOpt.get().getEncryLevelDept());
+			}
 			
 			BeanUtils.copyProperties(d, deptTreeBO);
 			deptTreeList.add(deptTreeBO);

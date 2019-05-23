@@ -4,14 +4,8 @@ import java.util.List;
 
 import lombok.Data;
 
-/**
- * 
- * @author lijunling
- *
- * @date 2019/05/22 20:34
- */
 @Data
-public class DeptTreeBO {
+public class UserInfoDeptTreeBO{
     /**
      * 主键
      */
