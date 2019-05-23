@@ -320,7 +320,7 @@ public class UserServiceImpl implements UserService {
 		//员工列表根据组织架构，全员可见
 		User currentUser = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
 		if(ContextUtil.getManageCurrentUser().getRoleLevel() != Constant.LEVEL_ONE){
-			criteria.andCompanyEqualTo(currentUser.getCompany());
+			//criteria.andCompanyEqualTo(currentUser.getCompany());
 		}
 		PageInfo<User> userPageInfo = PageHelper
 				.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
