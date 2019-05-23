@@ -15,6 +15,7 @@ import com.hoolink.manage.base.vo.req.ManagerUserPageParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.req.DictParamVO;
+import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
 import com.hoolink.manage.base.vo.res.DeptTreeVO;
 import com.hoolink.manage.base.vo.res.DictInfoVO;
@@ -24,6 +25,7 @@ import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.manage.base.vo.res.UserInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
@@ -152,7 +154,7 @@ public class UserController {
     
     @PostMapping(value = "list")
     @ApiOperation(value = "获取用户列表带分页")
-    @LogAndParam(value = "获取用户列表失败")
+    @LogAndParam(value = "获取用户列表失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<PageInfo<ManagerUserVO>> list(@RequestBody ManagerUserPageParamVO userPageParamVO) throws Exception{
     	ManagerUserPageParamBO userPageParamBO = CopyPropertiesUtil.copyBean(userPageParamVO, ManagerUserPageParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyPageInfo(userService.list(userPageParamBO), ManagerUserVO.class));
@@ -160,7 +162,7 @@ public class UserController {
     
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取用户基础信息")
-    @LogAndParam(value = "获取用户基础信息失败")
+    @LogAndParam(value = "获取用户基础信息失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<ManagerUserInfoVO> getManagerUserInfo(@RequestBody @Valid ManagerUserInfoParamVO userParamVO) throws Exception{
     	ManagerUserInfoParamBO userParamBO = CopyPropertiesUtil.copyBean(userParamVO, ManagerUserInfoParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getManagerUserInfo(userParamBO), ManagerUserInfoVO.class));
@@ -168,7 +170,7 @@ public class UserController {
     
     @PostMapping(value = "createUser")
     @ApiOperation(value = "创建用户")
-    @LogAndParam(value = "创建用户失败")
+    @LogAndParam(value = "创建用户失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<Void> createUser(@RequestBody ManagerUserParamVO userVO) throws Exception{
         BackVO validateParameter = ValidatorUtil.validateParameter(userVO, ManagerBaseGroup.CreateUser.class);
         if (validateParameter != null) {
@@ -180,7 +182,7 @@ public class UserController {
     
     @PostMapping(value = "updateUser")
     @ApiOperation(value = "更新用户")
-    @LogAndParam(value = "更新用户失败")
+    @LogAndParam(value = "更新用户失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<Void> updateUser(@RequestBody ManagerUserParamVO userVO) throws Exception{
         BackVO validateParameter = ValidatorUtil.validateParameter(userVO, ManagerBaseGroup.UpdateUser.class);
         if (validateParameter != null) {
@@ -190,9 +192,25 @@ public class UserController {
     	return BackVOUtil.operateAccess();
     }
     
+    @PostMapping(value = "removeUser")
+    @ApiOperation(value = "删除用户")
+    @LogAndParam(value = "删除用户失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> removeUser(@RequestBody BaseParam<Long> param) throws Exception{
+    	userService.removeUser(param.getData());
+    	return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "enableOrDisableUser")
+    @ApiOperation(value = "启用/禁用用户")
+    @LogAndParam(value = "启用/禁用用户失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> enableOrDisableUser(@RequestBody @Valid EnableOrDisableUserParamVO param) throws Exception{
+    	userService.enableOrDisableUser(param);
+    	return BackVOUtil.operateAccess();
+    }
+    
     @PostMapping(value = "getDictInfo")
     @ApiOperation(value = "获取字典值数据")
-    @LogAndParam(value = "获取字典值数据失败")
+    @LogAndParam(value = "获取字典值数据失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<DictInfoVO> getDictInfo(@RequestBody @Valid DictParamVO dictParamVO) throws Exception{
     	DictParamBO dictParamBO = CopyPropertiesUtil.copyBean(dictParamVO, DictParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getDictInfo(dictParamBO), DictInfoVO.class));
@@ -200,8 +218,8 @@ public class UserController {
     
     @PostMapping(value = "getDeptTree")
     @ApiOperation(value = "获取组织架构tree数据")
-    @LogAndParam(value = "获取组织架构tree数据失败")
-    public BackVO<List<DeptTreeVO>> getDeptTree() throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(), DeptTreeVO.class));
+    @LogAndParam(value = "获取组织架构tree数据失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody BaseParam<Long> companyId) throws Exception{
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(companyId.getData()), DeptTreeVO.class));
     }
 }

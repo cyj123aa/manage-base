@@ -41,11 +41,7 @@ public class AbilityClient {
      */
     @ClientException(message="访问OBS服务失败")
     public BackBO<ObsBO> getObs(Long fileId) {
-        BackBO<ObsBO> backBO = restTemplate.postForObject("cse://hoolink-ability/obs/getObs", fileId, BackBO.class);
-        if(backBO == null || !backBO.getStatus() || backBO.getData() == null){
-            throw new BusinessException(HoolinkExceptionMassageEnum.READ_FIRMWARE_FILE_ERROR);
-        }
-        return backBO;
+        return restTemplate.postForObject("cse://hoolink-ability/obs/getObs", fileId, BackBO.class);
     }
 
     public BackBO sendMsg(SmsBO smsBO) {

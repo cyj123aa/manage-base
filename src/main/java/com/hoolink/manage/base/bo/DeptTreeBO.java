@@ -31,4 +31,9 @@ public class DeptTreeBO {
      * 子节点
      */
     private List<DeptTreeBO> children;
+    
+    /**
+     * 是否选中
+     */
+    private boolean checked;
 }

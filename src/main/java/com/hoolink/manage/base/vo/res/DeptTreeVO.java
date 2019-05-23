@@ -30,4 +30,8 @@ public class DeptTreeVO {
      * 子节点
      */
     private List<DeptTreeVO> children;
+    /**
+     * 是否选中
+     */
+    private boolean checked;
 }

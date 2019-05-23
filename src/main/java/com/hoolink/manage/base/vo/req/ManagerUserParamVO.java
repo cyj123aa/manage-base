@@ -105,16 +105,6 @@ public class ManagerUserParamVO {
     private Integer encryLevelCompany;
 
     /**
-     * 用户状态: 启用/禁用
-     */
-    private Boolean status;
-    
-    /**
-     * 数据有效性
-     */
-    private Boolean enabled;
-    
-    /**
      * 用户部门关系
      */
     @NotEmpty(

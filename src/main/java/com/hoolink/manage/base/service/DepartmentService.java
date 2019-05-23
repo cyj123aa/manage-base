@@ -22,4 +22,10 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listAll();
+	/**
+	 * 根据组织类型查询
+	 * @param deptType
+	 * @return
+	 */
+	List<ManageDepartmentBO> listByDeptType(Byte deptType);
 }

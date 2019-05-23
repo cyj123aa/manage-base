@@ -14,6 +14,7 @@ import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
+import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
@@ -119,18 +120,16 @@ public interface UserService {
     /**
      * 创建用户
      * @param userBO
-     * @return
      * @throws Exception
      */
-    boolean createUser(ManagerUserParamBO userBO) throws Exception;
+    void createUser(ManagerUserParamBO userBO) throws Exception;
     
     /**
      * 更新用户
      * @param userBO
-     * @return
      * @throws Exception
      */
-    boolean updateUser(ManagerUserParamBO userBO) throws Exception;
+    void updateUser(ManagerUserParamBO userBO) throws Exception;
     
     /**
      * 获取字典值数据
@@ -148,8 +147,23 @@ public interface UserService {
     ManagerUserBO getById(Long id);
     
     /**
-     *获取组织架构树 
+     * 获取组织架构树
+     * @param companyId
      * @return
      */
-    List<DeptTreeBO> getDeptTree();
+    List<DeptTreeBO> getDeptTree(Long companyId);
+    
+    /**
+     * 删除用户
+     * @param id
+     * @return
+     */
+    boolean removeUser(Long id);
+    
+    /**
+     * 启用/禁用用户
+     * @param param
+     * @return
+     */
+    boolean enableOrDisableUser(EnableOrDisableUserParamVO param);
 }

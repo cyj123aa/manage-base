@@ -48,4 +48,12 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
 	}
 
+	@Override
+	public List<ManageDepartmentBO> listByDeptType(Byte deptType) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true).andDeptTypeEqualTo(deptType);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
 }
