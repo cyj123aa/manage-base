@@ -7,6 +7,7 @@ import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
+import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
@@ -23,6 +24,7 @@ import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;
@@ -86,6 +88,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private MiddleUserDepartmentService middleUserDepartmentService;
+
+    @Resource
+    private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -512,4 +517,9 @@ public class UserServiceImpl implements UserService {
 	public ManagerUserBO getById(Long id) {
 		return CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
 	}
+
+    @Override
+    public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
+        return middleUserDepartmentMapperExt.getUserSecurity(userId);
+    }
 }

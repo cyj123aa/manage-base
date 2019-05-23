@@ -3,6 +3,7 @@ package com.hoolink.manage.base.bo;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description: 用户所属信息
@@ -10,10 +11,12 @@ import java.util.List;
  * @date: 2019-05-21
  **/
 @Data
-public class UserDeptBO {
-    private String companyName;
+public class DeptPositionBO {
+    private Long id;
+
+    private String deptName;
     /**
      * 部门 岗级
      */
-    private List<DeptPositionBO> deptPositionBOS;
+    private List<DeptPositionBO> deptPositionBOList;
 }

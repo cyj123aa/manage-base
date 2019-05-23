@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,4 +35,11 @@ public class UserController {
 	public BackBO<ManagerUserBO> getById(@RequestBody Long id)throws Exception{
 		return BackBOUtil.defaultBackBO(userService.getById(id));
 	}
+
+    @PostMapping(value = "getUserSecurity")
+    @ApiOperation(value = "获取用户密保等级")
+    @LogAndParam(value = "用户密保等级获取失败，请稍后重试")
+    public BackBO<UserDeptInfoBO> getUserSecurity(@RequestBody Long userId)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getUserSecurity(userId));
+    }
 }

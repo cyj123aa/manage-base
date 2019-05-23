@@ -14,6 +14,7 @@ import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 
 /**
  * @Author: xuli
@@ -143,4 +144,12 @@ public interface UserService {
      * @return
      */
     ManagerUserBO getById(Long id);
+
+    /**
+     * 用户密保等级
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    UserDeptInfoBO getUserSecurity(Long userId) throws Exception;
 }

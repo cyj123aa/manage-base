@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.service.impl;
 
+import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.bo.ManageMenuBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.dao.mapper.ManageMenuMapper;
@@ -87,30 +88,13 @@ public class MenuServiceImpl implements MenuService {
             }
         }
         //EDM展示 二级菜单 三级菜单
-        //所属公司 部门
+        //所属公司 部门(部门资源库存在四级菜单 岗级菜单)
         UserDeptBO deptMenu = middleUserDepartmentMapperExt.getDeptMenu(userId);
         InitMenuBO initMenuBO = new InitMenuBO();
         for (EdmMenuBO edmMenuBO:menuBOS) {
             if (EdmResourceRepertory.DEPT_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //部门资源
-                if(deptMenu!=null){
-                    //下级菜单
-                    List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
-                    EdmMenuBO twoMenu = new EdmMenuBO();
-                    twoMenu.setMenuName(deptMenu.getCompanyName());
-                    Map<Long, String> deptMap = deptMenu.getDeptMap();
-                    if(!org.springframework.util.CollectionUtils.isEmpty(deptMap)){
-                        List<EdmMenuBO> threeMenuBOS = new ArrayList<>();
-                        for (Map.Entry<Long, String> entry:deptMap.entrySet()) {
-                            EdmMenuBO threeMenu = new EdmMenuBO();
-                            threeMenu.setId(entry.getKey());
-                            threeMenu.setMenuName(entry.getValue());
-                        }
-                        twoMenu.setEdmMenuVOList(threeMenuBOS);
-                    }
-                    twoMenuBOS.add(twoMenu);
-                    edmMenuBO.setEdmMenuVOList(twoMenuBOS);
-                }
+                getDeptInitMenu(deptMenu, edmMenuBO);
                 initMenuBO.setDeptVO(edmMenuBO);
             }else if (EdmResourceRepertory.CACHE_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //缓冲库
@@ -129,6 +113,44 @@ public class MenuServiceImpl implements MenuService {
             }
         }
         return initMenuBO;
+    }
+
+    /**
+     * 部门资源菜单初始化
+     * @param deptMenu
+     * @param edmMenuBO
+     */
+    private void getDeptInitMenu(UserDeptBO deptMenu, EdmMenuBO edmMenuBO) {
+        if(deptMenu!=null){
+            //下级菜单
+            List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
+            EdmMenuBO twoMenu = new EdmMenuBO();
+            twoMenu.setMenuName(deptMenu.getCompanyName());
+            List<DeptPositionBO> deptPositionBOS = deptMenu.getDeptPositionBOS();
+            if(!org.springframework.util.CollectionUtils.isEmpty(deptPositionBOS)){
+                List<EdmMenuBO> threeMenuBOS = new ArrayList<>();
+                for (DeptPositionBO deptPositionBO:deptPositionBOS) {
+                    EdmMenuBO threeMenu = new EdmMenuBO();
+                    threeMenu.setId(deptPositionBO.getId());
+                    threeMenu.setMenuName(deptPositionBO.getDeptName());
+                    List<DeptPositionBO> deptPositionBOList = deptPositionBO.getDeptPositionBOList();
+                    if(!org.springframework.util.CollectionUtils.isEmpty(deptPositionBOList)) {
+                        List<EdmMenuBO> fourMenuBOS = new ArrayList<>();
+                        for (DeptPositionBO positionBO : deptPositionBOS) {
+                            EdmMenuBO fourMenu = new EdmMenuBO();
+                            fourMenu.setId(positionBO.getId());
+                            fourMenu.setMenuName(positionBO.getDeptName());
+                            fourMenuBOS.add(fourMenu);
+                        }
+                        threeMenu.setEdmMenuVOList(fourMenuBOS);
+                    }
+                    threeMenuBOS.add(threeMenu);
+                }
+                twoMenu.setEdmMenuVOList(threeMenuBOS);
+            }
+            twoMenuBOS.add(twoMenu);
+            edmMenuBO.setEdmMenuVOList(twoMenuBOS);
+        }
     }
 
     /**

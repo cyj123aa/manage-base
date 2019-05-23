@@ -13,24 +13,39 @@
 
   <resultMap id="UserDeptMap" type="com.hoolink.manage.base.bo.UserDeptBO">
     <id column="company" jdbcType="VARCHAR" property="companyName" />
-    <collection property="deptMap" resultMap="DeptMap">
+    <collection property="deptPositionBOS" ofType="com.hoolink.manage.base.bo.DeptPositionBO">
+      <id column="id" jdbcType="BIGINT" property="id" />
+      <result column="dept_name" jdbcType="VARCHAR" property="deptName" />
+      <collection property="deptPositionBOList" ofType="com.hoolink.manage.base.bo.DeptPositionBO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dept_name" jdbcType="VARCHAR" property="deptName" />
+      </collection>
     </collection>
   </resultMap>
 
-  <resultMap id="DeptMap" type="java.util.Map">
-    <result column="id" property="id" />
-    <result column="dept_name" property="deptName" />
-  </resultMap>
-
   <select id="getDeptMenu" resultMap="UserDeptMap">
-    select mu.company,mu.id,md.dept_name from manage_user mu left join middle_user_department mud
+    select mu.company,md.id,md.dept_name from manage_user mu
+    left join middle_user_department mud on mu.id=mud.user_id
     left join manage_department md on mud.department_id=md.id
-    on mu.id=mud.user_id
+    left join manage_department mdept on mdept.parent_id=md.id
     where mu.enabled=true and mu.id=#{user_id}
+    and md.enabled=true and mdept.enabled=true
   </select>
 
-  <select id="getUserSecurity" resultMap="UserDeptMap">
-    select mu.encry_level_company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
+  <resultMap id="UserDeptInfoMap" type="com.hoolink.sdk.bo.manager.UserDeptInfoBO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="" jdbcType="INTEGER"  property="encryLevelCompany"/>
+    <collection property="deptMap" resultMap="DeptInfoMap">
+    </collection>
+  </resultMap>
+
+  <resultMap id="DeptInfoMap" type="java.util.Map">
+    <result column="dept_id" property="deptId" />
+    <result column="encry_level_dept" property="encryLevelDept" />
+  </resultMap>
+
+  <select id="getUserSecurity" resultMap="UserDeptInfoMap">
+    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept from manage_user mu left join middle_user_department mud
     on mu.id=mud.user_id
     where mu.enabled=true and mu.id=#{user_id}
   </select>
