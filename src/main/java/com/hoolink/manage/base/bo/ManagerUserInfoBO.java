@@ -73,5 +73,5 @@ public class ManagerUserInfoBO {
     /**
      * 用户部门关系
      */
-    private List<UserInfoDeptTreeBO> userInfoDeptTreeList;
+    private List<DeptTreeBO> deptTreeList;
 }

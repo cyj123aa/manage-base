@@ -2,6 +2,8 @@ package com.hoolink.manage.base.vo.res;
 
 import java.util.List;
 
+import com.hoolink.manage.base.bo.DeptTreeBO;
+
 import lombok.Data;
 
 /**
@@ -73,18 +75,5 @@ public class ManagerUserInfoVO {
     /**
      * 用户部门关系
      */
-    private List<UserDeptVO> userDeptPairList;
-    
-    @Data
-    public static class UserDeptVO{
-    	/**
-    	 * 部门ID
-    	 */
-    	private Long deptId;
-    	
-    	/**
-    	 * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
-    	 */
-    	private Integer encryLevelDept;
-    } 
+    private List<DeptTreeVO> deptTreeList;
 }

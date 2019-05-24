@@ -6,8 +6,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.hoolink.manage.base.bo.UserDeptPairParamBO;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
-import com.hoolink.manage.base.vo.res.ManagerUserInfoVO.UserDeptVO;
 
 import lombok.Data;
 /**
@@ -35,6 +35,15 @@ public class ManagerUserParamVO {
             groups = {ManagerBaseGroup.CreateUser.class}
     )
     private String userAccount;
+    
+    /**
+     * 员工编号
+     */
+    @NotBlank(
+            message = "编号不允许为空",
+            groups = {ManagerBaseGroup.CreateUser.class}
+    )
+    private String userNo;
 
     /**
      * 姓名
@@ -103,13 +112,22 @@ public class ManagerUserParamVO {
             groups = {ManagerBaseGroup.CreateUser.class}
     )
     private Integer encryLevelCompany;
-
+    
     /**
-     * 用户部门关系
+     * 是否可见员工密保等级
      */
-    @NotEmpty(
-            message = "部门不允许为空",
+    @NotNull(
+            message = "是否可见员工密保等级不允许为空",
             groups = {ManagerBaseGroup.CreateUser.class}
     )
-    private List<UserDeptVO> userDeptPairList;
+    private Boolean viewEncryLevelPermitted;
+
+    /**
+     * 用户组织关系
+     */
+    @NotEmpty(
+            message = "所属组织不允许为空",
+            groups = {ManagerBaseGroup.CreateUser.class}
+    )
+    private List<UserDeptPairParamBO> userDeptPairParamList;
 }

@@ -12,6 +12,7 @@ import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
+import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
@@ -149,9 +150,10 @@ public interface UserService {
     /**
      * 获取组织架构树
      * @param companyIdList
+     * @param middleUserDeptWithMoreList
      * @return
      */
-    List<DeptTreeBO> getDeptTree(List<Long> companyIdList);
+    List<DeptTreeBO> getDeptTree(List<Long> companyIdList, List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList);
     
     /**
      * 删除用户

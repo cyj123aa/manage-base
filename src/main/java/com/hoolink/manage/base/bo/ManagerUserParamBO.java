@@ -1,8 +1,6 @@
 package com.hoolink.manage.base.bo;
 import java.util.List;
 
-import com.hoolink.manage.base.vo.res.ManagerUserInfoVO.UserDeptVO;
-
 import lombok.Data;
 
 /**
@@ -21,6 +19,11 @@ public class ManagerUserParamBO {
      * 用户账号
      */
     private String userAccount;
+    
+    /**
+     * 员工编号
+     */
+    private String userNo;
 
     /**
      * 姓名
@@ -73,7 +76,13 @@ public class ManagerUserParamBO {
     private Boolean enabled;
     
     /**
+     * 是否可见员工密保等级
+     */
+    private Boolean viewEncryLevelPermitted;
+    
+    /**
      * 用户部门关系
      */
-    private List<UserDeptVO> userDeptPairList;
+    private List<UserDeptPairParamBO> userDeptPairParamList;
 }
+
