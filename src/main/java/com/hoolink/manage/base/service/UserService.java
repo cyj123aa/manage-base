@@ -13,9 +13,11 @@ import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
+import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
+import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
@@ -168,4 +170,11 @@ public interface UserService {
      * @return
      */
     boolean enableOrDisableUser(EnableOrDisableUserParamVO param);
+    
+    /**
+     * 获取个人中心基础信息
+     * @return
+     * @throws Exception
+     */
+    PersonalInfoBO getPersonalInfo() throws Exception;
 }

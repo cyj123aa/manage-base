@@ -15,6 +15,7 @@ import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
+import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
@@ -728,5 +729,45 @@ public class UserServiceImpl implements UserService {
 		user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
 		user.setUpdated(System.currentTimeMillis());
 		return user;
+	}
+
+	@Override
+	public PersonalInfoBO getPersonalInfo() throws Exception{
+		User user = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
+		if(user == null) {
+			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+		}
+		
+		PersonalInfoBO personalInfo = new PersonalInfoBO();
+		BeanUtils.copyProperties(user, personalInfo);
+		if(user.getImgId() != null) {
+			//调用obs服务获取用户头像
+			BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
+			if(obsBackBo.getData() != null) {
+				personalInfo.setImgUrl(obsBackBo.getData().getObjectUrl());
+			}
+		}
+		
+		List<ManageRoleBO> roleList = roleService.listByIdList(Arrays.asList(user.getRoleId()));
+		if(CollectionUtils.isNotEmpty(roleList)) {
+			personalInfo.setRoleName(roleList.get(0).getRoleName());
+		}
+		personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+		personalInfo.setViewEncryLevelPermittedDesc(
+				ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
+		
+		// 获取组织树
+		List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
+				.listWithMoreByUserIdList(Arrays.asList(user.getId()));
+		Set<String> companySet = new HashSet<>();
+		userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
+			companySet.add(ud.getDeptName());
+		});
+		personalInfo.setCompany(companySet.toString());
+		
+		List<MiddleUserDeptWithMoreBO> userDeptPairList = userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType())).collect(Collectors.toList());
+		personalInfo.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDepartmentBO.class));
+		return personalInfo;
 	}
 }

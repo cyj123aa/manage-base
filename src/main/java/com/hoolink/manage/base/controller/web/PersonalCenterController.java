@@ -6,13 +6,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
-import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
+import com.hoolink.manage.base.vo.res.PersonalInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.utils.BackVOUtil;
-import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 
@@ -33,9 +31,7 @@ public class PersonalCenterController {
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取个人中心基础信息")
     @LogAndParam(value = "获取个人中心基础信息失败")
-    public BackVO<ManagerUserInfoVO> getManagerUserInfo(ManagerUserInfoParamVO userParamVO) throws Exception{
-    	ManagerUserInfoParamBO userParamBO = new ManagerUserInfoParamBO();
-    	userParamBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getManagerUserInfo(userParamBO), ManagerUserInfoVO.class));
+    public BackVO<PersonalInfoVO> getManagerUserInfo(ManagerUserInfoParamVO userParamVO) throws Exception{
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getPersonalInfo(), PersonalInfoVO.class));
     }
 }

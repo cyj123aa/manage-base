@@ -2,8 +2,6 @@ package com.hoolink.manage.base.vo.res;
 
 import java.util.List;
 
-import com.hoolink.manage.base.bo.DeptTreeBO;
-
 import lombok.Data;
 
 /**
