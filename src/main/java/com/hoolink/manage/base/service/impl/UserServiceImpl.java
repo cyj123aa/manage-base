@@ -28,6 +28,7 @@ import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;
+import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
@@ -47,11 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import com.hoolink.manage.base.service.RoleService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -520,6 +518,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
-        return middleUserDepartmentMapperExt.getUserSecurity(userId);
+        UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
+        UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
+        List<DeptSecurityBO> list = userSecurity.getList();
+        if(CollectionUtils.isNotEmpty(list)){
+            List<Long> positionList = new ArrayList<>();
+            Map<String, Integer> map = new HashMap<>(list.size());
+            list.forEach(deptSecurityBO -> {
+                if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())){
+                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())){
+                    positionList.add(deptSecurityBO.getId());
+                }
+            });
+            userDeptInfoBO.setDeptMap(map);
+            userDeptInfoBO.setPositionList(positionList);
+        }
+        return userDeptInfoBO;
     }
 }

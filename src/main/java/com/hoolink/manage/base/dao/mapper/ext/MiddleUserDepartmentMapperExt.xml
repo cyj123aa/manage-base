@@ -25,21 +25,20 @@
     order by md.created asc
   </select>
 
-  <resultMap id="UserDeptInfoMap" type="com.hoolink.sdk.bo.manager.UserDeptInfoBO">
+  <resultMap id="UserDeptInfoMap" type="com.hoolink.manage.base.bo.UserSecurityBO">
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="" jdbcType="INTEGER"  property="encryLevelCompany"/>
-    <collection property="deptMap" resultMap="DeptInfoMap">
+    <result column="encry_level_company" jdbcType="INTEGER"  property="encryLevelCompany"/>
+    <collection property="list" ofType="com.hoolink.manage.base.bo.DeptSecurityBO">
+      <id column="dept_id" property="id" />
+      <result column="encry_level_dept" property="encryLevelDept" />
+      <result column="dept_type" property="deptType" />
     </collection>
   </resultMap>
 
-  <resultMap id="DeptInfoMap" type="java.util.Map">
-    <result column="dept_id" property="deptId" />
-    <result column="encry_level_dept" property="encryLevelDept" />
-  </resultMap>
-
   <select id="getUserSecurity" resultMap="UserDeptInfoMap">
-    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept from manage_user mu left join middle_user_department mud
-    on mu.id=mud.user_id
-    where mu.enabled=true and mu.id=#{user_id}
+    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept,md.dept_type from manage_user mu
+    left join middle_user_department mud on mu.id=mud.user_id
+    left join manage_department md on mud.dept_id=md.id
+    where mu.enabled=true and mu.id=#{userId} and md.dept_type!=1
   </select>
 </mapper>

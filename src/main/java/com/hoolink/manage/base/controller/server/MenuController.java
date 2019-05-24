@@ -5,13 +5,12 @@ import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.enums.CheckEnum;
+import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @description: 菜单
@@ -28,8 +27,8 @@ public class MenuController {
 
     @PostMapping(value = "listByCode")
     @ApiOperation(value = "获得初始化菜单")
-    @LogAndParam(value = "获得初始化菜单失败",check = CheckEnum.STRING_NOT_BLANK)
-    public BackBO<InitMenuBO> listByCode(String code) throws Exception {
-        return BackBOUtil.defaultBackBO(menuService.listByCode(code));
+    @LogAndParam(value = "获得初始化菜单失败",check = CheckEnum.DATA_NOT_NULL)
+    public BackBO<InitMenuBO> listByCode(@RequestBody BaseParam<String> baseParam) throws Exception {
+        return BackBOUtil.defaultBackBO(menuService.listByCode(baseParam.getData()));
     }
 }

@@ -121,6 +121,7 @@ public class MenuServiceImpl implements MenuService {
             }else if (EdmResourceRepertory.COMPANY_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //资源库 二级菜单
                 if(company==null){
+                    initMenuBO.setCompanyVO(edmMenuBO);
                     continue;
                 }
                 List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
