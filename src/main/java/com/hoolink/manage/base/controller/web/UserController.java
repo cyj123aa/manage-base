@@ -31,13 +31,20 @@ import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -222,5 +229,22 @@ public class UserController {
     @LogAndParam(value = "获取组织架构tree数据失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody BaseParam<Long> companyId) throws Exception{
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(Arrays.asList(companyId.getData()), null), DeptTreeVO.class));
+    }
+    
+    @PostMapping(value = "exportList")
+    @ApiOperation(value = "导出用户列表")
+    @LogAndParam(value = "导出用户列表失败")
+    @ApiResponses({@ApiResponse(code = 200, response = File.class, message = "导出列表"),})
+    public ResponseEntity<Resource> exportByParam(@RequestBody ManagerUserPageParamVO userPageParamVO) throws Exception {
+    	ManagerUserPageParamBO userPageParamBO = CopyPropertiesUtil.copyBean(userPageParamVO, ManagerUserPageParamBO.class);
+        return userService.exportList(userPageParamBO);
+    }
+    
+    @PostMapping(value = "downloadTemplate")
+    @ApiOperation(value = "下载模板")
+    @LogAndParam(value = "下载模板失败")
+    @ApiResponses({@ApiResponse(code = 200, response = File.class, message = "下载模板"),})
+    public ResponseEntity<Resource> downloadTemplate() throws Exception {
+        return userService.downloadTemplate();
     }
 }

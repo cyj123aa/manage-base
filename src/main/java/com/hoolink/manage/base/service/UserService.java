@@ -2,6 +2,9 @@ package com.hoolink.manage.base.service;
 
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.DeptTreeBO;
 import com.hoolink.manage.base.bo.DictInfoBO;
@@ -177,4 +180,19 @@ public interface UserService {
      * @throws Exception
      */
     PersonalInfoBO getPersonalInfo() throws Exception;
+    
+    /**
+     * 用户导出
+     * @param userPageParamBO
+     * @return
+     * @throws Exception
+     */
+    ResponseEntity<Resource> exportList(ManagerUserPageParamBO userPageParamBO) throws Exception;
+    
+    /**
+     *下载模板
+     * @return
+     * @throws Exception
+     */
+    ResponseEntity<Resource> downloadTemplate() throws Exception;
 }
