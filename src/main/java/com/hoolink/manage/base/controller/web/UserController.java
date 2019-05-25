@@ -88,6 +88,13 @@ public class UserController {
         return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),true));
     }
 
+    @PostMapping(value = "modifyPhoneGetCode")
+    @ApiOperation(value = "修改手机号时获取手机验证码")
+    @LogAndParam(value = "修改手机验证码失败，请稍后重试")
+    public BackVO<String> modifyPhoneGetCode(@RequestBody BaseParam<String> phone)throws Exception  {
+        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),true));
+    }
+
     @PostMapping(value = "verifyPhoneCode")
     @ApiOperation(value = "验证手机验证码")
     @LogAndParam(value = "验证手机验证码失败，请稍后重试")
