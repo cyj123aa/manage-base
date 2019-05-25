@@ -253,10 +253,6 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
         currentUserBO.setRoleId(user.getRoleId());
-        RoleParamBO role = roleService.getById(user.getRoleId());
-        if (role != null && role.getRoleStatus()) {
-            currentUserBO.setRoleLevel(role.getRoleLevel());
-        }
         return sessionService.cacheCurrentUser(currentUserBO);
     }
 
