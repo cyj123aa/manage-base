@@ -1,8 +1,7 @@
 package com.hoolink.manage.base.service;
 
-import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DictInfoBO;
-import com.hoolink.manage.base.bo.DictParamBO;
+import java.util.List;
+
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoBO;
@@ -20,11 +19,12 @@ import com.hoolink.sdk.bo.manager.ManagerUserBO;
  * @Date: 2019/4/15 19:24
  */
 public interface UserService {
+
     /**
      * 用户登录
-     *
      * @param loginParam
      * @return
+     * @throws Exception
      */
     LoginResultBO login(LoginParamBO loginParam) throws Exception;
 
@@ -43,8 +43,8 @@ public interface UserService {
 
     /**
      * 重置密码
-     * @param
-     * @return
+     * @param loginParam
+     * @throws Exception
      */
     void resetPassword(LoginParamBO loginParam) throws Exception ;
 
@@ -52,8 +52,9 @@ public interface UserService {
      * 获取手机验证码
      * @param phone
      * @return
+     * @throws Exception
      */
-    String getPhoneCode(String phone) throws Exception;
+    String getPhoneCode(String phone,Boolean flag) throws Exception;
 
     /**
      * 验证手机验证码
@@ -64,6 +65,7 @@ public interface UserService {
 
     /**
      * 绑定手机号
+     * @param bindPhoneParam
      * @throws Exception
      */
     void bindPhone(PhoneParamBO bindPhoneParam) throws Exception;
@@ -85,7 +87,7 @@ public interface UserService {
 
     /**
      * 修改手机号
-     * @param
+     * @param phoneParam
      * @throws Exception
      */
     void updatePhone(PhoneParamBO phoneParam) throws Exception;
@@ -96,51 +98,18 @@ public interface UserService {
      * @throws Exception
      */
     UserBO getUser() throws Exception;
-    
-    /**
-     * 获取用户列表（带分页）
-     * @param userPageParamBO
-     * @return
-     * @throws Exception
-     */
-    PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception;
-    
-    /**
-     * 获取用户基础信息
-     * @param userParamBO
-     * @return
-     * @throws Exception
-     */
-    ManagerUserInfoBO getManagerUserInfo(ManagerUserInfoParamBO userParamBO) throws Exception;
-    
-    /**
-     * 创建用户
-     * @param userBO
-     * @return
-     * @throws Exception
-     */
-    boolean createUser(ManagerUserParamBO userBO) throws Exception;
-    
-    /**
-     * 更新用户
-     * @param userBO
-     * @return
-     * @throws Exception
-     */
-    boolean updateUser(ManagerUserParamBO userBO) throws Exception;
-    
-    /**
-     * 获取字典值数据
-     * @param dictParamBO
-     * @return
-     * @throws Exception
-     */
-    DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception;
-    
+
     /**
      * 根据id获取用户
      * @param id
      * @return
      */
     ManagerUserBO getById(Long id);
+
+    /**
+     * 根据id集合获取用户
+     * @param idList
+     * @return
+     */
+    List<ManagerUserBO> listByIdList(List<Long> idList);
 }

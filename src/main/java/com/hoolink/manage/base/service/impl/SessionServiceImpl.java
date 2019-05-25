@@ -5,12 +5,9 @@ import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.Base64Util;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
-import com.hoolink.sdk.utils.Aes128Util;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 
 import javax.annotation.Resource;
 import java.util.UUID;
