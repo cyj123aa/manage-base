@@ -1,6 +1,8 @@
 package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
+import com.hoolink.sdk.bo.manager.InitMenuBO;
+
 import java.util.List;
 
 /**
@@ -16,4 +18,11 @@ public interface MenuService {
      * @return
      */
     List<ManageMenuBO> listByIdList(List<Long> idList);
+
+    /**
+     * 通过code码查询初始化菜单
+     * @param code
+     * @return
+     */
+    InitMenuBO listByCode(String code);
 }

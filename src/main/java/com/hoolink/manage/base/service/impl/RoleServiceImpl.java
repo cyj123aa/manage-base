@@ -2,9 +2,7 @@ package com.hoolink.manage.base.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.ManageMenuBO;
-import com.hoolink.manage.base.bo.ManageRoleBO;
-import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleRoleMenuMapper;
@@ -28,6 +26,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -59,13 +58,14 @@ public class RoleServiceImpl implements RoleService {
     RedisUtil redisUtil;
 
     @Override
-    public Long create(RoleParamVO roleParamVO) throws Exception {
-        List<MiddleRoleMenuVO> roleMenuVOList = roleParamVO.getRoleMenuVOList();
+    @Transactional(rollbackFor = Exception.class)
+    public Long create(RoleParamBO roleParamBO ) throws Exception {
+        List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
         if(CollectionUtils.isEmpty(roleMenuVOList)){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //role 等级
-        ManageRole role = CopyPropertiesUtil.copyBean(roleParamVO, ManageRole.class);
+        ManageRole role = CopyPropertiesUtil.copyBean(roleParamBO, ManageRole.class);
         role.setEnabled(true);
         role.setRoleStatus(true);
         role.setCreated(System.currentTimeMillis());
@@ -74,10 +74,10 @@ public class RoleServiceImpl implements RoleService {
         ManageRole userRole = getUserRole();
         if(userRole!=null){
             role.setParentId(userRole.getId());
-            if((byte)Constant.LEVEL_THREE == userRole.getRoleLevel()){
+            if(Constant.LEVEL_THREE.equals(userRole.getRoleLevel())){
                 throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
-            }else if ((byte)Constant.LEVEL_THREE > userRole.getRoleLevel()){
-                role.setRoleLevel((byte)(userRole.getRoleLevel()+1));
+            }else if (Constant.LEVEL_THREE > userRole.getRoleLevel()){
+                role.setRoleLevel((byte)((int)userRole.getRoleLevel()+1));
             }
         }
         roleMapper.insertSelective(role);
@@ -112,34 +112,36 @@ public class RoleServiceImpl implements RoleService {
     	redisUtil.hmset(roleId, map, SESSION_TIMEOUT_SECONDS);
     }
 
+    /**
+     * 获得用户角色
+     * @return
+     * @throws Exception
+     */
     private ManageRole getUserRole() throws Exception {
         Long userId = ContextUtil.getManageCurrentUser().getUserId();
         if(userId==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_USER_NOT_EXIST);
         }
-        ManageRole role = manageRoleMapperExt.getUserRole(userId);
-        return role;
+        return manageRoleMapperExt.getUserRole(userId);
     }
 
     @Override
-    public void update(RoleParamVO roleParamVO) throws Exception {
-        if(roleParamVO.getId()==null){
+    @Transactional(rollbackFor = Exception.class)
+    public void update(RoleParamBO roleParamBO) throws Exception {
+        if(roleParamBO.getId()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        ManageRole role = CopyPropertiesUtil.copyBean(roleParamVO, ManageRole.class);
-        role.setUpdated(System.currentTimeMillis());
-        role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
-        roleMapper.updateByPrimaryKeySelective(role);
-        List<MiddleRoleMenuVO> roleMenuVOList = roleParamVO.getRoleMenuVOList();
+        updateRole(roleParamBO);
+        List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
+        //權限 传参：勾选的权限
+        MiddleRoleMenuExample example=new MiddleRoleMenuExample();
+        example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
+        roleMenuMapper.deleteByExample(example);
         if(CollectionUtils.isEmpty(roleMenuVOList)){
             return;
         }
-        //權限
-        MiddleRoleMenuExample example=new MiddleRoleMenuExample();
-        example.createCriteria().andRoleIdEqualTo(roleParamVO.getId());
-        roleMenuMapper.deleteByExample(example);
         List<MiddleRoleMenu> middleRoleMenus = CopyPropertiesUtil.copyList(roleMenuVOList, MiddleRoleMenu.class);
-        middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(role.getId()));
+        middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(roleParamBO.getId()));
         //批量創建
         roleMenuMapperExt.bulkInsert(middleRoleMenus);
         //保存角色对应权限到redis
@@ -147,63 +149,82 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleParamVO getById(Long roleId) throws Exception {
+    public void updateStatus(RoleParamBO roleParamBO) throws Exception {
+        if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()!=null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+        }
+        updateRole(roleParamBO);
+    }
+
+    /**
+     * 更新详情
+     * @param roleParamBO
+     */
+    private void updateRole(RoleParamBO roleParamBO) {
+        ManageRole role = CopyPropertiesUtil.copyBean(roleParamBO, ManageRole.class);
+        role.setUpdated(System.currentTimeMillis());
+        role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        roleMapper.updateByPrimaryKeySelective(role);
+    }
+
+    @Override
+    public RoleParamBO getById(Long roleId) throws Exception {
         ManageRoleExample example=new ManageRoleExample();
         example.createCriteria().andEnabledEqualTo(true).andIdEqualTo(roleId);
         List<ManageRole> roles = roleMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(roles)){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
         }
-        RoleParamVO roleParamVO = CopyPropertiesUtil.copyBean(roles.get(0), RoleParamVO.class);
+        //角色详情
+        RoleParamBO roleParamBO = CopyPropertiesUtil.copyBean(roles.get(0), RoleParamBO.class);
         MiddleRoleMenuExample example1=new MiddleRoleMenuExample();
         example1.createCriteria().andRoleIdEqualTo(roleId);
         List<MiddleRoleMenu> middleRoleMenus = roleMenuMapper.selectByExample(example1);
         if(CollectionUtils.isEmpty(middleRoleMenus)){
-            return roleParamVO;
+            return roleParamBO;
         }
-        List<MiddleRoleMenuVO> roleMenuVOList=CopyPropertiesUtil.copyList(middleRoleMenus,MiddleRoleMenuVO.class);
+        List<MiddleRoleMenuBO> roleMenuVOList=CopyPropertiesUtil.copyList(middleRoleMenus,MiddleRoleMenuBO.class);
         List<Long> menuIdList = new ArrayList<>();
         roleMenuVOList.forEach(middleRoleMenuVO -> menuIdList.add(middleRoleMenuVO.getMenuId()));
+        //角色菜单
         List<ManageMenuBO> manageMenus = menuService.listByIdList(menuIdList);
-        for (MiddleRoleMenuVO menuVO:roleMenuVOList){
+        for (MiddleRoleMenuBO menuBO:roleMenuVOList){
             for (ManageMenuBO menu:manageMenus){
-                if(menuVO.getMenuId().equals(menu.getId())){
-                    menuVO.setMenuName(menu.getMenuName());
-                    menuVO.setParentId(menu.getParentId());
-                    menuVO.setPriority(menu.getPriority());
+                if(menuBO.getMenuId().equals(menu.getId())){
+                    menuBO.setMenuName(menu.getMenuName());
+                    menuBO.setParentId(menu.getParentId());
+                    menuBO.setPriority(menu.getPriority());
                 }
             }
         }
-        roleParamVO.setRoleMenuVOList(roleMenuVOList);
-        return roleParamVO;
+        roleParamBO.setRoleMenuVOList(roleMenuVOList);
+        return roleParamBO;
     }
 
     @Override
-    public PageInfo<RoleParamVO> listByPage(PageParamVO pageParamVO) throws Exception {
-        if(pageParamVO.getPageNo()==null || pageParamVO.getPageSize()==null){
+    public PageInfo<RoleParamBO> listByPage(SearchPageParamBO pageParamBO) throws Exception {
+        if(pageParamBO.getPageNo()==null || pageParamBO.getPageSize()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //一级用户(全部角色) 二级用户(自己及创建的角色)  三级用户不能查看
-        PageHelper.startPage(pageParamVO.getPageNo(), pageParamVO.getPageSize());
+        PageHelper.startPage(pageParamBO.getPageNo(), pageParamBO.getPageSize());
         ManageRoleExample example=new ManageRoleExample();
         example.setOrderByClause("created desc");
         //获得用户角色
         ManageRole userRole = getUserRole();
+        List<ManageRole> roles=null;
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();
-            if((byte)Constant.LEVEL_THREE == roleLevel){
+            if(Constant.LEVEL_THREE.equals(roleLevel)){
                 throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
-            }else if ((byte)Constant.LEVEL_TWO == roleLevel){
-                example.or().andIdEqualTo(userRole.getId()).andEnabledEqualTo(true);
-                example.or().andParentIdEqualTo(userRole.getId()).andEnabledEqualTo(true);
-            }else if ((byte)Constant.LEVEL_ONE == roleLevel){
-                ManageRoleExample.Criteria criteria = example.createCriteria();
-                criteria.andEnabledEqualTo(true);
+            }else if (Constant.LEVEL_TWO.equals(roleLevel)){
+                roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue());
+            }else if (Constant.LEVEL_ONE.equals(roleLevel)){
+                roles = manageRoleMapperExt.getRoleByOne(pageParamBO.getSearchValue());
             }
         }
-        List<ManageRole> roles = roleMapper.selectByExample(example);
-        List<RoleParamVO> roleParamVOS = CopyPropertiesUtil.copyList(roles, RoleParamVO.class);
-        PageInfo<RoleParamVO> pageInfo = new PageInfo<>(roleParamVOS);
+        List<RoleParamBO> roleParamBOS = CopyPropertiesUtil.copyList(roles, RoleParamBO.class);
+        PageInfo<RoleParamBO> pageInfo = new PageInfo<>(roleParamBOS);
         return pageInfo;
     }
 
