@@ -165,6 +165,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStatus(RoleParamBO roleParamBO) throws Exception {
         if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
