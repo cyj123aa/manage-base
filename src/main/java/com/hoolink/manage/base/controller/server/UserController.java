@@ -36,7 +36,7 @@ public class UserController {
 	public BackBO<ManagerUserBO> getById(@RequestBody Long id)throws Exception{
 		return BackBOUtil.defaultBackBO(userService.getById(id));
 	}
-    
+
     @PostMapping(value = "listByIdList")
     @ApiOperation(value = "根据id集合获取用户")
     @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")
