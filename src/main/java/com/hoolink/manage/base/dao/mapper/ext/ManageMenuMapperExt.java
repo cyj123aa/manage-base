@@ -4,6 +4,7 @@ import com.hoolink.manage.base.dao.model.ManageMenu;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description: 菜单
@@ -17,5 +18,12 @@ public interface ManageMenuMapperExt {
      * @param code
      */
     List<ManageMenu> selectByExample(@Param("code") String code);
+
+    /**
+     *查询用户当前权限菜单
+     * @param roleId
+     * @return
+     */
+    Map<Long,Integer> getRoleMenu(@Param("roleId") Long roleId);
 
 }

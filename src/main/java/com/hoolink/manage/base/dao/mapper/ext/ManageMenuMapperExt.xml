@@ -29,13 +29,21 @@
     @mbggenerated
     -->
     select
-    <if test="distinct">
-      distinct
-    </if>
     <include refid="Base_Column_List" />
     from manage_menu mm inner join manage_menu me on mm.id=me.parent_id
     where mm.enabled=true and me.enabled=true and mm.menu_code=#{code}
     order by me.priority asc
+  </select>
+
+  <resultMap id="ResultMap" type="java.util.Map">
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="permission_flag" jdbcType="INTEGER" property="permissionFlag" />
+  </resultMap>
+
+  <select id="getRoleMenu" parameterType="java.lang.Long" resultMap="ResultMap">
+    select mm.id,mrm.permission_flag
+    from middle_role_menu mrm left join manage_menu mm on mm.id=mrm.menu_id
+    where mm.enabled=true and mrm.role_id=#{roleId}
   </select>
 
 </mapper>

@@ -127,4 +127,12 @@ public class MenuServiceImpl implements MenuService {
         List<MiddleRoleMenu> middleRoleMenus = middleRoleMenuMapper.selectByExample(example);
         return middleRoleMenus;
     }
+
+    @Override
+    public List<ManageMenuBO> listAll() {
+        ManageMenuExample example = new ManageMenuExample();
+        example.createCriteria().andEnabledEqualTo(true);
+        List<ManageMenu> menus = manageMenuMapper.selectByExample(example);
+        return CopyPropertiesUtil.copyList(menus, ManageMenuBO.class);
+    }
 }

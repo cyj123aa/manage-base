@@ -37,12 +37,15 @@
     where manage_user.id = #{userId} and manage_user.enabled=true and manage_role.enabled=true
   </select>
 
-  <select id="getRoleByOne" parameterType="java.lang.String" resultMap="BaseResultMap">
+  <select id="getRoleByOne" resultMap="BaseResultMap">
     select id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created,
     updated, enabled from manage_role
     where enabled=true
     <if test="searchValue!=null and searchValue!=''">
-    and locate(#{searchValue}, role_name)>0
+    and (locate(#{searchValue}, role_name)>0 or locate(#{searchValue}, role_desc)>0)
+    </if>
+    <if test="status!=null">
+      and role_status=#{status}
     </if>
     order by created desc
   </select>
@@ -53,7 +56,10 @@
     where enabled=true
     and (parent_id=#{roleId} or id=#{roleId})
     <if test="searchValue!=null and searchValue!=''">
-      and locate(#{searchValue}, role_name)>0
+      and (locate(#{searchValue}, role_name)>0 or locate(#{searchValue}, role_desc)>0)
+    </if>
+    <if test="status!=null">
+      and role_status=#{status}
     </if>
     order by created desc
   </select>
