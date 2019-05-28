@@ -74,12 +74,6 @@ public class ManagerUserInfoVO {
      * 账号状态: 启用/禁用
      */
     private Boolean status;
-    
-    /**
-     * 是否可见员工密保等级
-     */
-    private Boolean viewEncryLevelPermitted; 
-    
     /**
      * 用户组织关系
      */

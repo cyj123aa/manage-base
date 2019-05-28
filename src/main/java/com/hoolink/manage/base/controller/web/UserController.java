@@ -292,7 +292,7 @@ public class UserController {
     
     @PostMapping(value = "updatePassword")
     @ApiOperation(value = "修改密码")
-    @LogAndParam(value = "修改密码失败，请稍后重试")
+    @LogAndParam(value = "修改密码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<Void> updatePassword(@RequestBody UpdatePasswdParamVO updatePasswdParam)throws Exception  {
         BackVO validateParameter = ValidatorUtil.validateParameter(updatePasswdParam);
         if (validateParameter != null) {
@@ -301,6 +301,22 @@ public class UserController {
         //VO转BO
         UpdatePasswdParamBO updatePasswdParamBO = CopyPropertiesUtil.copyBean(updatePasswdParam, UpdatePasswdParamBO.class);
         userService.updatePasswd(updatePasswdParamBO);
+        return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "resetPhone")
+    @ApiOperation(value = "重置手机号码")
+    @LogAndParam(value = "重置手机号码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> resetPhone(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
+        userService.resetPhone(userIdParam.getData());
+        return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "resetPasswd")
+    @ApiOperation(value = "重置密码")
+    @LogAndParam(value = "重置密码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> resetPasswd(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
+        userService.resetPasswd(userIdParam.getData());
         return BackVOUtil.operateAccess();
     }
 }

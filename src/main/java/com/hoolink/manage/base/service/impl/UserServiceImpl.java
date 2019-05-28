@@ -28,7 +28,6 @@ import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.enums.StatusEnum;
-import com.hoolink.sdk.enums.ViewEncryLevelPermittedEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
@@ -373,8 +372,6 @@ public class UserServiceImpl implements UserService {
 			ManagerUserBO userBO = new ManagerUserBO();
 			userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
 			userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-			userBO.setViewEncryLevelPermittedDesc(
-					ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
 			ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
 					.orElseGet(ManageRoleBO::new);
 			userBO.setRoleName(role.getRoleName());
@@ -488,11 +485,6 @@ public class UserServiceImpl implements UserService {
 		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(companyIdList)) {
 			userInfoBO.setCompanyId(companyIdList.get(0));
-		}
-		//是否可见员工密保等级
-		if(!user.getViewEncryLevelPermitted()) {
-			userInfoBO.setEncryLevelCompany(null);
-			userInfoBO.getUserDeptPairList().stream().forEach(d -> d.setEncryLevelDept(null));
 		}
 		return userInfoBO;
 	}
@@ -812,8 +804,6 @@ public class UserServiceImpl implements UserService {
 		}
 		personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
 		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-		personalInfo.setViewEncryLevelPermittedDesc(
-				ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
 		personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
 		
 		// 获取组织树
@@ -845,7 +835,6 @@ public class UserServiceImpl implements UserService {
         head.add(Constant.EXCEL_USER_COMPANY);
         head.add(Constant.EXCEL_USER_PHONE);
         head.add(Constant.EXCEL_USER_ACCOUNT);
-        head.add(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED);
         head.add(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY);
         head.add(Constant.EXCEL_USER_STATUS);
         head.add(Constant.EXCEL_USER_LAST_TIME);
@@ -871,7 +860,6 @@ public class UserServiceImpl implements UserService {
             content.add(user.getCompany());
             content.add(user.getPhone());
             content.add(user.getUserAccount());
-            content.add(user.getViewEncryLevelPermittedDesc());
             content.add(user.getEncryLevelCompanyName());
             content.add(user.getStatusDesc());
             if (user.getLastTime() == null) {
@@ -898,10 +886,10 @@ public class UserServiceImpl implements UserService {
 		setHidenSheet(wb);
 		
 		//设置表头
-		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、是否可见员工密级、资源库密保等级
+		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、资源库密保等级
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, 
 				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
-				Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
+			    Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
 		
 		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
 		Row row0 = sheet1.createRow(0);
@@ -987,8 +975,6 @@ public class UserServiceImpl implements UserService {
 		deptPairListForExcel.add(getRolePairForExcel());
 		//获取加密等级字典值
 		deptPairListForExcel.add(getEncryLevelPairForExcel());
-		//获取是否可见员工密保等级字典值
-		deptPairListForExcel.add(getViewEncryPermittedPairForExcel());
 		//插入组织架构属性到隐藏的sheet
 		int rowId = 0;
 		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
@@ -1184,28 +1170,6 @@ public class UserServiceImpl implements UserService {
 		return encryLevelPairForExcel;
 	}
 	
-	/**
-	 * 获取是否可见员工密保等级字典值
-	 * @return
-	 */
-	private DictPairForExcelBO getViewEncryPermittedPairForExcel(){
-		DictPairForExcelBO viewEncryPermittedPairForExcel = new DictPairForExcelBO();
-		DictPairBO<Long, String> parentViewEncryPermittedPair = new DictPairBO<>();
-		parentViewEncryPermittedPair.setKey(-1L);
-		parentViewEncryPermittedPair.setValue(Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST);
-		viewEncryPermittedPairForExcel.setParentDictPair(parentViewEncryPermittedPair);
-		
-		List<DictPairBO<Long, String>> childrenViewEncryPermittedPairList = new ArrayList<>();
-		viewEncryPermittedPairForExcel.setChildrenDictPairList(childrenViewEncryPermittedPairList);
-		for(ViewEncryLevelPermittedEnum viewEncryLevelPermittedEnum : ViewEncryLevelPermittedEnum.values()) {
-			DictPairBO<Long, String> childViewEncryPermittedPair = new DictPairBO<>();
-			childViewEncryPermittedPair.setKey(viewEncryLevelPermittedEnum.getKey()==true ? 1L:0L);
-			childViewEncryPermittedPair.setValue(viewEncryLevelPermittedEnum.getValue());
-			childrenViewEncryPermittedPairList.add(childViewEncryPermittedPair);
-		}
-		return viewEncryPermittedPairForExcel;
-	}
-
 	@Override
 	public AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink() {
 		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
@@ -1221,8 +1185,7 @@ public class UserServiceImpl implements UserService {
         //校验手机验证码
         checkPhoneCode(updatePasswdParam.getPhoneParam());
         Long userId = getCurrentUserId();
-        User user = new User();
-        user.setId(userId);
+        User user = buildUserToUpdate(userId);
         user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
         userMapper.updateByPrimaryKeySelective(user);
 	}
@@ -1233,4 +1196,19 @@ public class UserServiceImpl implements UserService {
 		example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true);
 		return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
 	}
+
+	@Override
+	public void resetPhone(Long userId) {
+		User user = buildUserToUpdate(userId);
+		user.setPhone("");
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public void resetPasswd(Long userId) {
+		User user = buildUserToUpdate(userId);
+		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
 }

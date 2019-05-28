@@ -215,4 +215,16 @@ public interface UserService {
      * @param updatePasswdParam
      */
     void updatePasswd(UpdatePasswdParamBO updatePasswdParam);
+    
+    /**
+     * 重置手机号
+     * @param userId
+     */
+    void resetPhone(Long userId);
+    
+    /**
+     * 重置密码
+     * @param userId
+     */
+    void resetPasswd(Long userId);
 }
