@@ -293,9 +293,9 @@ public class UserServiceImpl implements UserService {
         //设置角色id
         currentUserBO.setRoleId(user.getRoleId());
         //设置角色层级
-        RoleParamBO role = roleService.getById(user.getRoleId());
-        if(role!=null && role.getRoleStatus()) {
-        	currentUserBO.setRoleLevel(role.getRoleLevel());
+		ManageRoleBO baseRole = roleService.getBaseRole(user.getRoleId());
+		if(baseRole!=null && baseRole.getRoleStatus()) {
+        	currentUserBO.setRoleLevel(baseRole.getRoleLevel());
         }
         //设置所属公司
 		List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreBOList = middleUserDepartmentService

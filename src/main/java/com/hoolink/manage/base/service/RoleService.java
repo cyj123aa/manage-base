@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.ManageRoleBO;
-import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
-import com.hoolink.manage.base.bo.RoleParamBO;
-import com.hoolink.manage.base.bo.SearchPageParamBO;
+import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.dao.model.ManageRole;
 
 /**
  * @description: 角色管理
@@ -44,7 +42,15 @@ public interface RoleService {
      * @return
      * @throws Exception
      */
-    RoleParamBO getById(Long roleId) throws Exception;
+    BackRoleBO getById(Long roleId) throws Exception;
+
+    /**
+     * 获得角色基础信息
+     * @param roleId
+     * @return
+     * @throws Exception
+     */
+    ManageRoleBO getBaseRole(Long roleId) throws Exception;
 
     /**
      * 分页获得角色列表

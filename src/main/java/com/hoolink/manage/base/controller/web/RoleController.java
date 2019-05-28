@@ -1,12 +1,16 @@
 package com.hoolink.manage.base.controller.web;
 
 import com.github.pagehelper.PageInfo;
+import com.hoolink.manage.base.bo.BackRoleBO;
+import com.hoolink.manage.base.bo.ManageMenuTreeBO;
 import com.hoolink.manage.base.bo.RoleParamBO;
 import com.hoolink.manage.base.bo.SearchPageParamBO;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
 import com.hoolink.manage.base.vo.req.SearchPageParamVO;
+import com.hoolink.manage.base.vo.res.BackRoleVO;
+import com.hoolink.manage.base.vo.res.ManageMenuTreeVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
@@ -66,10 +70,10 @@ public class RoleController {
     @PostMapping(value = "getById")
     @ApiOperation(value = "获取角色信息")
     @LogAndParam(value = "获取角色信息失败",check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<RoleParamVO> getById(@RequestBody BaseParam<Long> param) throws Exception {
-        RoleParamBO roleParamBO = roleService.getById(param.getData());
-        RoleParamVO roleParamVO = CopyPropertiesUtil.copyBean(roleParamBO, RoleParamVO.class);
-        return BackVOUtil.operateAccess(roleParamVO);
+    public BackVO<BackRoleVO> getById(@RequestBody BaseParam<Long> param) throws Exception {
+        BackRoleBO backRoleBO = roleService.getById(param.getData());
+        BackRoleVO backRoleVO = CopyPropertiesUtil.copyBean(backRoleBO, BackRoleVO.class);
+        return BackVOUtil.operateAccess(backRoleVO);
     }
 
     @PostMapping(value = "listByPage")
