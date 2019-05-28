@@ -35,13 +35,15 @@
     order by me.priority asc
   </select>
 
-  <resultMap id="ResultMap" type="java.util.Map">
-    <result column="id" jdbcType="BIGINT" property="id" />
+  <resultMap id="ResultMap" type="com.hoolink.manage.base.bo.MiddleRoleMenuBO">
+    <id column="id" jdbcType="BIGINT" property="menuId" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
     <result column="permission_flag" jdbcType="INTEGER" property="permissionFlag" />
   </resultMap>
 
   <select id="getRoleMenu" parameterType="java.lang.Long" resultMap="ResultMap">
-    select mm.id,mrm.permission_flag
+    select IFNULL(mm.parent_id ,0) as parent_id,mrm.permission_flag,mm.id, mm.menu_name
     from middle_role_menu mrm left join manage_menu mm on mm.id=mrm.menu_id
     where mm.enabled=true and mrm.role_id=#{roleId}
   </select>

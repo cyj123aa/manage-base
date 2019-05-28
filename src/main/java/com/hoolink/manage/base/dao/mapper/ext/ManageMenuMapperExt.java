@@ -1,10 +1,10 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 
+import com.hoolink.manage.base.bo.MiddleRoleMenuBO;
 import com.hoolink.manage.base.dao.model.ManageMenu;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @description: 菜单
@@ -24,6 +24,6 @@ public interface ManageMenuMapperExt {
      * @param roleId
      * @return
      */
-    Map<Long,Integer> getRoleMenu(@Param("roleId") Long roleId);
+    List<MiddleRoleMenuBO> getRoleMenu(@Param("roleId") Long roleId);
 
 }

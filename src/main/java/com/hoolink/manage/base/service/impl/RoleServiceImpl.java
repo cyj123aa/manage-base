@@ -168,66 +168,135 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleParamBO getById(Long roleId) throws Exception {
-        //角色详情
+    public ManageRoleBO getBaseRole(Long roleId) throws Exception {
         ManageRoleExample example=new ManageRoleExample();
         example.createCriteria().andEnabledEqualTo(true).andIdEqualTo(roleId);
         List<ManageRole> roles = roleMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(roles)){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
         }
-        RoleParamBO roleParamBO = CopyPropertiesUtil.copyBean(roles.get(0), RoleParamBO.class);
+        ManageRoleBO roleParamBO = CopyPropertiesUtil.copyBean(roles.get(0), ManageRoleBO.class);
+        return roleParamBO;
+    }
+
+    @Override
+    public BackRoleBO getById(Long roleId) throws Exception {
+        //角色详情
+        ManageRoleBO baseRole = getBaseRole(roleId);
+        BackRoleBO roleParamBO = CopyPropertiesUtil.copyBean(baseRole, BackRoleBO.class);
+        roleParamBO.setName(baseRole.getRoleName());
+        roleParamBO.setStatus(baseRole.getRoleStatus());
+        roleParamBO.setDescription(baseRole.getRoleDesc());
         //查询所有菜单
         List<ManageMenuBO> manageMenuBOS = menuService.listAll();
         if(CollectionUtils.isEmpty(manageMenuBOS)){
             return roleParamBO;
         }
-        Map<Long, List<MiddleRoleMenuBO>> map = new HashMap<>(manageMenuBOS.size());
+        //全部菜单  及  勾选菜单
+        RoleMenuBO roleMenuBO = new RoleMenuBO();
+        Map<Long, List<ManageMenuTreeBO>> map = new HashMap<>(manageMenuBOS.size());
         manageMenuBOS.forEach(manageMenuBO -> {
             if(manageMenuBO.getParentId()==null || manageMenuBO.getParentId()==0L){
                 //一级菜单
                 if(map.containsKey(0L)){
-                    List<MiddleRoleMenuBO> middleRoleMenuBOS = map.get(0L);
-                    MiddleRoleMenuBO menuBO = CopyPropertiesUtil.copyBean(manageMenuBO, MiddleRoleMenuBO.class);
-                    menuBO.setMenuId(manageMenuBO.getId());
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(0L);
+                    ManageMenuTreeBO menuBO =toMenuTree(manageMenuBO);
                     middleRoleMenuBOS.add(menuBO);
                 }else{
-                    List<MiddleRoleMenuBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
+                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
                     map.put(0L,roleMenuBOS);
                 }
             }else{
                 //下级菜单
                 Long parentId = manageMenuBO.getParentId();
                 if(map.containsKey(parentId)){
-                    List<MiddleRoleMenuBO> middleRoleMenuBOS = map.get(parentId);
-                    MiddleRoleMenuBO menuBO = CopyPropertiesUtil.copyBean(manageMenuBO, MiddleRoleMenuBO.class);
-                    menuBO.setMenuId(manageMenuBO.getId());
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(parentId);
+                    ManageMenuTreeBO menuBO =toMenuTree(manageMenuBO);
                     middleRoleMenuBOS.add(menuBO);
                 }else{
-                    List<MiddleRoleMenuBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
+                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
                     map.put(parentId,roleMenuBOS);
                 }
             }
         });
-        //角色权限列表
-        Map<Long, Integer> roleMenuMap = manageMenuMapperExt.getRoleMenu(roleId);
         //组合菜单列表
-        List<MiddleRoleMenuBO> firstMenuList = map.get(0L);
-        for (MiddleRoleMenuBO menuBO:firstMenuList){
+        List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
+        roleMenuBO.setManageMenu(firstMenuList);
+        //角色权限列表
+        List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(roleId);
+        if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
+            Map<Long, List<ManageMenuTreeBO>> roleMenuMap = new HashMap<>(roleMenu.size());
+            roleMenu.forEach(middleRoleMenuBO -> {
+                Long parentId = middleRoleMenuBO.getParentId();
+                if (roleMenuMap.containsKey(parentId)) {
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = roleMenuMap.get(parentId);
+                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                    middleRoleMenuBOS.add(menuBO);
+                } else {
+                    List<ManageMenuTreeBO> roleMenuBOS = new ArrayList<>();
+                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                    roleMenuBOS.add(menuBO);
+                    roleMenuMap.put(parentId, roleMenuBOS);
+                }
+            });
+            List<ManageMenuTreeBO> manageMenuTreeBOS = assembleMenuTree(roleMenuMap);
+            roleMenuBO.setChooseMenu(manageMenuTreeBOS);
+        }
+        roleParamBO.setBeSelectMenus(roleMenuBO);
+        return roleParamBO;
+    }
+
+    /**
+     * 组合菜单层级列表
+     * @param map
+     * @return
+     */
+    private List<ManageMenuTreeBO> assembleMenuTree(Map<Long, List<ManageMenuTreeBO>> map) {
+        List<ManageMenuTreeBO> firstMenuList = map.get(0L);
+        for (ManageMenuTreeBO menuBO:firstMenuList){
             //menuBO 的下级菜单
-            List<MiddleRoleMenuBO> middleRoleMenuBOS = map.get(menuBO.getMenuId());
+            List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(menuBO.getKey());
             if (CollectionUtils.isEmpty(middleRoleMenuBOS)) {
                 continue;
             }
-            if(!org.springframework.util.CollectionUtils.isEmpty(roleMenuMap)){
-                menuBO.setPermissionFlag(roleMenuMap.get(menuBO.getMenuId()));
-            }
-            fillNextMenu(map, middleRoleMenuBOS,roleMenuMap);
+            fillNextMenu(map, middleRoleMenuBOS);
             //封装 menuBO
-            menuBO.setChildList(middleRoleMenuBOS);
+            menuBO.setChildren(middleRoleMenuBOS);
         }
-        roleParamBO.setRoleMenuVOList(firstMenuList);
-        return roleParamBO;
+        return firstMenuList;
+    }
+
+    /**
+     * 组合 ManageMenuTreeBO
+     * @param manageMenuBO
+     * @return
+     */
+    private ManageMenuTreeBO toMenuTree(ManageMenuBO manageMenuBO){
+        if(manageMenuBO==null){
+            return null;
+        }
+        ManageMenuTreeBO menuTreeBO = new ManageMenuTreeBO();
+        menuTreeBO.setKey(manageMenuBO.getId());
+        menuTreeBO.setTitle(manageMenuBO.getMenuName());
+        menuTreeBO.setValue(manageMenuBO.getId().toString());
+        return menuTreeBO;
+    }
+
+    /**
+     * 组合 ManageMenuTreeBO
+     * @param middleRoleMenuBO
+     * @return
+     */
+    private ManageMenuTreeBO toMenuTree(MiddleRoleMenuBO middleRoleMenuBO){
+        if(middleRoleMenuBO==null){
+            return null;
+        }
+        ManageMenuTreeBO menuTreeBO = new ManageMenuTreeBO();
+        menuTreeBO.setKey(middleRoleMenuBO.getMenuId());
+        menuTreeBO.setValue(middleRoleMenuBO.getMenuId().toString());
+        menuTreeBO.setTitle(middleRoleMenuBO.getMenuName());
+        menuTreeBO.setReadonly(middleRoleMenuBO.getPermissionFlag());
+        return menuTreeBO;
     }
 
     /**
@@ -235,10 +304,9 @@ public class RoleServiceImpl implements RoleService {
      * @param manageMenuBO
      * @return
      */
-    private List<MiddleRoleMenuBO> getMiddleRoleMenuBOS(ManageMenuBO manageMenuBO) {
-        List<MiddleRoleMenuBO> roleMenuBOS = new ArrayList<>();
-        MiddleRoleMenuBO menuBO = CopyPropertiesUtil.copyBean(manageMenuBO, MiddleRoleMenuBO.class);
-        menuBO.setMenuId(manageMenuBO.getId());
+    private List<ManageMenuTreeBO> getMiddleRoleMenuBOS(ManageMenuBO manageMenuBO) {
+        List<ManageMenuTreeBO> roleMenuBOS = new ArrayList<>();
+        ManageMenuTreeBO menuBO = toMenuTree(manageMenuBO);
         roleMenuBOS.add(menuBO);
         return roleMenuBOS;
     }
@@ -249,18 +317,15 @@ public class RoleServiceImpl implements RoleService {
      * @param
      * @return
      */
-    private void fillNextMenu(Map<Long, List<MiddleRoleMenuBO>> map,List<MiddleRoleMenuBO> middleRoleMenuBOS,Map<Long, Integer> roleMenuMap){
-        for (MiddleRoleMenuBO childMenu : middleRoleMenuBOS) {
-            Long menuId = childMenu.getMenuId();
-            List<MiddleRoleMenuBO> menuBOS = map.get(menuId);
+    private void fillNextMenu(Map<Long, List<ManageMenuTreeBO>> map,List<ManageMenuTreeBO> middleRoleMenuBOS){
+        for (ManageMenuTreeBO childMenu : middleRoleMenuBOS) {
+            Long menuId = childMenu.getKey();
+            List<ManageMenuTreeBO> menuBOS = map.get(menuId);
             if (CollectionUtils.isEmpty(menuBOS)) {
                 continue;
             }
-            if(!org.springframework.util.CollectionUtils.isEmpty(roleMenuMap)){
-                childMenu.setPermissionFlag(roleMenuMap.get(menuId));
-            }
-            fillNextMenu(map,menuBOS,roleMenuMap);
-            childMenu.setChildList(menuBOS);
+            fillNextMenu(map,menuBOS);
+            childMenu.setChildren(menuBOS);
         }
     }
 
@@ -272,6 +337,7 @@ public class RoleServiceImpl implements RoleService {
         //获得用户角色
         ManageRole userRole = getUserRole();
         //一级用户(全部角色) 二级用户(自己及创建的角色)  三级用户不能查看
+        // 无法查看当前角色的信息
         PageHelper.startPage(pageParamBO.getPageNo(), pageParamBO.getPageSize());
         List<ManageRole> roles=null;
         if(userRole!=null){
@@ -279,9 +345,9 @@ public class RoleServiceImpl implements RoleService {
             if(Constant.LEVEL_THREE.equals(roleLevel)){
                 throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
-                roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
+                roles = manageRoleMapperExt.getRoleByTwo(pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
-                roles = manageRoleMapperExt.getRoleByOne(pageParamBO.getSearchValue(),pageParamBO.getStatus());
+                roles = manageRoleMapperExt.getRoleByOne(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }
         }
         List<RoleParamBO> roleParamBOS = CopyPropertiesUtil.copyList(roles, RoleParamBO.class);
