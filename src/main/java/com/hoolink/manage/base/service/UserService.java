@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 import com.github.pagehelper.PageInfo;
+import com.hoolink.manage.base.bo.AccessToEDMOrHoolinkBO;
 import com.hoolink.manage.base.bo.DeptTreeBO;
 import com.hoolink.manage.base.bo.DictInfoBO;
 import com.hoolink.manage.base.bo.DictParamBO;
@@ -155,10 +156,9 @@ public interface UserService {
     /**
      * 获取组织架构树
      * @param companyIdList
-     * @param middleUserDeptWithMoreList
      * @return
      */
-    List<DeptTreeBO> getDeptTree(List<Long> companyIdList, List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList);
+    List<DeptTreeBO> getDeptTree(List<Long> companyIdList);
     
     /**
      * 删除用户
@@ -195,4 +195,11 @@ public interface UserService {
      * @throws Exception
      */
     ResponseEntity<Resource> downloadTemplate() throws Exception;
+    
+    /**
+     * 是否有EDM和hoolink的权限
+     * @return
+     */
+    AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink();
+    
 }

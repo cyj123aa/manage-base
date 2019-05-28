@@ -51,11 +51,6 @@ public class ManagerUserParamBO {
     private String phone;
 
     /**
-     * 所属公司
-     */
-    private String company;
-
-    /**
      * 职位
      */
     private String position;

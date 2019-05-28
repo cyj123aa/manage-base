@@ -17,6 +17,7 @@ import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
+import com.hoolink.manage.base.vo.res.AccessToEDMOrHoolinkVO;
 import com.hoolink.manage.base.vo.res.DeptTreeVO;
 import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
@@ -228,7 +229,7 @@ public class UserController {
     @ApiOperation(value = "获取组织架构tree数据")
     @LogAndParam(value = "获取组织架构tree数据失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody BaseParam<Long> companyId) throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(Arrays.asList(companyId.getData()), null), DeptTreeVO.class));
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(Arrays.asList(companyId.getData())), DeptTreeVO.class));
     }
     
     @PostMapping(value = "exportList")
@@ -246,5 +247,12 @@ public class UserController {
     @ApiResponses({@ApiResponse(code = 200, response = File.class, message = "下载模板"),})
     public ResponseEntity<Resource> downloadTemplate() throws Exception {
         return userService.downloadTemplate();
+    }
+    
+    @PostMapping(value = "isAccessToEDMOrHoolink")
+    @ApiOperation(value = "首页获取EDM/hoolink权限")
+    @LogAndParam(value = "首页获取EDM/hoolink权限失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<AccessToEDMOrHoolinkVO> isAccessToEDMOrHoolink() throws Exception{
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.isAccessToEDMOrHoolink(), AccessToEDMOrHoolinkVO.class));
     }
 }

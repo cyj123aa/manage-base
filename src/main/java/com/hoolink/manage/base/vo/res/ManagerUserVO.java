@@ -51,6 +51,16 @@ public class ManagerUserVO {
     private String phone;
     
     /**
+     * 性别: 1/0 男/女
+     */
+    private Boolean sex;
+    
+    /**
+     * 性别
+     */
+    private String sexDesc;
+    
+    /**
      * 账号
      */
     private String userAccount;
@@ -101,7 +111,7 @@ public class ManagerUserVO {
     private List<UserDepartmentVO> userDeptPairList;
     
     @Data
-    public class UserDepartmentVO{
+    public static class UserDepartmentVO{
     	/**
     	 * 部门ID
     	 */
