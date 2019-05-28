@@ -102,4 +102,6 @@ public class Constant {
      */
     public static final String EDM = "EDM";
     public static final String HOOLINK = "Hoolink";
+    public static final String MANAGE_CENTER = "manageCenter";
+
 }

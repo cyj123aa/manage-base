@@ -51,6 +51,13 @@ public interface RoleService {
     RoleMenuBO getCurrentRoleMenu() throws Exception;
 
     /**
+     * 获得基础菜单
+     * @param menuParamBO
+     * @return
+     */
+    List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO);
+
+    /**
      * 获得角色基础信息
      * @param roleId
      * @return

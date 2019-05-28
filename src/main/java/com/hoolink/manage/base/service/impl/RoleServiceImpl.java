@@ -194,31 +194,7 @@ public class RoleServiceImpl implements RoleService {
         }
         //全部菜单  及  勾选菜单
         RoleMenuBO roleMenuBO = new RoleMenuBO();
-        Map<Long, List<ManageMenuTreeBO>> map = new HashMap<>(manageMenuBOS.size());
-        manageMenuBOS.forEach(manageMenuBO -> {
-            if(manageMenuBO.getParentId()==null || manageMenuBO.getParentId()==0L){
-                //一级菜单
-                if(map.containsKey(0L)){
-                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(0L);
-                    ManageMenuTreeBO menuBO =toMenuTree(manageMenuBO);
-                    middleRoleMenuBOS.add(menuBO);
-                }else{
-                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
-                    map.put(0L,roleMenuBOS);
-                }
-            }else{
-                //下级菜单
-                Long parentId = manageMenuBO.getParentId();
-                if(map.containsKey(parentId)){
-                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(parentId);
-                    ManageMenuTreeBO menuBO =toMenuTree(manageMenuBO);
-                    middleRoleMenuBOS.add(menuBO);
-                }else{
-                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
-                    map.put(parentId,roleMenuBOS);
-                }
-            }
-        });
+        Map<Long, List<ManageMenuTreeBO>> map = seperationMenu(manageMenuBOS);
         //组合菜单列表
         List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
         roleMenuBO.setManageMenu(firstMenuList);
@@ -238,13 +214,16 @@ public class RoleServiceImpl implements RoleService {
      */
     private List<ManageMenuTreeBO> assembleMenuTree(Map<Long, List<ManageMenuTreeBO>> map) {
         List<ManageMenuTreeBO> firstMenuList = map.get(0L);
+        if (CollectionUtils.isEmpty(firstMenuList)) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_MENU_INCOMPLETE);
+        }
         for (ManageMenuTreeBO menuBO:firstMenuList){
             //menuBO 的下级菜单
             List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(menuBO.getKey());
             if (CollectionUtils.isEmpty(middleRoleMenuBOS)) {
                 continue;
             }
-            fillNextMenu(map, middleRoleMenuBOS);
+            fillNextMenu(map, middleRoleMenuBOS,null);
             //封装 menuBO
             menuBO.setChildren(middleRoleMenuBOS);
         }
@@ -302,16 +281,84 @@ public class RoleServiceImpl implements RoleService {
      * @param
      * @return
      */
-    private void fillNextMenu(Map<Long, List<ManageMenuTreeBO>> map,List<ManageMenuTreeBO> middleRoleMenuBOS){
+    private void fillNextMenu(Map<Long, List<ManageMenuTreeBO>> map,List<ManageMenuTreeBO> middleRoleMenuBOS,Integer level){
+        if(level!=null){
+            level--;
+            if(level==0){
+                return;
+            }
+        }
+        if(CollectionUtils.isEmpty(middleRoleMenuBOS)){
+            return;
+        }
         for (ManageMenuTreeBO childMenu : middleRoleMenuBOS) {
             Long menuId = childMenu.getKey();
             List<ManageMenuTreeBO> menuBOS = map.get(menuId);
             if (CollectionUtils.isEmpty(menuBOS)) {
                 continue;
             }
-            fillNextMenu(map,menuBOS);
+            fillNextMenu(map,menuBOS,null);
             childMenu.setChildren(menuBOS);
         }
+    }
+
+    @Override
+    public List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) {
+        //所有菜单
+        List<ManageMenuBO> manageMenuBOS = menuService.listAll();
+        if(CollectionUtils.isEmpty(manageMenuBOS)){
+            return null;
+        }
+        String code = menuParamBO.getCode();
+        Integer level = menuParamBO.getLevel();
+        if(StringUtils.isEmpty(code)){
+            code=Constant.MANAGE_CENTER;
+        }
+        //查询当前menu
+        ManageMenu byCode = menuService.getByCode(code);
+        //组合所有子集列表
+        Map<Long, List<ManageMenuTreeBO>> map = seperationMenu(manageMenuBOS);
+        List<ManageMenuTreeBO> manageMenuTreeBOS = map.get(byCode.getId());
+        if(level==null || level==0L){
+            fillNextMenu(map,manageMenuTreeBOS,null);
+        }else{
+            fillNextMenu(map,manageMenuTreeBOS,level);
+        }
+        return manageMenuTreeBOS;
+    }
+
+    /**
+     * 根据parentId 组装map
+     * @param manageMenuBOS
+     * @return
+     */
+    private Map<Long, List<ManageMenuTreeBO>> seperationMenu(List<ManageMenuBO> manageMenuBOS) {
+        Map<Long, List<ManageMenuTreeBO>> map = new HashMap<>(manageMenuBOS.size());
+        manageMenuBOS.forEach(manageMenuBO -> {
+            if (manageMenuBO.getParentId() == null || manageMenuBO.getParentId() == 0L) {
+                //一级菜单
+                if (map.containsKey(0L)) {
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(0L);
+                    ManageMenuTreeBO menuBO = toMenuTree(manageMenuBO);
+                    middleRoleMenuBOS.add(menuBO);
+                } else {
+                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
+                    map.put(0L, roleMenuBOS);
+                }
+            } else {
+                //下级菜单
+                Long parentId = manageMenuBO.getParentId();
+                if (map.containsKey(parentId)) {
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = map.get(parentId);
+                    ManageMenuTreeBO menuBO = toMenuTree(manageMenuBO);
+                    middleRoleMenuBOS.add(menuBO);
+                } else {
+                    List<ManageMenuTreeBO> roleMenuBOS = getMiddleRoleMenuBOS(manageMenuBO);
+                    map.put(parentId, roleMenuBOS);
+                }
+            }
+        });
+        return map;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.hoolink.manage.base.controller.web;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.manage.base.vo.req.MenuParamVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
 import com.hoolink.manage.base.vo.req.SearchPageParamVO;
@@ -10,8 +11,10 @@ import com.hoolink.manage.base.vo.res.BackRoleVO;
 import com.hoolink.manage.base.vo.res.ManageMenuTreeVO;
 import com.hoolink.manage.base.vo.res.RoleMenuVO;
 import com.hoolink.sdk.annotation.LogAndParam;
+import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.BackBOUtil;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
@@ -72,6 +75,16 @@ public class RoleController {
         BackRoleBO backRoleBO = roleService.getById(param.getData());
         BackRoleVO backRoleVO = CopyPropertiesUtil.copyBean(backRoleBO, BackRoleVO.class);
         return BackVOUtil.operateAccess(backRoleVO);
+    }
+
+    @PostMapping(value = "getBaseMenu")
+    @ApiOperation(value = "获得管理基础菜单")
+    @LogAndParam(value = "获得管理基础菜单失败")
+    public BackBO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO){
+        MenuParamBO menuParamBO = CopyPropertiesUtil.copyBean(menuParamVO, MenuParamBO.class);
+        List<ManageMenuTreeBO> baseMenu = roleService.getBaseMenu(menuParamBO);
+        List<ManageMenuTreeVO> manageMenuTreeVOS = CopyPropertiesUtil.copyList(baseMenu, ManageMenuTreeVO.class);
+        return BackBOUtil.defaultBackBO(manageMenuTreeVOS);
     }
 
     @PostMapping(value = "getCurrentRoleMenu")
