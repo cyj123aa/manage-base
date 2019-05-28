@@ -1,14 +1,15 @@
-package com.hoolink.manage.base.bo;
+package com.hoolink.manage.base.vo.res;
 
 import lombok.Data;
 
 /**
+ * 
  * @author lijunling
- * @description
- * @date 2019/05/15 19:00
+ *
+ * @date 2019/05/27 14:40
  */
 @Data
-public class MiddleUserDepartmentBO {
+public class MiddleUserDepartmentVO {
     /**
      * 主键
      */
@@ -28,9 +29,4 @@ public class MiddleUserDepartmentBO {
      * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
      */
     private Integer encryLevelDept;
-    
-    /**
-     * 同一用户不同部门区分标识
-     */
-    private String diffDeptGroup;
 }

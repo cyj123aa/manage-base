@@ -15,4 +15,5 @@ public class DictPairForExcelBO {
 	private DictPairBO<Long, String> parentDictPair;
 	/** 直接子级**/
 	private List<DictPairBO<Long, String>> childrenDictPairList;
+	private String name;
 }

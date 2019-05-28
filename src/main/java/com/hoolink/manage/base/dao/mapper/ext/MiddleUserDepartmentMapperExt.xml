@@ -3,11 +3,11 @@
 <mapper namespace="com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt">
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into middle_user_department (user_id, dept_id, encry_level_dept
+    insert into middle_user_department (user_id, dept_id, encry_level_dept, diff_dept_group
       )
     values
     <foreach collection="middleUserDeptList" item="userDeptPair" separator=",">
-      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept})
+      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept},#{userDeptPair.diffDeptGroup})
     </foreach>
   </insert>
 

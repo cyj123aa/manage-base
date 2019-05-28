@@ -19,6 +19,11 @@ public class ManagerUserInfoBO {
      * 账号
      */
     private String userAccount;
+    
+    /**
+     * 员工编号
+     */
+    private String userNo;
 	
     /**
      * 姓名
@@ -51,9 +56,9 @@ public class ManagerUserInfoBO {
     private Long roleId;
     
     /**
-     * 所属公司
+     * 所属公司Id
      */
-    private String company;
+    private Long companyId;
     
     /**
      * 联系电话
@@ -71,7 +76,12 @@ public class ManagerUserInfoBO {
     private Boolean status;
     
     /**
-     * 用户部门关系
+     * 是否可见员工密保等级
      */
-    private List<DeptTreeBO> deptTreeList;
+    private Boolean viewEncryLevelPermitted; 
+    
+    /**
+     * 用户组织关系
+     */
+    private List<DeptPairBO> userDeptPairList;
 }

@@ -42,6 +42,7 @@ public class Constant {
     public static final String EXCEL_USER_DEPT = "所属部门";
     public static final String EXCEL_USER_TEAM = "所属team";
     public static final String EXCEL_USER_ENCRY_LEVEL_DEPT = "部门密保等级";
+    public static final String EXCEL_ID = "id";
     /**
      * 导出文件数据末次登录时间字段为空，填充数据
      */
@@ -67,6 +68,18 @@ public class Constant {
      * 感叹号
      */
     public static final String EXCLAMATION_MARK = "!";
+    /**
+     * 下划线
+     */
+    public static final String UNDERLINE = "_";
+    /**
+     * 逗号
+     */
+    public static final String COMMA = ",";
+    /**
+     * 横杠
+     */
+    public static final String RUNG = "-";
     
     /**
      * 错误信息
@@ -83,4 +96,10 @@ public class Constant {
     public static final String EXCEL_DEPT_FORMULA = "INDIRECT($D1)";
     public static final String EXCEL_TEAM_FORMULA = "INDIRECT($E1)";
     
+    
+    /**
+     * 菜单
+     */
+    public static final String EDM = "EDM";
+    public static final String HOOLINK = "Hoolink";
 }

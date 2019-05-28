@@ -30,13 +30,4 @@ public class DeptTreeVO {
      * 子节点
      */
     private List<DeptTreeVO> children;
-    /**
-     * 是否选中
-     */
-    private boolean checked;
-    
-    /**
-	 * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
-	 */
-	private Integer encryLevelDept;
 }

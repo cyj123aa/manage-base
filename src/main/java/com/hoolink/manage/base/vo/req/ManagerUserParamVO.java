@@ -87,15 +87,6 @@ public class ManagerUserParamVO {
     private String phone;
 
     /**
-     * 所属公司
-     */
-    @NotBlank(
-            message = "公司不允许为空",
-            groups = {ManagerBaseGroup.CreateUser.class}
-    )
-    private String company;
-
-    /**
      * 职位
      */
     @NotBlank(
@@ -129,5 +120,5 @@ public class ManagerUserParamVO {
             message = "所属组织不允许为空",
             groups = {ManagerBaseGroup.CreateUser.class}
     )
-    private List<UserDeptPairParamBO> userDeptPairParamList;
+    private List<UserDeptPairParamVO> userDeptPairParamList;
 }

@@ -24,6 +24,8 @@ import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
+import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
+import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.enums.StatusEnum;
 import com.hoolink.sdk.enums.ViewEncryLevelPermittedEnum;
 import com.hoolink.sdk.exception.BusinessException;
@@ -41,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
@@ -60,16 +63,16 @@ import com.hoolink.manage.base.service.RoleService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -390,10 +393,8 @@ public class UserServiceImpl implements UserService {
 
 				Set<String> companySet = new HashSet<>();
 				userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
-						.forEach(ud -> {
-							companySet.add(ud.getDeptName());
-						});
-				userBO.setCompany(companySet.toString());
+						.forEach(ud -> companySet.add(ud.getDeptName()));
+				userBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
 			}
 			
 			BeanUtils.copyProperties(user, userBO);
@@ -467,36 +468,32 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
-		// 获取组织树
-		List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList = middleUserDepartmentService.listWithMoreByUserIdList(Arrays.asList(user.getId()));
-		List<Long> companyIdList = middleUserDeptWithMoreList.stream()
-				.filter(mudwm -> DeptTypeEnum.COMPANY.getKey().equals(mudwm.getDeptType()))
-				.map(mudwm -> mudwm.getDeptId()).collect(Collectors.toList());
+		// 获取用户组织对应关系
+		List<MiddleUserDeptWithMoreBO> userDeptWithMoreList = middleUserDepartmentService.listWithMoreByUserIdList(Arrays.asList(user.getId()));
+		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDeptWithMoreList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 		
-		List<DeptTreeBO> deptTreeList = getDeptTree(companyIdList, middleUserDeptWithMoreList);
-		userInfoBO.setDeptTreeList(deptTreeList);
+		List<DeptPairBO> deptPairList = new ArrayList<>();
+		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+			DeptPairBO deptPair = new DeptPairBO();
+			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+			}
+			deptPairList.add(deptPair);
+		}
+		userInfoBO.setUserDeptPairList(deptPairList);
 		
+		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(companyIdList)) {
+			userInfoBO.setCompanyId(companyIdList.get(0));
+		}
 		//是否可见员工密保等级
 		if(!user.getViewEncryLevelPermitted()) {
 			userInfoBO.setEncryLevelCompany(null);
-			
-			deptTreeList.stream().forEach(d -> {
-				removeEncryLevelCompanyAttr(d);
-			});
+			userInfoBO.getUserDeptPairList().stream().forEach(d -> d.setEncryLevelDept(null));
 		}
 		return userInfoBO;
-	}
-	
-	/**
-	 * 如果员工密保等级不可见，encryLevelDept置为null
-	 * @param parentDeptTree
-	 */
-	private void removeEncryLevelCompanyAttr(DeptTreeBO parentDeptTree) {
-		List<DeptTreeBO> children = parentDeptTree.getChildren();
-		children.stream().forEach(c -> {
-			c.setEncryLevelDept(null);
-			removeEncryLevelCompanyAttr(c);
-		});
 	}
 
 	@Override
@@ -504,9 +501,9 @@ public class UserServiceImpl implements UserService {
 	public void createUser(ManagerUserParamBO userBO) throws Exception {
 		//查看账号是否已经存在
 		checkAccountExist(userBO.getUserAccount());
-		List<UserDeptPairParamBO> userDeptPairParamList = userBO.getUserDeptPairParamList();
+		checkUserNoExist(userBO.getUserNo());
 		//得到将要入库的deptIdList
-		Set<Long> toCreateDeptIdSet = parseGetToCreateDeptIdSet(userBO.getUserDeptPairParamList());
+		List<DeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), true);
 		
 		//创建用户
 		User user = CopyPropertiesUtil.copyBean(userBO, User.class);
@@ -519,7 +516,7 @@ public class UserServiceImpl implements UserService {
 		userMapper.insertSelective(user);
 		
 		//新增用户组织对应关系
-		batchInsertUserDept(toCreateDeptIdSet, userDeptPairParamList, user.getId());
+		batchInsertUserDept(deptPairList, user.getId());
 	}
 	
 	/**
@@ -528,10 +525,23 @@ public class UserServiceImpl implements UserService {
 	 */
     private void checkAccountExist(String account){
         UserExample example=new UserExample();
-        example.createCriteria().andEnabledEqualTo(true).andStatusEqualTo(true).andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if(user != null){
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_EXISTS);
+        }
+    }
+    
+    /**
+     * 查看编号是否已经存在
+     * @param userNo
+     */
+    private void checkUserNoExist(String userNo){
+        UserExample example=new UserExample();
+        example.createCriteria().andUserNoEqualTo(userNo);
+        User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if(user != null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_EXISTS);
         }
     }
     
@@ -570,94 +580,129 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	/**
-	 * 解析参数获得将要入库的deptIdList
+	 * 参数校验
 	 * @param userDeptPairParamList
+	 * @param flag
 	 * @return
 	 */
-	private Set<Long> parseGetToCreateDeptIdSet(List<UserDeptPairParamBO> userDeptPairParamList){
-		if(CollectionUtils.isEmpty(userDeptPairParamList)) {
+	private List<DeptPairBO> parseGetToCreateDeptId(List<UserDeptPairParamBO> userDeptPairParamList, boolean flag){
+		if(flag && CollectionUtils.isEmpty(userDeptPairParamList)) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
 		}
-		
 		List<ManageDepartmentBO> deptList = departmentService.listAll();
-		//判断选中的组织等级是否含有部门且有密保等级
-		boolean isContainDeptAndEncryLevel = false;
-		for(UserDeptPairParamBO userDeptPairParam : userDeptPairParamList) {
-			Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(userDeptPairParam.getDeptId())).findFirst();
-			if(manageDepartmentBOOpt.isPresent() && DeptTypeEnum.DEPARTMENT.getKey() <= manageDepartmentBOOpt.get().getDeptType() && userDeptPairParam.getEncryLevelDept() != null) {
-				isContainDeptAndEncryLevel = true;
-				break;
-			}
-		}
-		if(!isContainDeptAndEncryLevel) {
-			throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
-		}
-		
-		List<Long> selectedDeptIdList = userDeptPairParamList.stream().map(udpp -> udpp.getDeptId()).collect(Collectors.toList());
-		//找出选中的所有末节点(没有子节点的)
-		for(Iterator<Long> it = selectedDeptIdList.iterator(); it.hasNext();) {
-			Long selectedDeptId = it.next();
-			List<Long> chidrenOfSelectedDeptId = new ArrayList<>();
-			traverseGetAllChildrenDeptId(deptList, chidrenOfSelectedDeptId, selectedDeptId);
-			chidrenOfSelectedDeptId.retainAll(selectedDeptIdList);
-			if(CollectionUtils.isNotEmpty(chidrenOfSelectedDeptId)) {
-				//如果不是末节点，直接删除
-				it.remove();
-			}
-		}
-
-		//得到选中的所有的末节点之后，得到对应的父节点
-		List<Long> parentOfSelectedDeptId = new ArrayList<>();
-		selectedDeptIdList.stream().forEach(sdi -> {
-			parentOfSelectedDeptId.add(sdi);
-			traverseGetAllParentDeptId(deptList, parentOfSelectedDeptId, sdi);
-		});
-		
-		//得到选中的所有的末节点之后，得到对应的子节点
-		List<Long> chidrenOfSelectedDeptId = new ArrayList<>();
-		selectedDeptIdList.stream().forEach(sdi -> {
-			traverseGetAllChildrenDeptId(deptList, chidrenOfSelectedDeptId, sdi);
-		});
-		
-		//将要入库的deptIdList
-		Set<Long> toCreateDeptIdSet = new HashSet<>();
-		toCreateDeptIdSet.addAll(parentOfSelectedDeptId);
-		toCreateDeptIdSet.addAll(chidrenOfSelectedDeptId);
-		return toCreateDeptIdSet;
+		return validUserDeptPairParam(deptList, userDeptPairParamList);
 	}
 
 	/**
-	 * 新增用户组织对应关系
-	 * @param toCreateDeptIdSet
+	 * 校验用户组织参数
+	 * @param deptList
 	 * @param userDeptPairParamList
+	 * @return
+	 */
+	private List<DeptPairBO> validUserDeptPairParam(List<ManageDepartmentBO> deptList, List<UserDeptPairParamBO> userDeptPairParamList){
+		List<DeptPairBO> deptPairList = new ArrayList<>();
+		if(CollectionUtils.isNotEmpty(userDeptPairParamList)) {
+			List<List<Long>> allDeptIdList = new ArrayList<>();
+			for(UserDeptPairParamBO userDeptPairParam : userDeptPairParamList) {
+				List<Long> deptIdGroupList = userDeptPairParam.getDeptIdList();
+				if(CollectionUtils.isEmpty(deptIdGroupList)) {
+					throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
+				}
+				
+				
+				//从末节点逐级找到父节点校验
+				Long lastDeptId = deptIdGroupList.get(deptIdGroupList.size()-1);
+				List<Long> parentOfTheLastDeptId = new ArrayList<>();
+				parentOfTheLastDeptId.add(lastDeptId);
+				traverseGetAllParentDeptId(deptList, parentOfTheLastDeptId, lastDeptId);
+				
+				if(!parentOfTheLastDeptId.containsAll(deptIdGroupList) || deptIdGroupList.size()!=parentOfTheLastDeptId.size()) {
+					throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_FORMAT_ERROR);
+				}
+				
+				//判断末节点是否至少为部门类型
+				Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(lastDeptId)).findFirst();
+				if(!manageDepartmentBOOpt.isPresent() || DeptTypeEnum.DEPARTMENT.getKey() > manageDepartmentBOOpt.get().getDeptType()) {
+					throw new BusinessException(HoolinkExceptionMassageEnum.TYPE_AT_LEASE_DEPT);
+				}else if(userDeptPairParam.getEncryLevelDept() == null) {
+					throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
+				}
+				
+				allDeptIdList.add(deptIdGroupList);
+			}
+			
+			//判断节点是否重复或属于父子关系
+			if(allDeptIdList.size() > 1) {
+				for(int i=0; i<allDeptIdList.size(); i++) {
+					List<Long> deptIdGroupList = allDeptIdList.get(i);
+					for(int j=i+1; j<allDeptIdList.size(); j++) {
+						List<Long> afterDeptIdGroupList = allDeptIdList.get(j);
+						if(deptIdGroupList.containsAll(afterDeptIdGroupList) || afterDeptIdGroupList.containsAll(deptIdGroupList)) {
+							throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_REPEAT_OR_CONTAIN);
+						}
+					}
+				}
+			}
+			
+			for(int i=0; i<allDeptIdList.size(); i++) {
+				List<Long> deptIdList = allDeptIdList.get(i);
+				//从末节点逐级找到子节点入库
+				Long lastDeptId = deptIdList.get(deptIdList.size()-1);
+				List<Long> chidrenDeptId = new ArrayList<>();
+				traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
+				deptIdList.addAll(chidrenDeptId);
+				DeptPairBO deptPair = new DeptPairBO();
+				deptPair.setDeptIdList(deptIdList);
+				deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
+				deptPairList.add(deptPair);
+			}
+		}
+		return deptPairList;
+	}
+	
+	/**
+	 * 新增用户组织对应关系
+	 * @param deptPairList
 	 * @param userId
 	 */
-	private void batchInsertUserDept(Set<Long> toCreateDeptIdSet, List<UserDeptPairParamBO> userDeptPairParamList, Long userId) {
+	private void batchInsertUserDept(List<DeptPairBO> deptPairList, Long userId) {
 		List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
-		toCreateDeptIdSet.stream().forEach(tcdi -> {
-			MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
-			middleUserDept.setDeptId(tcdi);
-			Optional<UserDeptPairParamBO> userDeptPairParamBOOpt = userDeptPairParamList.stream().filter(udp -> tcdi.equals(udp.getDeptId())).findFirst();
-			userDeptPairParamBOOpt.ifPresent(u -> middleUserDept.setEncryLevelDept(u.getEncryLevelDept()));
-			middleUserDept.setUserId(userId);
-			middleUserDeptList.add(middleUserDept);
+		deptPairList.stream().forEach(dp -> {
+			String diffDeptGroup = generateRandom();
+			for(Long deptId : dp.getDeptIdList()) {
+				MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
+				middleUserDept.setDeptId(deptId);
+				middleUserDept.setUserId(userId);
+				middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
+				middleUserDept.setDiffDeptGroup(diffDeptGroup);
+				middleUserDeptList.add(middleUserDept);
+			}
 		});
 		middleUserDepartmentService.batchInsert(middleUserDeptList);
+	}
+	
+	private String generateRandom() {
+		StringBuilder str=new StringBuilder(UUID.randomUUID().toString().replaceAll(Constant.RUNG, ""));
+		Random random=new Random();
+		for(int i=0; i<8; i++){
+		    str.append(random.nextInt(10));
+		}
+		return str.toString();
 	}
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateUser(ManagerUserParamBO userBO) throws Exception {
-		List<UserDeptPairParamBO> userDeptPairParamList = userBO.getUserDeptPairParamList();
 		//得到将要入库的deptIdList
-		Set<Long> toCreateDeptIdSet = parseGetToCreateDeptIdSet(userBO.getUserDeptPairParamList());
+		List<DeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), false);
 		
-		//删除原有用户部门对应关系
-		middleUserDepartmentService.removeByUserId(userBO.getId());
-		
-		//新增用户组织对应关系
-		batchInsertUserDept(toCreateDeptIdSet, userDeptPairParamList, userBO.getId());
-		
+		if(CollectionUtils.isNotEmpty(deptPairList)) {
+			//删除原有用户部门对应关系
+			middleUserDepartmentService.removeByUserId(userBO.getId());
+			
+			//新增用户组织对应关系
+			batchInsertUserDept(deptPairList, userBO.getId());			
+		}
 		//更新用户
 		User user = CopyPropertiesUtil.copyBean(userBO, User.class);
 		user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
@@ -679,36 +724,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<DeptTreeBO> getDeptTree(List<Long> companyIdList, List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList) {
+	public List<DeptTreeBO> getDeptTree(List<Long> companyIdList) {
 		List<ManageDepartmentBO> departmentList = departmentService.listAll();
 		List<ManageDepartmentBO> deptParentList = departmentList.stream()
 				.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
-		return getChildren(deptParentList, departmentList, middleUserDeptWithMoreList);
+		return getChildren(deptParentList, departmentList);
 	}
 	
 	/**
 	 * 递归遍历出所有子节点
 	 * @param deptParentList
 	 * @param departmentList
-	 * @param middleUserDeptWithMoreList
 	 * @return
 	 */
-	private List<DeptTreeBO> getChildren(List<ManageDepartmentBO> deptParentList, List<ManageDepartmentBO> departmentList, List<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreList) {
+	private List<DeptTreeBO> getChildren(List<ManageDepartmentBO> deptParentList, List<ManageDepartmentBO> departmentList) {
 		List<DeptTreeBO> deptTreeList = new ArrayList<>();
 		deptParentList.stream().forEach(d -> {
 			DeptTreeBO deptTreeBO = new DeptTreeBO();
 			//找出子节点
 			List<ManageDepartmentBO> deptChildren = departmentList.stream().filter(c -> d.getId().equals(c.getParentId())).collect(Collectors.toList());
-			deptTreeBO.setChildren(getChildren(deptChildren, departmentList, middleUserDeptWithMoreList));
-			
-			if(CollectionUtils.isNotEmpty(middleUserDeptWithMoreList)) {
-				Optional<MiddleUserDeptWithMoreBO> middleUserDeptWithMoreOpt = middleUserDeptWithMoreList.stream().filter(mudwm -> d.getId().equals(mudwm.getDeptId())).findFirst();
-				if(middleUserDeptWithMoreOpt.isPresent()) {
-					deptTreeBO.setEncryLevelDept(middleUserDeptWithMoreOpt.get().getEncryLevelDept());
-					deptTreeBO.setChecked(true);
-				}
-			}
-			
+			deptTreeBO.setChildren(getChildren(deptChildren, departmentList));
 			BeanUtils.copyProperties(d, deptTreeBO);
 			deptTreeList.add(deptTreeBO);
 		});
@@ -767,6 +802,7 @@ public class UserServiceImpl implements UserService {
 		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
 		personalInfo.setViewEncryLevelPermittedDesc(
 				ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
+		personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
 		
 		// 获取组织树
 		List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
@@ -775,7 +811,7 @@ public class UserServiceImpl implements UserService {
 		userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
 			companySet.add(ud.getDeptName());
 		});
-		personalInfo.setCompany(companySet.toString());
+		personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
 		
 		List<MiddleUserDeptWithMoreBO> userDeptPairList = userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType())).collect(Collectors.toList());
 		personalInfo.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDepartmentBO.class));
@@ -880,6 +916,13 @@ public class UserServiceImpl implements UserService {
 			name.setNameName(parentDeptPair.getValue());
 			String formula = Constant.EXCEL_HIDE_SHEET + Constant.EXCLAMATION_MARK + range;
 			name.setRefersToFormula(formula);
+			
+			// 添加对应ID管理器
+			range = getRange(1, rowId, childrenDeptPairList.size());
+			name = wb.createName();
+			name.setNameName(parentDeptPair.getValue() + Constant.UNDERLINE + Constant.EXCEL_ID);
+			formula = Constant.EXCEL_HIDE_SHEET + Constant.EXCLAMATION_MARK + range;
+			name.setRefersToFormula(formula);
 		}
 		
 		
@@ -889,21 +932,23 @@ public class UserServiceImpl implements UserService {
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_COMPANY, Constant.EXCEL_USER_DEPT,
 				Constant.EXCEL_USER_TEAM, Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
 				Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
+		
 		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
 		Row row0 = sheet1.createRow(0);
 		for(int i=0; i<headerArray.length; i++) {
 			row0.createCell(i).setCellValue(headerArray[i]);
 		}
 		
+		
 		//设置公式
 		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage()));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage()));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		
 		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
 			List<String> headerList = Arrays.asList(headerArray);
@@ -914,6 +959,36 @@ public class UserServiceImpl implements UserService {
 				DataValidation cacse = new HSSFDataValidation(rangeAddressList, formula);
 				cacse.createErrorBox(Constant.ERROR, formulaForExcel.getErrMsg());
 				sheet1.addValidationData(cacse);					
+			}
+		}
+		
+		//隐藏的id域
+		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
+		int len = headerArray.length;
+		boolean flag = false;
+		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
+			List<String> headerList = Arrays.asList(headerArray);
+			if(headerList.contains(formulaForExcel.getKey())) {
+				int index = headerList.indexOf(formulaForExcel.getKey());
+				Cell cell = row0.createCell(len);
+				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
+				
+				
+				for(int i=1; i<10000; i++) {
+					Row row;
+					if(!flag) {
+						row = sheet1.createRow(i);	
+					}else {
+						row = sheet1.getRow(i);
+					}
+					
+					Cell cell1 = row.createCell(len);
+					String formula = "INDEX(INDIRECT(\"" + formulaForExcel.getFormula() + Constant.UNDERLINE + Constant.EXCEL_ID + "\"),,MATCH(INDIRECT(ADDRESS(ROW(), COLUMN(" + getExcelColumn(index)+ "1))), INDIRECT(\"" + formulaForExcel.getFormula() + "\"), 0 ))";
+					cell1.setCellFormula("IF(ISERROR("+ formula + "), \"\", " + formula + ")");
+					
+				}
+				len++;
+				flag = true;
 			}
 		}
 		sheet1.setForceFormulaRecalculation(true);
@@ -981,7 +1056,13 @@ public class UserServiceImpl implements UserService {
 		}
 		deptPairForExcel.setChildrenDictPairList(childrenDeptPairList);
 	}
-	
+	/**
+	 * 获取excel别名引用地址
+	 * @param offset
+	 * @param rowId
+	 * @param colCount
+	 * @return
+	 */
 	private String getRange(int offset, int rowId, int colCount) {
 		char start = (char)('A' + offset);
 		if (colCount <= 25) {
@@ -1006,6 +1087,15 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			return "$" + start + "$" + rowId + ":$" + endPrefix + endSuffix + "$" + rowId;
+		}
+	}
+	
+	private String getExcelColumn(int col) {
+		char start = (char)('A' + col);
+		if(col <= 25) {
+			return start + "";
+		}else {
+			return "";
 		}
 	}
 	/**
@@ -1073,5 +1163,15 @@ public class UserServiceImpl implements UserService {
 			childrenViewEncryPermittedPairList.add(childViewEncryPermittedPair);
 		}
 		return viewEncryPermittedPairForExcel;
+	}
+
+	@Override
+	public AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink() {
+		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
+		AccessToEDMOrHoolinkBO accessToEDMOrHoolinkBO = new AccessToEDMOrHoolinkBO();
+		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(currentUserRoleId);
+		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessEDM(true));
+		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessHoolink(true));
+		return accessToEDMOrHoolinkBO;
 	}
 }
