@@ -50,6 +50,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -296,7 +297,7 @@ public class UserServiceImpl implements UserService {
         //设置角色id
         currentUserBO.setRoleId(user.getRoleId());
         //设置角色层级
-        RoleParamBO role = roleService.getById(user.getRoleId());
+        ManageRoleBO role = roleService.selectById(user.getRoleId());
         if(role!=null && role.getRoleStatus()) {
         	currentUserBO.setRoleLevel(role.getRoleLevel());
         }
@@ -307,7 +308,7 @@ public class UserServiceImpl implements UserService {
 				.filter(cudwm -> DeptTypeEnum.COMPANY.getKey().equals(cudwm.getDeptType()))
 				.map(cudwm -> cudwm.getDeptId()).collect(Collectors.toSet()));
         //设置权限url
-        currentUserBO.setAuthUrls(roleService.listAccessUrlByRoleId(user.getRoleId()));
+        currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
         return sessionService.cacheCurrentUser(currentUserBO);
     }
 
@@ -609,7 +610,6 @@ public class UserServiceImpl implements UserService {
 					throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
 				}
 				
-				
 				//从末节点逐级找到父节点校验
 				Long lastDeptId = deptIdGroupList.get(deptIdGroupList.size()-1);
 				List<Long> parentOfTheLastDeptId = new ArrayList<>();
@@ -681,10 +681,15 @@ public class UserServiceImpl implements UserService {
 		middleUserDepartmentService.batchInsert(middleUserDeptList);
 	}
 	
+	/**
+	 * 生成随机字符串
+	 * @return
+	 */
 	private String generateRandom() {
+		int eight = 8;
 		StringBuilder str=new StringBuilder(UUID.randomUUID().toString().replaceAll(Constant.RUNG, ""));
 		Random random=new Random();
-		for(int i=0; i<8; i++){
+		for(int i=0; i<eight; i++){
 		    str.append(random.nextInt(10));
 		}
 		return str.toString();
@@ -693,6 +698,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateUser(ManagerUserParamBO userBO) throws Exception {
+		//查看账号是否已经存在
+		if(StringUtils.isNotEmpty(userBO.getUserAccount())) {
+			checkAccountExist(userBO.getUserAccount());
+		}
+		if(StringUtils.isNotEmpty(userBO.getUserNo())) {
+			checkUserNoExist(userBO.getUserNo());
+		}
 		//得到将要入库的deptIdList
 		List<DeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), false);
 		
@@ -883,11 +895,94 @@ public class UserServiceImpl implements UserService {
 	
 	private Workbook buildUserWorkbook() {
 		Workbook wb = new HSSFWorkbook();
+		setHidenSheet(wb);
+		
+		//设置表头
+		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、是否可见员工密级、资源库密保等级
+		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, 
+				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
+				Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
+		
+		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
+		Row row0 = sheet1.createRow(0);
+		for(int i=0; i<headerArray.length; i++) {
+			row0.createCell(i).setCellValue(headerArray[i]);
+		}
+		
+		
+		//设置公式
+		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		
+		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
+			List<String> headerList = Arrays.asList(headerArray);
+			if(headerList.contains(formulaForExcel.getKey())) {
+				int index = headerList.indexOf(formulaForExcel.getKey());
+				DVConstraint formula = DVConstraint.createFormulaListConstraint(formulaForExcel.getFormula());
+				CellRangeAddressList rangeAddressList = new CellRangeAddressList(1, 10000, index, index);
+				DataValidation cacse = new HSSFDataValidation(rangeAddressList, formula);
+		        //处理Excel兼容性问题
+		        if(cacse instanceof XSSFDataValidation) {
+		        	cacse.setSuppressDropDownArrow(true);
+		            cacse.createErrorBox(Constant.ERROR, formulaForExcel.getErrMsg());
+		        }else {
+		        	cacse.setSuppressDropDownArrow(false);
+		        }
+				
+				sheet1.addValidationData(cacse);					
+			}
+		}
+		
+		//隐藏的id域
+		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
+		int len = headerArray.length;
+		boolean flag = false;
+		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
+			List<String> headerList = Arrays.asList(headerArray);
+			if(headerList.contains(formulaForExcel.getKey())) {
+				int index = headerList.indexOf(formulaForExcel.getKey());
+				Cell cell = row0.createCell(len);
+				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
+				sheet1.setColumnHidden(len, true);
+				
+				int tenThousand = 10000;
+				for(int i=1; i<tenThousand; i++) {
+					Row row;
+					if(!flag) {
+						row = sheet1.createRow(i);	
+					}else {
+						row = sheet1.getRow(i);
+					}
+					
+					Cell cell1 = row.createCell(len);
+					String formula = "INDEX(INDIRECT(\"" + formulaForExcel.getFormula() + Constant.UNDERLINE + Constant.EXCEL_ID + "\"),,MATCH(INDIRECT(ADDRESS(ROW(), COLUMN(" + getExcelColumn(index)+ "1))), INDIRECT(\"" + formulaForExcel.getFormula() + "\"), 0 ))";
+					cell1.setCellFormula("IF(ISERROR("+ formula + "), \"\", " + formula + ")");
+					
+				}
+				len++;
+				flag = true;
+			}
+		}
+		sheet1.setForceFormulaRecalculation(true);
+		return wb;
+	}
+	
+	/**
+	 * 在隐藏的sheet上面赋值下拉框参数
+	 * @param wb
+	 */
+	private void setHidenSheet(Workbook wb) {
 		Sheet hideSheet = wb.createSheet(Constant.EXCEL_HIDE_SHEET);
-		//wb.setSheetHidden(wb.getSheetIndex(Constant.HIDE_SHEET), true);
+		wb.setSheetHidden(wb.getSheetIndex(Constant.EXCEL_HIDE_SHEET), true);
 		
 		//获取组织架构字典
-		List<DictPairForExcelBO> deptPairListForExcel = listDeptPairForExcel();
+		List<DictPairForExcelBO> deptPairListForExcel = new ArrayList<>();
 		//获取角色字典
 		deptPairListForExcel.add(getRolePairForExcel());
 		//获取加密等级字典值
@@ -924,77 +1019,7 @@ public class UserServiceImpl implements UserService {
 			formula = Constant.EXCEL_HIDE_SHEET + Constant.EXCLAMATION_MARK + range;
 			name.setRefersToFormula(formula);
 		}
-		
-		
-		
-		//设置表头
-		//员工编号、姓名、职位、所属公司、所属部门、所属team、部门密保等级、所属角色、联系电话、账号、是否可见员工密级、资源库密保等级
-		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_COMPANY, Constant.EXCEL_USER_DEPT,
-				Constant.EXCEL_USER_TEAM, Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
-				Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
-		
-		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
-		Row row0 = sheet1.createRow(0);
-		for(int i=0; i<headerArray.length; i++) {
-			row0.createCell(i).setCellValue(headerArray[i]);
-		}
-		
-		
-		//设置公式
-		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		
-		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
-			List<String> headerList = Arrays.asList(headerArray);
-			if(headerList.contains(formulaForExcel.getKey())) {
-				int index = headerList.indexOf(formulaForExcel.getKey());
-				DVConstraint formula = DVConstraint.createFormulaListConstraint(formulaForExcel.getFormula());
-				CellRangeAddressList rangeAddressList = new CellRangeAddressList(1, 10000, index, index);
-				DataValidation cacse = new HSSFDataValidation(rangeAddressList, formula);
-				cacse.createErrorBox(Constant.ERROR, formulaForExcel.getErrMsg());
-				sheet1.addValidationData(cacse);					
-			}
-		}
-		
-		//隐藏的id域
-		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
-		int len = headerArray.length;
-		boolean flag = false;
-		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
-			List<String> headerList = Arrays.asList(headerArray);
-			if(headerList.contains(formulaForExcel.getKey())) {
-				int index = headerList.indexOf(formulaForExcel.getKey());
-				Cell cell = row0.createCell(len);
-				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
-				
-				
-				for(int i=1; i<10000; i++) {
-					Row row;
-					if(!flag) {
-						row = sheet1.createRow(i);	
-					}else {
-						row = sheet1.getRow(i);
-					}
-					
-					Cell cell1 = row.createCell(len);
-					String formula = "INDEX(INDIRECT(\"" + formulaForExcel.getFormula() + Constant.UNDERLINE + Constant.EXCEL_ID + "\"),,MATCH(INDIRECT(ADDRESS(ROW(), COLUMN(" + getExcelColumn(index)+ "1))), INDIRECT(\"" + formulaForExcel.getFormula() + "\"), 0 ))";
-					cell1.setCellFormula("IF(ISERROR("+ formula + "), \"\", " + formula + ")");
-					
-				}
-				len++;
-				flag = true;
-			}
-		}
-		sheet1.setForceFormulaRecalculation(true);
-		return wb;
 	}
-	
 	/**
 	 * 得到组织架构的excel属性
 	 * @return
@@ -1065,37 +1090,53 @@ public class UserServiceImpl implements UserService {
 	 */
 	private String getRange(int offset, int rowId, int colCount) {
 		char start = (char)('A' + offset);
-		if (colCount <= 25) {
+		int twentyFive = 25;
+		int twentySix = 26;
+		int fiftyOne = 51;
+		if (colCount <= twentyFive) {
 			char end = (char)(start + colCount - 1);
 			return "$" + start + "$" + rowId + ":$" + end + "$" + rowId;
 		} else {
 			char endPrefix = 'A';
 			char endSuffix = 'A';
-			if ((colCount - 25) / 26 == 0 || colCount == 51) {// 26-51之间，包括边界（仅两次字母表计算）
-				if ((colCount - 25) % 26 == 0) {// 边界值
-					endSuffix = (char)('A' + 25);
+			// 26-51之间，包括边界（仅两次字母表计算）
+			if ((colCount - twentyFive) / twentySix == 0 || colCount == fiftyOne) {
+				// 边界值
+				if ((colCount - twentyFive) % twentySix == 0) {
+					endSuffix = (char)('A' + twentyFive);
 				} else {
-					endSuffix = (char)('A' + (colCount - 25) % 26 - 1);
+					endSuffix = (char)('A' + (colCount - twentyFive) % twentySix - 1);
 				}
-			} else {// 51以上
-				if ((colCount - 25) % 26 == 0) {
-					endSuffix = (char)('A' + 25);
-					endPrefix = (char)(endPrefix + (colCount - 25) / 26 - 1);
+			} else {
+				// 51以上
+				if ((colCount - twentyFive) % twentySix == 0) {
+					endSuffix = (char)('A' + twentyFive);
+					endPrefix = (char)(endPrefix + (colCount - twentyFive) / twentySix - 1);
 				} else {
-					endSuffix = (char)('A' + (colCount - 25) % 26 - 1);
-					endPrefix = (char)(endPrefix + (colCount - 25) / 26);
+					endSuffix = (char)('A' + (colCount - twentyFive) % twentySix - 1);
+					endPrefix = (char)(endPrefix + (colCount - twentyFive) / twentySix);
 				}
 			}
 			return "$" + start + "$" + rowId + ":$" + endPrefix + endSuffix + "$" + rowId;
 		}
 	}
-	
+
+	/**
+	 * 列换算成excel的字母标识
+	 * @param col
+	 * @return
+	 */
 	private String getExcelColumn(int col) {
-		char start = (char)('A' + col);
-		if(col <= 25) {
-			return start + "";
+		char start = 'A';
+		int end = (int) (start + col);
+		int b =(end - 91) / 26;
+		int c =(end - 91) % 26;
+		
+		int twentyFive = 25;
+		if(col <= twentyFive) {
+			return (char)(start + col)+"";
 		}else {
-			return "";
+			return (char)(start + b) +""+ (char)(start + c) ;	
 		}
 	}
 	/**

@@ -103,27 +103,6 @@ public class RoleServiceImpl implements RoleService {
     }
     
     /**
-     * 保存角色对应权限到redis
-     * @param middleRoleMenus
-     */
-    private void saveRoleMenuPermissionToRedis(List<MiddleRoleMenu> middleRoleMenus) {
-    	String roleId = middleRoleMenus.get(0).getRoleId().toString(); 
-    	redisUtil.del(roleId);
-		List<Long> menuIdList = middleRoleMenus.stream().map(mrm -> mrm.getMenuId()).collect(Collectors.toList());
-		List<ManageMenuBO> menus = menuService.listByIdList(menuIdList);
-		
-		Map<String, Object> map = new HashMap<>(15);
-    	middleRoleMenus.stream().forEach(mrm -> {
-    		RoleMenuPermissionBO roleMenuPermission = new RoleMenuPermissionBO();
-    		BeanUtils.copyProperties(mrm, roleMenuPermission);
-    		ManageMenuBO menu = menus.stream().filter(m -> m.getId().longValue()==mrm.getMenuId().longValue()).findFirst().orElseGet(ManageMenuBO::new);
-    		roleMenuPermission.setMenuCode(menu.getMenuCode());
-    		map.put(roleMenuPermission.getMenuCode(), roleMenuPermission);
-    	});
-    	redisUtil.hmset(roleId, map, SESSION_TIMEOUT_SECONDS);
-    }
-
-    /**
      * 获得用户角色
      * @return
      * @throws Exception
@@ -164,8 +143,8 @@ public class RoleServiceImpl implements RoleService {
         middleRoleMenus.forEach(middleRoleMenu -> middleRoleMenu.setRoleId(id));
         //批量創建
         roleMenuMapperExt.bulkInsert(middleRoleMenus);
-        //保存角色对应权限到redis
-        saveRoleMenuPermissionToRedis(middleRoleMenus);
+        //删除角色对应权限
+        redisUtil.del(RedisConstant.ROLE_PERMITTED_URL_PREFIX + id);
     }
 
     @Override
@@ -387,5 +366,10 @@ public class RoleServiceImpl implements RoleService {
 	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
 	        return urlSet;
 		}
+	}
+
+	@Override
+	public ManageRoleBO selectById(Long roleId) {
+		return CopyPropertiesUtil.copyBean(roleMapper.selectByPrimaryKey(roleId), ManageRoleBO.class);
 	}
 }
