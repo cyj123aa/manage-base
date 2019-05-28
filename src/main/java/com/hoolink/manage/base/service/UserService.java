@@ -16,12 +16,11 @@ import com.hoolink.manage.base.bo.ManagerUserInfoBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
-import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
+import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
-import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
@@ -31,11 +30,12 @@ import com.hoolink.sdk.bo.manager.ManagerUserBO;
  * @Date: 2019/4/15 19:24
  */
 public interface UserService {
+
     /**
      * 用户登录
-     *
      * @param loginParam
      * @return
+     * @throws Exception
      */
     LoginResultBO login(LoginParamBO loginParam) throws Exception;
 
@@ -54,8 +54,8 @@ public interface UserService {
 
     /**
      * 重置密码
-     * @param
-     * @return
+     * @param loginParam
+     * @throws Exception
      */
     void resetPassword(LoginParamBO loginParam) throws Exception ;
 
@@ -63,8 +63,9 @@ public interface UserService {
      * 获取手机验证码
      * @param phone
      * @return
+     * @throws Exception
      */
-    String getPhoneCode(String phone) throws Exception;
+    String getPhoneCode(String phone,Boolean flag) throws Exception;
 
     /**
      * 验证手机验证码
@@ -75,6 +76,7 @@ public interface UserService {
 
     /**
      * 绑定手机号
+     * @param bindPhoneParam
      * @throws Exception
      */
     void bindPhone(PhoneParamBO bindPhoneParam) throws Exception;
@@ -96,7 +98,7 @@ public interface UserService {
 
     /**
      * 修改手机号
-     * @param
+     * @param phoneParam
      * @throws Exception
      */
     void updatePhone(PhoneParamBO phoneParam) throws Exception;
@@ -107,9 +109,23 @@ public interface UserService {
      * @throws Exception
      */
     UserBO getUser() throws Exception;
+
+    /**
+     * 根据id获取用户
+     * @param id
+     * @return
+     */
+    ManagerUserBO getById(Long id);
     
     /**
-     * 获取用户列表（带分页）
+     * 根据id集合获取用户
+     * @param idList
+     * @return
+     */
+    List<ManagerUserBO> listByIdList(List<Long> idList);
+
+    /**
+     * 员工列表(分页)
      * @param userPageParamBO
      * @return
      * @throws Exception
@@ -117,10 +133,9 @@ public interface UserService {
     PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception;
     
     /**
-     * 获取用户基础信息
-     * @param userParamBO
+     * 根据id集合获取用户
+     * @param idList
      * @return
-     * @throws Exception
      */
     ManagerUserInfoBO getManagerUserInfo(ManagerUserInfoParamBO userParamBO) throws Exception;
     
@@ -145,13 +160,6 @@ public interface UserService {
      * @throws Exception
      */
     DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception;
-    
-    /**
-     * 根据id获取用户
-     * @param id
-     * @return
-     */
-    ManagerUserBO getById(Long id);
     
     /**
      * 获取组织架构树
@@ -202,4 +210,9 @@ public interface UserService {
      */
     AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink();
     
+    /**
+     * 修改密码
+     * @param updatePasswdParam
+     */
+    void updatePasswd(UpdatePasswdParamBO updatePasswdParam);
 }
