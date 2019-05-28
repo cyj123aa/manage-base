@@ -71,11 +71,6 @@ public class ManagerUserParamBO {
     private Boolean enabled;
     
     /**
-     * 是否可见员工密保等级
-     */
-    private Boolean viewEncryLevelPermitted;
-    
-    /**
      * 用户部门关系
      */
     private List<UserDeptPairParamBO> userDeptPairParamList;

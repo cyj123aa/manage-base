@@ -86,16 +86,6 @@ public class ManagerUserVO {
     private String statusDesc;
     
     /**
-     * 是否可见员工密保等级
-     */
-    private Boolean viewEncryLevelPermitted;
-    
-    /**
-     * 是否可见员工密保等级
-     */
-    private String viewEncryLevelPermittedDesc;
-    
-    /**
      *创建时间 
      */
     private Long created;

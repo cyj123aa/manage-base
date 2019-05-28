@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.controller.web;
 
 import com.hoolink.manage.base.bo.PhoneParamBO;
+import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
@@ -11,6 +12,7 @@ import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.ValidatorUtil;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
 import com.hoolink.manage.base.vo.req.PhoneParamVO;
+import com.hoolink.manage.base.vo.req.UpdatePasswdParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserPageParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
@@ -103,8 +105,15 @@ public class UserController {
     @PostMapping(value = "getPhoneCode")
     @ApiOperation(value = "获取手机验证码")
     @LogAndParam(value = "获取手机验证码失败，请稍后重试")
-    public BackVO<String> getPhoneCode(@RequestBody BaseParam<String> newPassword)throws Exception  {
-        return BackVOUtil.operateAccess(userService.getPhoneCode(newPassword.getData()));
+    public BackVO<String> getPhoneCode(@RequestBody BaseParam<String> phone)throws Exception  {
+        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),false));
+    }
+
+    @PostMapping(value = "bindPhoneGetCode")
+    @ApiOperation(value = "绑定手机号时获取手机验证码")
+    @LogAndParam(value = "获取手机验证码失败，请稍后重试")
+    public BackVO<String> bindPhoneGetCode(@RequestBody BaseParam<String> phone)throws Exception  {
+        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),true));
     }
 
     @PostMapping(value = "verifyPhoneCode")
@@ -278,5 +287,36 @@ public class UserController {
     @LogAndParam(value = "首页获取EDM/hoolink权限失败", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<AccessToEDMOrHoolinkVO> isAccessToEDMOrHoolink() throws Exception{
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.isAccessToEDMOrHoolink(), AccessToEDMOrHoolinkVO.class));
+    }
+    
+    
+    @PostMapping(value = "updatePassword")
+    @ApiOperation(value = "修改密码")
+    @LogAndParam(value = "修改密码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> updatePassword(@RequestBody UpdatePasswdParamVO updatePasswdParam)throws Exception  {
+        BackVO validateParameter = ValidatorUtil.validateParameter(updatePasswdParam);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
+        //VO转BO
+        UpdatePasswdParamBO updatePasswdParamBO = CopyPropertiesUtil.copyBean(updatePasswdParam, UpdatePasswdParamBO.class);
+        userService.updatePasswd(updatePasswdParamBO);
+        return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "resetPhone")
+    @ApiOperation(value = "重置手机号码")
+    @LogAndParam(value = "重置手机号码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> resetPhone(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
+        userService.resetPhone(userIdParam.getData());
+        return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "resetPasswd")
+    @ApiOperation(value = "重置密码")
+    @LogAndParam(value = "重置密码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> resetPasswd(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
+        userService.resetPasswd(userIdParam.getData());
+        return BackVOUtil.operateAccess();
     }
 }

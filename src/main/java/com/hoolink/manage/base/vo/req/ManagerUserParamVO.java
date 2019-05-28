@@ -105,15 +105,6 @@ public class ManagerUserParamVO {
     private Integer encryLevelCompany;
     
     /**
-     * 是否可见员工密保等级
-     */
-    @NotNull(
-            message = "是否可见员工密保等级不允许为空",
-            groups = {ManagerBaseGroup.CreateUser.class}
-    )
-    private Boolean viewEncryLevelPermitted;
-
-    /**
      * 用户组织关系
      */
     @NotEmpty(

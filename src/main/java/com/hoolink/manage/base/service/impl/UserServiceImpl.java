@@ -11,6 +11,7 @@ import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MiddleUserDepartmentService;
+import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.SpringUtils;
@@ -27,7 +28,6 @@ import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.enums.StatusEnum;
-import com.hoolink.sdk.enums.ViewEncryLevelPermittedEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
@@ -36,7 +36,6 @@ import com.hoolink.sdk.utils.DateUtil;
 import com.hoolink.sdk.utils.ExcelUtil;
 import com.hoolink.sdk.utils.MD5Util;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import com.hoolink.manage.base.service.RoleService;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -74,7 +73,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 
 /**
  * @Author: xuli
@@ -97,13 +95,13 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private MessageSource messageSource;
-    
+
     @Autowired
     private DepartmentService departmentService;
-    
+
     @Autowired
     private RoleService roleService;
-    
+
     @Autowired
     private MiddleUserDepartmentService middleUserDepartmentService;
 
@@ -113,7 +111,7 @@ public class UserServiceImpl implements UserService {
     private static final long REPEAT_PERIOD = 1;
 
     @Override
-    public LoginResultBO login(LoginParamBO loginParam)throws Exception {
+    public LoginResultBO login(LoginParamBO loginParam) throws Exception {
         /*
          * 1.校验：1).检查用户及密码能否关联到用户  2).检查客户被禁用  3).检查用户是否被禁用  4).检查用户所属角色是否被禁用
          * 2.返回Token，是否第一次登录（用于用户协议确认），密码是否被重置（用于强制修改密码），最后一次项目
@@ -129,12 +127,10 @@ public class UserServiceImpl implements UserService {
         // 缓存当前用户
         String token = cacheSession(user);
 
-        LoginResultBO loginResult=new LoginResultBO();
+        LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
-
-
 
         return loginResult;
     }
@@ -164,7 +160,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void resetPassword(LoginParamBO loginParam) throws Exception {
-        User user=getUserByAccount(loginParam.getAccount());
+        User user = getUserByAccount(loginParam.getAccount());
         //重置密码,并且设置不是首次登录
         user.setId(user.getId());
         user.setPasswd(MD5Util.MD5(loginParam.getPasswd()));
@@ -175,23 +171,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getPhoneCode(String phone) throws Exception {
+    public String getPhoneCode(String phone, Boolean flag) throws Exception {
+        //为true表示需要校验手机号是否存在
+        if (flag) {
+            checkPhoneExist(phone);
+        }
         //生成随机6位数字
-        String code= RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
+        String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //调用ability发送验证码
-        SmsBO smsBO=new SmsBO();
+        SmsBO smsBO = new SmsBO();
         String content = messageSource.getMessage("sms.captcha", new Object[]{code}, Locale.getDefault());
         smsBO.setContent(content);
         smsBO.setPhone(phone);
         abilityClient.sendMsg(smsBO);
         // 缓存剩余时间
-        Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.PHONE_CODE_PREFIX+phone, TimeUnit.MINUTES);
+        Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.PHONE_CODE_PREFIX + phone, TimeUnit.MINUTES);
         // 默认1分钟之内仅进行1次验证码发送业务
         if (remainingTime != null && TIMEOUT_MINUTES - remainingTime < REPEAT_PERIOD) {
             throw new BusinessException(HoolinkExceptionMassageEnum.CAPTCHA_CACHE_TOO_FREQUENTLY);
         }
         //手机号与验证码存入
-        stringRedisTemplate.opsForValue().set(Constant.PHONE_CODE_PREFIX+phone,code, TIMEOUT_MINUTES, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(Constant.PHONE_CODE_PREFIX + phone, code, TIMEOUT_MINUTES, TimeUnit.MINUTES);
         return code;
     }
 
@@ -208,36 +208,36 @@ public class UserServiceImpl implements UserService {
         checkPhoneCode(bindPhoneParam);
         Long userId = getCurrentUserId();
         //绑定手机号
-        User user=new User();
+        User user = new User();
         user.setId(userId);
         user.setPhone(bindPhoneParam.getPhone());
         user.setUpdator(userId);
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
         //删除缓存中的验证码信息
-        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX+bindPhoneParam.getPhone());
+        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX + bindPhoneParam.getPhone());
     }
 
-    private String checkPhoneCode(PhoneParamBO phoneParamBO){
-        String code=null;
-        try{
-            code=stringRedisTemplate.opsForValue().get(Constant.PHONE_CODE_PREFIX+phoneParamBO.getPhone());
-        }catch (Exception e){
+    private String checkPhoneCode(PhoneParamBO phoneParamBO) {
+        String code = null;
+        try {
+            code = stringRedisTemplate.opsForValue().get(Constant.PHONE_CODE_PREFIX + phoneParamBO.getPhone());
+        } catch (Exception e) {
             e.printStackTrace();
-            log.error("从redis中获取手机验证码异常,手机号为{}，验证码为{}",phoneParamBO.getPhone(),phoneParamBO.getCode());
+            log.error("从redis中获取手机验证码异常,手机号为{}，验证码为{}", phoneParamBO.getPhone(), phoneParamBO.getCode());
         }
-        if(StringUtils.isBlank(code) || !Objects.equals(code,phoneParamBO.getCode())){
+        if (StringUtils.isBlank(code) || !Objects.equals(code, phoneParamBO.getCode())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
         }
         //校验完了后删除验证码缓存信息，一个验证码只能用一次
-        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX+phoneParamBO.getPhone());
+        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX + phoneParamBO.getPhone());
         return code;
     }
 
     @Override
     public String forgetPassword(LoginParamBO loginParam) throws Exception {
-        User user=getUserByAccount(loginParam.getAccount());
-        if(StringUtils.isBlank(user.getPhone())){
+        User user = getUserByAccount(loginParam.getAccount());
+        if (StringUtils.isBlank(user.getPhone())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.NOT_BIND_PHONE);
         }
         return user.getPhone();
@@ -247,11 +247,11 @@ public class UserServiceImpl implements UserService {
     public UserInfoBO getUserInfo() throws Exception {
         Long userId = getCurrentUserId();
         User user = userMapper.selectByPrimaryKey(userId);
-        if(user==null){
+        if (user == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
         }
         //封装结果
-        UserInfoBO userInfoBO=new UserInfoBO();
+        UserInfoBO userInfoBO = new UserInfoBO();
         userInfoBO.setPhone(user.getPhone());
         userInfoBO.setUserName(user.getName());
         userInfoBO.setRoleName(Constant.USER_ROLE_NAME);
@@ -269,7 +269,6 @@ public class UserServiceImpl implements UserService {
         user.setPhone(phoneParam.getPhone());
         userMapper.updateByPrimaryKeySelective(user);
     }
-
 
     @Override
     public UserBO getUser() throws Exception {
@@ -291,7 +290,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private String cacheSession(User user) throws Exception {
-        CurrentUserBO currentUserBO=new CurrentUserBO();
+        CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
         //设置角色id
@@ -312,31 +311,31 @@ public class UserServiceImpl implements UserService {
         return sessionService.cacheCurrentUser(currentUserBO);
     }
 
-    private Long getCurrentUserId(){
+    private Long getCurrentUserId() {
         //获取当前登录用户
-        Long userId=ContextUtil.getManageCurrentUser().getUserId();
-        if(userId==null){
+        Long userId = ContextUtil.getManageCurrentUser().getUserId();
+        if (userId == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
         }
         return userId;
     }
 
-    private User getUserByAccount(String account){
-        UserExample example=new UserExample();
+    private User getUserByAccount(String account) {
+        UserExample example = new UserExample();
         example.createCriteria().andUserAccountEqualTo(account);
-        User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
-        if(user==null){
+        User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if (user == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.ACCOUNT_NOT_EXIST);
         }
         return user;
     }
 
-    private void checkPhoneExist(String phone){
+    private void checkPhoneExist(String phone) {
         //查看手机号是否已经存在
-        UserExample example=new UserExample();
+        UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andPhoneEqualTo(phone);
-        User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
-        if(user !=null){
+        User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_PHONE_EXISTS);
         }
     }
@@ -373,8 +372,6 @@ public class UserServiceImpl implements UserService {
 			ManagerUserBO userBO = new ManagerUserBO();
 			userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
 			userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-			userBO.setViewEncryLevelPermittedDesc(
-					ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
 			ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
 					.orElseGet(ManageRoleBO::new);
 			userBO.setRoleName(role.getRoleName());
@@ -488,11 +485,6 @@ public class UserServiceImpl implements UserService {
 		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(companyIdList)) {
 			userInfoBO.setCompanyId(companyIdList.get(0));
-		}
-		//是否可见员工密保等级
-		if(!user.getViewEncryLevelPermitted()) {
-			userInfoBO.setEncryLevelCompany(null);
-			userInfoBO.getUserDeptPairList().stream().forEach(d -> d.setEncryLevelDept(null));
 		}
 		return userInfoBO;
 	}
@@ -812,8 +804,6 @@ public class UserServiceImpl implements UserService {
 		}
 		personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
 		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-		personalInfo.setViewEncryLevelPermittedDesc(
-				ViewEncryLevelPermittedEnum.getValue(user.getViewEncryLevelPermitted()));
 		personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
 		
 		// 获取组织树
@@ -845,7 +835,6 @@ public class UserServiceImpl implements UserService {
         head.add(Constant.EXCEL_USER_COMPANY);
         head.add(Constant.EXCEL_USER_PHONE);
         head.add(Constant.EXCEL_USER_ACCOUNT);
-        head.add(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED);
         head.add(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY);
         head.add(Constant.EXCEL_USER_STATUS);
         head.add(Constant.EXCEL_USER_LAST_TIME);
@@ -871,7 +860,6 @@ public class UserServiceImpl implements UserService {
             content.add(user.getCompany());
             content.add(user.getPhone());
             content.add(user.getUserAccount());
-            content.add(user.getViewEncryLevelPermittedDesc());
             content.add(user.getEncryLevelCompanyName());
             content.add(user.getStatusDesc());
             if (user.getLastTime() == null) {
@@ -898,10 +886,10 @@ public class UserServiceImpl implements UserService {
 		setHidenSheet(wb);
 		
 		//设置表头
-		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、是否可见员工密级、资源库密保等级
+		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、资源库密保等级
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, 
 				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
-				Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
+			    Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
 		
 		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
 		Row row0 = sheet1.createRow(0);
@@ -987,8 +975,6 @@ public class UserServiceImpl implements UserService {
 		deptPairListForExcel.add(getRolePairForExcel());
 		//获取加密等级字典值
 		deptPairListForExcel.add(getEncryLevelPairForExcel());
-		//获取是否可见员工密保等级字典值
-		deptPairListForExcel.add(getViewEncryPermittedPairForExcel());
 		//插入组织架构属性到隐藏的sheet
 		int rowId = 0;
 		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
@@ -1184,28 +1170,6 @@ public class UserServiceImpl implements UserService {
 		return encryLevelPairForExcel;
 	}
 	
-	/**
-	 * 获取是否可见员工密保等级字典值
-	 * @return
-	 */
-	private DictPairForExcelBO getViewEncryPermittedPairForExcel(){
-		DictPairForExcelBO viewEncryPermittedPairForExcel = new DictPairForExcelBO();
-		DictPairBO<Long, String> parentViewEncryPermittedPair = new DictPairBO<>();
-		parentViewEncryPermittedPair.setKey(-1L);
-		parentViewEncryPermittedPair.setValue(Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST);
-		viewEncryPermittedPairForExcel.setParentDictPair(parentViewEncryPermittedPair);
-		
-		List<DictPairBO<Long, String>> childrenViewEncryPermittedPairList = new ArrayList<>();
-		viewEncryPermittedPairForExcel.setChildrenDictPairList(childrenViewEncryPermittedPairList);
-		for(ViewEncryLevelPermittedEnum viewEncryLevelPermittedEnum : ViewEncryLevelPermittedEnum.values()) {
-			DictPairBO<Long, String> childViewEncryPermittedPair = new DictPairBO<>();
-			childViewEncryPermittedPair.setKey(viewEncryLevelPermittedEnum.getKey()==true ? 1L:0L);
-			childViewEncryPermittedPair.setValue(viewEncryLevelPermittedEnum.getValue());
-			childrenViewEncryPermittedPairList.add(childViewEncryPermittedPair);
-		}
-		return viewEncryPermittedPairForExcel;
-	}
-
 	@Override
 	public AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink() {
 		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
@@ -1215,4 +1179,36 @@ public class UserServiceImpl implements UserService {
 		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessHoolink(true));
 		return accessToEDMOrHoolinkBO;
 	}
+
+	@Override
+	public void updatePasswd(UpdatePasswdParamBO updatePasswdParam) {
+        //校验手机验证码
+        checkPhoneCode(updatePasswdParam.getPhoneParam());
+        Long userId = getCurrentUserId();
+        User user = buildUserToUpdate(userId);
+        user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
+        userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public List<ManagerUserBO> listByIdList(List<Long> idList) {
+		UserExample example = new UserExample();
+		example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true);
+		return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
+	}
+
+	@Override
+	public void resetPhone(Long userId) {
+		User user = buildUserToUpdate(userId);
+		user.setPhone("");
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public void resetPasswd(Long userId) {
+		User user = buildUserToUpdate(userId);
+		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+
 }
