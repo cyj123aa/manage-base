@@ -27,7 +27,4 @@ public class ManageMenuTreeVO implements Serializable {
 
     /*** 1：只读\ 2：全部 */
     private Integer readonly;
-
-    /*** 菜单类型 */
-    private Byte menuType;
 }

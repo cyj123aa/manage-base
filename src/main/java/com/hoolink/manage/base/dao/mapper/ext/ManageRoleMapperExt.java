@@ -16,16 +16,18 @@ public interface ManageRoleMapperExt {
 
     /**
      * 一级用户查询角色（包括模糊查询）
+     * @param roleId
      * @param searchValue
+     * @param status
      * @return
      */
-    List<ManageRole> getRoleByOne(@Param("searchValue") String searchValue,@Param("status") Boolean status);
+    List<ManageRole> getRoleByOne(@Param("roleId") Long roleId,@Param("searchValue") String searchValue,@Param("status") Boolean status);
 
     /**
      * 二级用户查询角色（包括模糊查询）
-     * @param roleId
      * @param searchValue
+     * @param status
      * @return
      */
-    List<ManageRole> getRoleByTwo(@Param("roleId") Long roleId,@Param("searchValue") String searchValue,@Param("status") Boolean status);
+    List<ManageRole> getRoleByTwo(@Param("searchValue") String searchValue,@Param("status") Boolean status);
 }

@@ -244,8 +244,22 @@ public class RoleServiceImpl implements RoleService {
         List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
         roleMenuBO.setManageMenu(firstMenuList);
         //角色权限列表
-        Map<Long, List<ManageMenuTreeBO>> roleMenuMap = manageMenuMapperExt.getRoleMenu(roleId);
-        if(!org.springframework.util.CollectionUtils.isEmpty(roleMenuMap)){
+        List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(roleId);
+        if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
+            Map<Long, List<ManageMenuTreeBO>> roleMenuMap = new HashMap<>(roleMenu.size());
+            roleMenu.forEach(middleRoleMenuBO -> {
+                Long parentId = middleRoleMenuBO.getParentId();
+                if (roleMenuMap.containsKey(parentId)) {
+                    List<ManageMenuTreeBO> middleRoleMenuBOS = roleMenuMap.get(parentId);
+                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                    middleRoleMenuBOS.add(menuBO);
+                } else {
+                    List<ManageMenuTreeBO> roleMenuBOS = new ArrayList<>();
+                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                    roleMenuBOS.add(menuBO);
+                    roleMenuMap.put(parentId, roleMenuBOS);
+                }
+            });
             List<ManageMenuTreeBO> manageMenuTreeBOS = assembleMenuTree(roleMenuMap);
             roleMenuBO.setChooseMenu(manageMenuTreeBOS);
         }
@@ -290,6 +304,23 @@ public class RoleServiceImpl implements RoleService {
     }
 
     /**
+     * 组合 ManageMenuTreeBO
+     * @param middleRoleMenuBO
+     * @return
+     */
+    private ManageMenuTreeBO toMenuTree(MiddleRoleMenuBO middleRoleMenuBO){
+        if(middleRoleMenuBO==null){
+            return null;
+        }
+        ManageMenuTreeBO menuTreeBO = new ManageMenuTreeBO();
+        menuTreeBO.setKey(middleRoleMenuBO.getMenuId());
+        menuTreeBO.setValue(middleRoleMenuBO.getMenuId().toString());
+        menuTreeBO.setTitle(middleRoleMenuBO.getMenuName());
+        menuTreeBO.setReadonly(middleRoleMenuBO.getPermissionFlag());
+        return menuTreeBO;
+    }
+
+    /**
      * 新增map记录
      * @param manageMenuBO
      * @return
@@ -327,6 +358,7 @@ public class RoleServiceImpl implements RoleService {
         //获得用户角色
         ManageRole userRole = getUserRole();
         //一级用户(全部角色) 二级用户(自己及创建的角色)  三级用户不能查看
+        // 无法查看当前角色的信息
         PageHelper.startPage(pageParamBO.getPageNo(), pageParamBO.getPageSize());
         List<ManageRole> roles=null;
         if(userRole!=null){
@@ -334,9 +366,9 @@ public class RoleServiceImpl implements RoleService {
             if(Constant.LEVEL_THREE.equals(roleLevel)){
                 throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
-                roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
+                roles = manageRoleMapperExt.getRoleByTwo(pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
-                roles = manageRoleMapperExt.getRoleByOne(pageParamBO.getSearchValue(),pageParamBO.getStatus());
+                roles = manageRoleMapperExt.getRoleByOne(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }
         }
         List<RoleParamBO> roleParamBOS = CopyPropertiesUtil.copyList(roles, RoleParamBO.class);

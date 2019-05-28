@@ -1,8 +1,5 @@
 package com.hoolink.manage.base.vo.res;
 
-import com.hoolink.manage.base.bo.ManageMenuTreeBO;
-import com.hoolink.sdk.bo.base.CurrencyMenuBO;
-import com.hoolink.sdk.bo.base.ProjectMenuBO;
 import lombok.Data;
 
 import java.io.Serializable;
