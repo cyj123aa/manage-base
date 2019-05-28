@@ -10,4 +10,21 @@
       (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept})
     </foreach>
   </insert>
+
+  <resultMap id="UserDeptMap" type="com.hoolink.manage.base.bo.UserDeptBO">
+    <id column="company" jdbcType="VARCHAR" property="companyName" />
+    <collection property="deptMap" resultMap="DeptMap">
+    </collection>
+  </resultMap>
+
+  <resultMap id="DeptMap" type="java.util.Map">
+    <result column="id" property="id" />
+    <result column="dept_name" property="deptName" />
+  </resultMap>
+
+  <select id="getDeptMenu" resultMap="UserDeptMap">
+    select mu.company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
+    on mu.id=mud.user_id
+    where mu.enabled=true and mu.id=#{user_id}
+  </select>
 </mapper>

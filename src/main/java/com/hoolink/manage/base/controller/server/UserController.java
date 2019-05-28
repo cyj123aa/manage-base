@@ -14,7 +14,6 @@ import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.utils.BackBOUtil;
-
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -37,7 +36,7 @@ public class UserController {
 	public BackBO<ManagerUserBO> getById(@RequestBody Long id)throws Exception{
 		return BackBOUtil.defaultBackBO(userService.getById(id));
 	}
-    
+
     @PostMapping(value = "listByIdList")
     @ApiOperation(value = "根据id集合获取用户")
     @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")

@@ -753,76 +753,6 @@ public class UserExample {
             return (Criteria) this;
         }
 
-        public Criteria andCompanyIsNull() {
-            addCriterion("company is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyIsNotNull() {
-            addCriterion("company is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyEqualTo(String value) {
-            addCriterion("company =", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyNotEqualTo(String value) {
-            addCriterion("company <>", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyGreaterThan(String value) {
-            addCriterion("company >", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyGreaterThanOrEqualTo(String value) {
-            addCriterion("company >=", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyLessThan(String value) {
-            addCriterion("company <", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyLessThanOrEqualTo(String value) {
-            addCriterion("company <=", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyLike(String value) {
-            addCriterion("company like", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyNotLike(String value) {
-            addCriterion("company not like", value, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyIn(List<String> values) {
-            addCriterion("company in", values, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyNotIn(List<String> values) {
-            addCriterion("company not in", values, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyBetween(String value1, String value2) {
-            addCriterion("company between", value1, value2, "company");
-            return (Criteria) this;
-        }
-
-        public Criteria andCompanyNotBetween(String value1, String value2) {
-            addCriterion("company not between", value1, value2, "company");
-            return (Criteria) this;
-        }
-
         public Criteria andPositionIsNull() {
             addCriterion("position is null");
             return (Criteria) this;
@@ -1130,6 +1060,66 @@ public class UserExample {
 
         public Criteria andStatusNotBetween(Boolean value1, Boolean value2) {
             addCriterion("user_status not between", value1, value2, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedIsNull() {
+            addCriterion("view_encry_level_permitted is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedIsNotNull() {
+            addCriterion("view_encry_level_permitted is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedEqualTo(Boolean value) {
+            addCriterion("view_encry_level_permitted =", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedNotEqualTo(Boolean value) {
+            addCriterion("view_encry_level_permitted <>", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedGreaterThan(Boolean value) {
+            addCriterion("view_encry_level_permitted >", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("view_encry_level_permitted >=", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedLessThan(Boolean value) {
+            addCriterion("view_encry_level_permitted <", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedLessThanOrEqualTo(Boolean value) {
+            addCriterion("view_encry_level_permitted <=", value, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedIn(List<Boolean> values) {
+            addCriterion("view_encry_level_permitted in", values, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedNotIn(List<Boolean> values) {
+            addCriterion("view_encry_level_permitted not in", values, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedBetween(Boolean value1, Boolean value2) {
+            addCriterion("view_encry_level_permitted between", value1, value2, "viewEncryLevelPermitted");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewEncryLevelPermittedNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("view_encry_level_permitted not between", value1, value2, "viewEncryLevelPermitted");
             return (Criteria) this;
         }
 

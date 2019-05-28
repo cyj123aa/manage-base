@@ -4,6 +4,10 @@ import java.util.List;
 
 import com.hoolink.manage.base.bo.LoginParamBO;
 import com.hoolink.manage.base.bo.LoginResultBO;
+import com.hoolink.manage.base.bo.ManagerUserInfoBO;
+import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
+import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
+import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -94,14 +98,14 @@ public interface UserService {
      * @throws Exception
      */
     UserBO getUser() throws Exception;
-    
+
     /**
      * 根据id获取用户
      * @param id
      * @return
      */
     ManagerUserBO getById(Long id);
-    
+
     /**
      * 根据id集合获取用户
      * @param idList
