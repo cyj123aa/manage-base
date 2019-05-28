@@ -93,4 +93,11 @@ public interface RoleService {
      * @return
      */
     Set<String> listAccessUrlByRoleId(Long roleId);
+    
+    /**
+     * 根据id获取角色
+     * @param roleId
+     * @return
+     */
+    ManageRoleBO selectById(Long roleId);
 }

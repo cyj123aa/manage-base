@@ -110,7 +110,11 @@ public class UserController {
     @PostMapping(value = "verifyPhoneCode")
     @ApiOperation(value = "验证手机验证码")
     @LogAndParam(value = "验证手机验证码失败，请稍后重试")
-    public BackVO<String> verifyPhoneCode(@RequestBody @Valid PhoneParamVO phoneParam)throws Exception  {
+    public BackVO<String> verifyPhoneCode(@RequestBody PhoneParamVO phoneParam)throws Exception  {
+        BackVO validateParameter = ValidatorUtil.validateParameter(phoneParam);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
         PhoneParamBO bindPhone=CopyPropertiesUtil.copyBean(phoneParam, PhoneParamBO.class);
         userService.verifyPhone(bindPhone);
         return BackVOUtil.operateAccess();
@@ -119,7 +123,11 @@ public class UserController {
     @PostMapping(value = "bindPhone")
     @ApiOperation(value = "绑定手机号")
     @LogAndParam(value = "绑定手机号失败，请稍后重试")
-    public BackVO<Void> bindPhone(@RequestBody @Valid PhoneParamVO bindPhoneParam)throws Exception  {
+    public BackVO<Void> bindPhone(@RequestBody PhoneParamVO bindPhoneParam)throws Exception  {
+        BackVO validateParameter = ValidatorUtil.validateParameter(bindPhoneParam);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
         PhoneParamBO bindPhone=CopyPropertiesUtil.copyBean(bindPhoneParam, PhoneParamBO.class);
         userService.bindPhone(bindPhone);
         return BackVOUtil.operateAccess();
@@ -148,7 +156,11 @@ public class UserController {
     @PostMapping(value = "updatePhone")
     @ApiOperation(value = "修改手机号")
     @LogAndParam(value = "修改手机号失败，请稍后重试")
-    public BackVO<Void> updatePhone(@RequestBody @Valid PhoneParamVO phoneParam)throws Exception  {
+    public BackVO<Void> updatePhone(@RequestBody PhoneParamVO phoneParam)throws Exception  {
+        BackVO validateParameter = ValidatorUtil.validateParameter(phoneParam);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
         PhoneParamBO bindPhone=CopyPropertiesUtil.copyBean(phoneParam, PhoneParamBO.class);
         userService.updatePhone(bindPhone);
         return BackVOUtil.operateAccess();
@@ -172,7 +184,11 @@ public class UserController {
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取用户基础信息")
     @LogAndParam(value = "获取用户基础信息失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<ManagerUserInfoVO> getManagerUserInfo(@RequestBody @Valid ManagerUserInfoParamVO userParamVO) throws Exception{
+    public BackVO<ManagerUserInfoVO> getManagerUserInfo(@RequestBody ManagerUserInfoParamVO userParamVO) throws Exception{
+        BackVO validateParameter = ValidatorUtil.validateParameter(userParamVO);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
     	ManagerUserInfoParamBO userParamBO = CopyPropertiesUtil.copyBean(userParamVO, ManagerUserInfoParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getManagerUserInfo(userParamBO), ManagerUserInfoVO.class));
     }
@@ -212,7 +228,11 @@ public class UserController {
     @PostMapping(value = "enableOrDisableUser")
     @ApiOperation(value = "启用/禁用用户")
     @LogAndParam(value = "启用/禁用用户失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<Void> enableOrDisableUser(@RequestBody @Valid EnableOrDisableUserParamVO param) throws Exception{
+    public BackVO<Void> enableOrDisableUser(@RequestBody EnableOrDisableUserParamVO param) throws Exception{
+        BackVO validateParameter = ValidatorUtil.validateParameter(param);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
     	userService.enableOrDisableUser(param);
     	return BackVOUtil.operateAccess();
     }
@@ -220,7 +240,11 @@ public class UserController {
     @PostMapping(value = "getDictInfo")
     @ApiOperation(value = "获取字典值数据")
     @LogAndParam(value = "获取字典值数据失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<DictInfoVO> getDictInfo(@RequestBody @Valid DictParamVO dictParamVO) throws Exception{
+    public BackVO<DictInfoVO> getDictInfo(@RequestBody DictParamVO dictParamVO) throws Exception{
+        BackVO validateParameter = ValidatorUtil.validateParameter(dictParamVO);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
     	DictParamBO dictParamBO = CopyPropertiesUtil.copyBean(dictParamVO, DictParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getDictInfo(dictParamBO), DictInfoVO.class));
     }
