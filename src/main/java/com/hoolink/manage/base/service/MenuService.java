@@ -25,4 +25,10 @@ public interface MenuService {
      * @return
      */
     InitMenuBO listByCode(String code);
+
+    /**
+     * 查询所有的菜单
+     * @return
+     */
+    List<ManageMenuBO> listAll();
 }

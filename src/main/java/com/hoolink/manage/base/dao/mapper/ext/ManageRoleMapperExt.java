@@ -19,7 +19,7 @@ public interface ManageRoleMapperExt {
      * @param searchValue
      * @return
      */
-    List<ManageRole> getRoleByOne(@Param("searchValue") String searchValue);
+    List<ManageRole> getRoleByOne(@Param("searchValue") String searchValue,@Param("status") Boolean status);
 
     /**
      * 二级用户查询角色（包括模糊查询）
@@ -27,5 +27,5 @@ public interface ManageRoleMapperExt {
      * @param searchValue
      * @return
      */
-    List<ManageRole> getRoleByTwo(@Param("roleId") Long roleId,@Param("searchValue") String searchValue);
+    List<ManageRole> getRoleByTwo(@Param("roleId") Long roleId,@Param("searchValue") String searchValue,@Param("status") Boolean status);
 }
