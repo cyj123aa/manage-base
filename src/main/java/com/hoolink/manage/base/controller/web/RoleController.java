@@ -1,16 +1,14 @@
 package com.hoolink.manage.base.controller.web;
 
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.BackRoleBO;
-import com.hoolink.manage.base.bo.ManageMenuTreeBO;
-import com.hoolink.manage.base.bo.RoleParamBO;
-import com.hoolink.manage.base.bo.SearchPageParamBO;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
 import com.hoolink.manage.base.vo.req.SearchPageParamVO;
 import com.hoolink.manage.base.vo.res.BackRoleVO;
 import com.hoolink.manage.base.vo.res.ManageMenuTreeVO;
+import com.hoolink.manage.base.vo.res.RoleMenuVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
@@ -74,6 +72,15 @@ public class RoleController {
         BackRoleBO backRoleBO = roleService.getById(param.getData());
         BackRoleVO backRoleVO = CopyPropertiesUtil.copyBean(backRoleBO, BackRoleVO.class);
         return BackVOUtil.operateAccess(backRoleVO);
+    }
+
+    @PostMapping(value = "getCurrentRoleMenu")
+    @ApiOperation(value = "获取当前角色权限")
+    @LogAndParam(value = "获取当前角色权限失败")
+    public BackVO<RoleMenuVO> getCurrentRoleMenu() throws Exception {
+        RoleMenuBO roleMenuBO = roleService.getCurrentRoleMenu();
+        RoleMenuVO roleMenuVO = CopyPropertiesUtil.copyBean(roleMenuBO, RoleMenuVO.class);
+        return BackVOUtil.operateAccess(roleMenuVO);
     }
 
     @PostMapping(value = "listByPage")

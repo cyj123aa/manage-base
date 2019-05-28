@@ -225,22 +225,7 @@ public class RoleServiceImpl implements RoleService {
         //角色权限列表
         List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(roleId);
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
-            Map<Long, List<ManageMenuTreeBO>> roleMenuMap = new HashMap<>(roleMenu.size());
-            roleMenu.forEach(middleRoleMenuBO -> {
-                Long parentId = middleRoleMenuBO.getParentId();
-                if (roleMenuMap.containsKey(parentId)) {
-                    List<ManageMenuTreeBO> middleRoleMenuBOS = roleMenuMap.get(parentId);
-                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
-                    middleRoleMenuBOS.add(menuBO);
-                } else {
-                    List<ManageMenuTreeBO> roleMenuBOS = new ArrayList<>();
-                    ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
-                    roleMenuBOS.add(menuBO);
-                    roleMenuMap.put(parentId, roleMenuBOS);
-                }
-            });
-            List<ManageMenuTreeBO> manageMenuTreeBOS = assembleMenuTree(roleMenuMap);
-            roleMenuBO.setChooseMenu(manageMenuTreeBOS);
+            getCurrentMenu(roleMenu, roleMenuBO);
         }
         roleParamBO.setBeSelectMenus(roleMenuBO);
         return roleParamBO;
@@ -327,6 +312,46 @@ public class RoleServiceImpl implements RoleService {
             fillNextMenu(map,menuBOS);
             childMenu.setChildren(menuBOS);
         }
+    }
+
+    @Override
+    public RoleMenuBO getCurrentRoleMenu() throws Exception {
+        ManageRole userRole = getUserRole();
+        if(userRole==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
+        }
+        //角色权限列表
+        List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(userRole.getId());
+        if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
+            RoleMenuBO roleMenuBO = new RoleMenuBO();
+            getCurrentMenu(roleMenu, roleMenuBO);
+            return roleMenuBO;
+        }
+        return null;
+    }
+
+    /**
+     * 当前权限菜单
+     * @param roleMenu
+     * @param roleMenuBO
+     */
+    private void getCurrentMenu(List<MiddleRoleMenuBO> roleMenu, RoleMenuBO roleMenuBO) {
+        Map<Long, List<ManageMenuTreeBO>> roleMenuMap = new HashMap<>(roleMenu.size());
+        roleMenu.forEach(middleRoleMenuBO -> {
+            Long parentId = middleRoleMenuBO.getParentId();
+            if (roleMenuMap.containsKey(parentId)) {
+                List<ManageMenuTreeBO> middleRoleMenuBOS = roleMenuMap.get(parentId);
+                ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                middleRoleMenuBOS.add(menuBO);
+            } else {
+                List<ManageMenuTreeBO> roleMenuBOS = new ArrayList<>();
+                ManageMenuTreeBO menuBO = toMenuTree(middleRoleMenuBO);
+                roleMenuBOS.add(menuBO);
+                roleMenuMap.put(parentId, roleMenuBOS);
+            }
+        });
+        List<ManageMenuTreeBO> manageMenuTreeBOS = assembleMenuTree(roleMenuMap);
+        roleMenuBO.setChooseMenu(manageMenuTreeBOS);
     }
 
     @Override

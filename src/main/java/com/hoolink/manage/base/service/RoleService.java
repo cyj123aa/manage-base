@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.dao.model.ManageRole;
 
 /**
  * @description: 角色管理
@@ -43,6 +42,13 @@ public interface RoleService {
      * @throws Exception
      */
     BackRoleBO getById(Long roleId) throws Exception;
+
+    /**
+     *获取当前角色权限
+     * @return
+     * @throws Exception
+     */
+    RoleMenuBO getCurrentRoleMenu() throws Exception;
 
     /**
      * 获得角色基础信息
