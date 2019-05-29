@@ -425,8 +425,9 @@ public class UserServiceImpl implements UserService {
 		return userExample;
 	}
 	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(userPageParamBO.getDeptId() != null) {
-			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(userPageParamBO.getDeptId()));
+		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
+			List<Long> deptIdList = userPageParamBO.getDeptId();
+			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size()-1)));
 		}
 		if(userPageParamBO.getRoleId() != null) {
 			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
