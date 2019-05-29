@@ -21,7 +21,6 @@ import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.vo.req.GetDeptTreeParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
-import com.hoolink.manage.base.vo.res.AccessToEDMOrHoolinkVO;
 import com.hoolink.manage.base.vo.res.DeptTreeVO;
 import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
@@ -294,14 +293,6 @@ public class UserController {
     public ResponseEntity<Resource> downloadTemplate() throws Exception {
         return excelService.downloadTemplate();
     }
-    
-    @PostMapping(value = "isAccessToEDMOrHoolink")
-    @ApiOperation(value = "首页获取EDM/hoolink权限")
-    @LogAndParam(value = "首页获取EDM/hoolink权限失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<AccessToEDMOrHoolinkVO> isAccessToEDMOrHoolink() throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.isAccessToEDMOrHoolink(), AccessToEDMOrHoolinkVO.class));
-    }
-    
     
     @PostMapping(value = "updatePassword")
     @ApiOperation(value = "修改密码")

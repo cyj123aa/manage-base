@@ -172,59 +172,7 @@ public class ExcelServiceImpl implements ExcelService{
                     if(StringUtils.isBlank(value)) {
                     	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
                     }
-                    switch (j) {
-	                    case 0:
-	                    	//用户编号
-	                    	managerUserParam.setUserNo(value);
-	                        break;
-	                    case 1:
-	                    	//用户姓名
-	                    	managerUserParam.setName(value);
-	                        break;
-	                    case 2:
-	                    	//用户性别
-	                        break;
-	                    case 3:
-	                    	//所属角色
-	                        break;
-	                    case 4:
-	                    	//部门密保等级
-	                        break;
-	                    case 5:
-	                    	//职位
-	                    	managerUserParam.setPosition(value);
-	                        break;
-	                    case 6:
-	                    	//资源库密保等级
-	                        break;
-	                    case 7:
-	                    	//登录账号
-	                    	managerUserParam.setUserAccount(value);
-	                        break;
-	                    case 8:
-	                    	//用户性别id
-	                    	managerUserParam.setSex("1".equals(value) ? true:false);
-	                    	break;
-	                    case 9:
-	                    	//所属角色id
-	                    	managerUserParam.setRoleId(Long.parseLong(value));
-	                    	break;
-	                    case 10:
-	                    	//部门密保等级id
-	                    	List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
-	                    	UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
-	                    	userDeptPairParam.setEncryLevelDept(Integer.parseInt(value));
-	                    	userDeptPairParam.setDeptIdList(null);
-	                    	userDeptPairParamList.add(userDeptPairParam);
-	                    	managerUserParam.setUserDeptPairParamList(userDeptPairParamList);
-	                    	break;
-	                    case 11:
-	                    	//资源库密保等级id
-	                    	managerUserParam.setEncryLevelCompany(Integer.parseInt(value));
-	                    	break;
-	                    default:
-	                        break;
-                    }
+                    buildManagerUserParam(managerUserParam, j, value);
                 }
             }
             
@@ -235,6 +183,68 @@ public class ExcelServiceImpl implements ExcelService{
             }
         }
         return userExcelList;
+	}
+	
+	/**
+	 * 赋值
+	 * @param managerUserParam
+	 * @param j
+	 * @param value
+	 */
+	private void buildManagerUserParam(ManagerUserParamBO managerUserParam, int j, String value) {
+        switch (j) {
+	        case 0:
+	        	//用户编号
+	        	managerUserParam.setUserNo(value);
+	            break;
+	        case 1:
+	        	//用户姓名
+	        	managerUserParam.setName(value);
+	            break;
+	        case 2:
+	        	//用户性别
+	            break;
+	        case 3:
+	        	//所属角色
+	            break;
+	        case 4:
+	        	//部门密保等级
+	            break;
+	        case 5:
+	        	//职位
+	        	managerUserParam.setPosition(value);
+	            break;
+	        case 6:
+	        	//资源库密保等级
+	            break;
+	        case 7:
+	        	//登录账号
+	        	managerUserParam.setUserAccount(value);
+	            break;
+	        case 8:
+	        	//用户性别id
+	        	managerUserParam.setSex("1".equals(value) ? true:false);
+	        	break;
+	        case 9:
+	        	//所属角色id
+	        	managerUserParam.setRoleId(Long.parseLong(value));
+	        	break;
+	        case 10:
+	        	//部门密保等级id
+	        	List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
+	        	UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
+	        	userDeptPairParam.setEncryLevelDept(Integer.parseInt(value));
+	        	userDeptPairParam.setDeptIdList(null);
+	        	userDeptPairParamList.add(userDeptPairParam);
+	        	managerUserParam.setUserDeptPairParamList(userDeptPairParamList);
+	        	break;
+	        case 11:
+	        	//资源库密保等级id
+	        	managerUserParam.setEncryLevelCompany(Integer.parseInt(value));
+	        	break;
+	        default:
+	            break;
+	    }
 	}
 	
 	@Override

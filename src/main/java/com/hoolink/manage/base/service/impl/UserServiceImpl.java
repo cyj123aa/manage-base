@@ -113,9 +113,18 @@ public class UserServiceImpl implements UserService {
         loginResult.setGreetings(setGreeting());
         //设置系统访问权限（EDM和管理平台）
 		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(user.getRoleId());
-		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessEDM(true));
-		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessHoolink(true));
-
+		Optional<RoleMenuPermissionBO> edmRoleMenuPermissionOPt = roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst();
+		if(edmRoleMenuPermissionOPt.isPresent()) {
+			loginResult.setAccessEDM(true);
+		}else {
+			loginResult.setAccessEDM(false);
+		}
+		Optional<RoleMenuPermissionBO> hoolinkRoleMenuPermissionOPt = roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst();
+		if(hoolinkRoleMenuPermissionOPt.isPresent()) {
+			loginResult.setAccessHoolink(true);
+		}else {
+			loginResult.setAccessHoolink(false);
+		}
         return loginResult;
     }
 
@@ -822,16 +831,6 @@ public class UserServiceImpl implements UserService {
 		List<MiddleUserDeptWithMoreBO> userDeptPairList = userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType())).collect(Collectors.toList());
 		personalInfo.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDepartmentBO.class));
 		return personalInfo;
-	}
-
-	@Override
-	public AccessToEdmOrHoolinkBO isAccessToEDMOrHoolink() {
-		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
-		AccessToEdmOrHoolinkBO accessToEDMOrHoolinkBO = new AccessToEdmOrHoolinkBO();
-		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(currentUserRoleId);
-		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessEDM(true));
-		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessHoolink(true));
-		return accessToEDMOrHoolinkBO;
 	}
 
 	@Override
