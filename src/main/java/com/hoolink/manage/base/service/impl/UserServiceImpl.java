@@ -727,8 +727,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<DeptTreeBO> getDeptTree(List<Long> companyIdList) {
 		List<ManageDepartmentBO> departmentList = departmentService.listAll();
-		List<ManageDepartmentBO> deptParentList = departmentList.stream()
-				.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
+		List<ManageDepartmentBO> deptParentList;
+		if(CollectionUtils.isNotEmpty(companyIdList)) {
+			deptParentList = departmentList.stream()
+					.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
+		}else {
+			deptParentList = departmentList.stream()
+					.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType())).collect(Collectors.toList());
+		}
 		return getChildren(deptParentList, departmentList);
 	}
 	
