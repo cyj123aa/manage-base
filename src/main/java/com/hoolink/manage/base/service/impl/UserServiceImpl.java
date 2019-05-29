@@ -534,4 +534,10 @@ public class UserServiceImpl implements UserService {
         }
         return userDeptInfoBO;
     }
+    @Override
+    public List<ManagerUserBO> getUserList(List<Long> idList) {
+        UserExample example = new UserExample();
+        example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true).andIdIn(idList);
+        return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
+    }
 }
