@@ -2,6 +2,7 @@ package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
+import com.hoolink.sdk.bo.manager.RoleMenuBO;
 
 import java.util.List;
 
@@ -25,4 +26,12 @@ public interface MenuService {
      * @return
      */
     InitMenuBO listByCode(String code) throws Exception;
+
+    /**
+     * 根据角色获取菜单
+     * @param roleId
+     * @return
+     * @throws Exception
+     */
+    List<RoleMenuBO> listByRoleId(Long roleId) throws Exception;
 }
