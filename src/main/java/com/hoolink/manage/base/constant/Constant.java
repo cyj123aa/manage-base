@@ -106,4 +106,16 @@ public class Constant {
     public static final String HOOLINK = "Hoolink";
     public static final String MANAGE_CENTER = "manageCenter";
 
+    /**
+     * 登录
+     */
+    public static final String GREETING_MORNING="凌晨好";
+    public static final String GREETING_FORENOON="上午好";
+    public static final String GREETING_NOON="中午好";
+    public static final String GREETING_AFTERNOON="下午好";
+    public static final String GREETING_NIGHT="晚上好";
+    public static final String GREETING_YOU="你好";
+
+
+
 }

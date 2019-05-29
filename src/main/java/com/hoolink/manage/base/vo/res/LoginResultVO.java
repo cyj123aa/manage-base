@@ -21,4 +21,18 @@ public class LoginResultVO {
      * 手机号
      */
     private String phone;
+
+    /**
+     * EDM系统权限
+     */
+    private boolean accessEDM;
+    /**
+     * hoolink系统权限
+     */
+    private boolean accessHoolink;
+
+    /**
+     * 问候语
+     */
+    private String greetings;
 }
