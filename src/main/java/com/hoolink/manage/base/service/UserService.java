@@ -136,7 +136,7 @@ public interface UserService {
     
     /**
      * 根据id集合获取用户
-     * @param idList
+     * @param userParamBO
      * @return
      */
     ManagerUserInfoBO getManagerUserInfo(ManagerUserInfoParamBO userParamBO) throws Exception;

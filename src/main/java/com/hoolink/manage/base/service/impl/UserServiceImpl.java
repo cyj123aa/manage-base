@@ -47,17 +47,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -118,6 +109,12 @@ public class UserServiceImpl implements UserService {
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
+        //设置问候语
+        loginResult.setGreetings(setGreeting());
+        //设置系统访问权限（EDM和管理平台）
+		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(user.getRoleId());
+		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessEDM(true));
+		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessHoolink(true));
 
         return loginResult;
     }
@@ -848,4 +845,29 @@ public class UserServiceImpl implements UserService {
 		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
 		userMapper.updateByPrimaryKeySelective(user);
 	}
+
+	private String setGreeting(){
+		Date date = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("HH");
+		String str = df.format(date);
+		int a = Integer.parseInt(str);
+		if (a >= 0 && a <= 6) {
+			return Constant.GREETING_MORNING;
+		}
+		if (a > 6 && a <= 12) {
+			return Constant.GREETING_FORENOON;
+		}
+		if (a > 12 && a <= 13) {
+			return Constant.GREETING_NOON;
+		}
+		if (a > 13 && a <= 18) {
+			return Constant.GREETING_AFTERNOON;
+		}
+		if (a > 18 && a <= 24) {
+			return Constant.GREETING_NIGHT;
+		}
+		return Constant.GREETING_YOU;
+	}
+
+
 }
