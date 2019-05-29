@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -26,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.PageInfo;
@@ -48,6 +50,7 @@ import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
+import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.DateUtil;
@@ -75,6 +78,7 @@ public class ExcelServiceImpl implements ExcelService{
     private DepartmentService departmentService;
     
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, List<Long> deptIdList) throws Exception{
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
@@ -86,13 +90,17 @@ public class ExcelServiceImpl implements ExcelService{
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
             file.delete();
             if(CollectionUtils.isEmpty(userExcelList)) {
-            	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_EMPTY);
+            	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
             }
         	userExcelList.stream().forEach(ue -> 
     			ue.getUserDeptPairParamList().stream().forEach(udp -> udp.setDeptIdList(deptIdList))
         	);
             for(ManagerUserParamBO userParam : userExcelList) {
-            	userService.createUser(userParam);
+            	try {
+            		userService.createUser(userParam);
+            	}catch(Exception e) {
+            		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
+            	}
             }
             userExcelData.setTotal(userExcelList.size());
             return userExcelData;
@@ -161,41 +169,47 @@ public class ExcelServiceImpl implements ExcelService{
                 
                 if (rowCell != null) {
                     String value = getValue(rowCell);
+                    if(StringUtils.isBlank(value)) {
+                    	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
+                    }
                     switch (j) {
 	                    case 0:
-	                    	//员工编号
+	                    	//用户编号
 	                    	managerUserParam.setUserNo(value);
 	                        break;
 	                    case 1:
-	                    	//姓名
+	                    	//用户姓名
 	                    	managerUserParam.setName(value);
 	                        break;
 	                    case 2:
+	                    	//用户性别
+	                        break;
+	                    case 3:
+	                    	//所属角色
+	                        break;
+	                    case 4:
+	                    	//部门密保等级
+	                        break;
+	                    case 5:
 	                    	//职位
 	                    	managerUserParam.setPosition(value);
 	                        break;
-	                    case 3:
-	                    	//部门密保等级
-	                        break;
-	                    case 4:
-	                    	//所属角色
-	                        break;
-	                    case 5:
-	                    	//联系电话
-	                    	managerUserParam.setPhone(value);
-	                        break;
 	                    case 6:
-	                    	//账号
-	                    	managerUserParam.setUserAccount(value);
-	                        break;
-	                    case 7:
 	                    	//资源库密保等级
 	                        break;
+	                    case 7:
+	                    	//登录账号
+	                    	managerUserParam.setUserAccount(value);
+	                        break;
 	                    case 8:
+	                    	//用户性别id
+	                    	managerUserParam.setSex("1".equals(value) ? true:false);
+	                    	break;
+	                    case 9:
 	                    	//所属角色id
 	                    	managerUserParam.setRoleId(Long.parseLong(value));
 	                    	break;
-	                    case 9:
+	                    case 10:
 	                    	//部门密保等级id
 	                    	List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
 	                    	UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
@@ -204,7 +218,7 @@ public class ExcelServiceImpl implements ExcelService{
 	                    	userDeptPairParamList.add(userDeptPairParam);
 	                    	managerUserParam.setUserDeptPairParamList(userDeptPairParamList);
 	                    	break;
-	                    case 10:
+	                    case 11:
 	                    	//资源库密保等级id
 	                    	managerUserParam.setEncryLevelCompany(Integer.parseInt(value));
 	                    	break;
@@ -234,10 +248,9 @@ public class ExcelServiceImpl implements ExcelService{
 		setHidenSheet(wb);
 		
 		//设置表头
-		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、资源库密保等级
-		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, 
-				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
-			    Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
+		//用户编号、用户姓名、用户性别、所属角色、部门密保等级、部门职位、资源库密保等级、账号
+		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_SEX, Constant.EXCEL_USER_ROLENAME, 
+				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_USER_ACCOUNT};
 		
 		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
 		Row row0 = sheet1.createRow(0);
@@ -248,13 +261,15 @@ public class ExcelServiceImpl implements ExcelService{
 		
 		//设置公式
 		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_SEX, Constant.EXCEL_SEX_LIST, HoolinkExceptionMassageEnum.EXCEL_SEX_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
+		
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
+		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		
 		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
 			List<String> headerList = Arrays.asList(headerArray);
@@ -323,6 +338,8 @@ public class ExcelServiceImpl implements ExcelService{
 		deptPairListForExcel.add(getRolePairForExcel());
 		//获取加密等级字典值
 		deptPairListForExcel.add(getEncryLevelPairForExcel());
+		//获取性别字典值
+		deptPairListForExcel.add(getSexPairForExcel());
 		//插入组织架构属性到隐藏的sheet
 		int rowId = 0;
 		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
@@ -416,6 +433,28 @@ public class ExcelServiceImpl implements ExcelService{
 			childrenEncryLevelPairList.add(childEncryLevelPair);
 		}
 		return encryLevelPairForExcel;
+	}
+	
+	/**
+	 * 获取性别字典值
+	 * @return
+	 */
+	private DictPairForExcelBO getSexPairForExcel(){
+		DictPairForExcelBO sexPairForExcel = new DictPairForExcelBO();
+		DictPairBO<Long, String> parentSexPair = new DictPairBO<>();
+		parentSexPair.setKey(-1L);
+		parentSexPair.setValue(Constant.EXCEL_SEX_LIST);
+		sexPairForExcel.setParentDictPair(parentSexPair);
+		
+		List<DictPairBO<Long, String>> childrenSexPairList = new ArrayList<>();
+		sexPairForExcel.setChildrenDictPairList(childrenSexPairList);
+		for(ManagerUserSexEnum sexEnum : ManagerUserSexEnum.values()) {
+			DictPairBO<Long, String> childSexPair = new DictPairBO<>();
+			childSexPair.setKey(sexEnum.getKey()==true?1L:0L);
+			childSexPair.setValue(sexEnum.getValue());
+			childrenSexPairList.add(childSexPair);
+		}
+		return sexPairForExcel;
 	}
 	
 	/**

@@ -6,7 +6,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import com.hoolink.manage.base.bo.UserDeptPairParamBO;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
 
 import lombok.Data;
@@ -76,11 +75,6 @@ public class ManagerUserParamVO {
      * 用户头像ID
      */
     private Long imgId;
-
-    /**
-     * 手机号
-     */
-    private String phone;
 
     /**
      * 职位

@@ -46,11 +46,6 @@ public class ManagerUserParamBO {
     private Long imgId;
 
     /**
-     * 手机号
-     */
-    private String phone;
-
-    /**
      * 职位
      */
     private String position;
