@@ -23,4 +23,6 @@ public class DeptPositionBO {
      * </pre>
      */
     private Byte deptType;
+
+    private Long parentId;
 }

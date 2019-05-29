@@ -95,13 +95,13 @@ public class MenuServiceImpl implements MenuService {
         //部门资源库存在四级菜单 岗级菜单
         //用户权限下所有组织架构列表
         List<DeptPositionBO> deptAllList = middleUserDepartmentMapperExt.getDept(userId);
-        DeptPositionBO company= null;
+        List<DeptPositionBO> companyList = new ArrayList<>();
         List<DeptPositionBO> deptList = new ArrayList<>();
         List<DeptPositionBO> positionList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(deptAllList)){
             for (DeptPositionBO deptPositionBO : deptAllList){
                 if(EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    company=deptPositionBO;
+                    companyList.add(deptPositionBO);
                 }else if(EdmDeptEnum.DEPT.getKey().equals(deptPositionBO.getDeptType().intValue())){
                     deptList.add(deptPositionBO);
                 }else if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
@@ -113,22 +113,24 @@ public class MenuServiceImpl implements MenuService {
         for (EdmMenuBO edmMenuBO:menuBOS) {
             if (EdmResourceRepertory.DEPT_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //部门资源
-                getDeptInitMenu(company,deptList,positionList, edmMenuBO);
+                getDeptInitMenu(companyList,deptList,positionList, edmMenuBO);
                 initMenuBO.setDeptVO(edmMenuBO);
             }else if (EdmResourceRepertory.CACHE_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //缓冲库
                 initMenuBO.setCacheVO(edmMenuBO);
             }else if (EdmResourceRepertory.COMPANY_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
                 //资源库 二级菜单
-                if(company==null){
+                if(CollectionUtils.isEmpty(companyList)){
                     initMenuBO.setCompanyVO(edmMenuBO);
                     continue;
                 }
                 List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
-                EdmMenuBO twoMenu = new EdmMenuBO();
-                twoMenu.setId(company.getId());
-                twoMenu.setMenuName(company.getDeptName());
-                twoMenuBOS.add(twoMenu);
+                companyList.forEach(company -> {
+                    EdmMenuBO twoMenu = new EdmMenuBO();
+                    twoMenu.setId(company.getId());
+                    twoMenu.setMenuName(company.getDeptName());
+                    twoMenuBOS.add(twoMenu);
+                });
                 edmMenuBO.setEdmMenuVOList(twoMenuBOS);
                 initMenuBO.setCompanyVO(edmMenuBO);
             }else if (EdmResourceRepertory.PUBLIC_RESOURCE_CODE.getCode().equals(edmMenuBO.getMenuCode())){
@@ -147,39 +149,45 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 部门资源菜单初始化
-     * @param company
+     * @param companyList
      * @param deptList
      * @param positionList
      * @param edmMenuBO
      */
-    private void getDeptInitMenu(DeptPositionBO company,List<DeptPositionBO> deptList,List<DeptPositionBO> positionList, EdmMenuBO edmMenuBO) {
-        if(company!=null){
+    private void getDeptInitMenu(List<DeptPositionBO> companyList,List<DeptPositionBO> deptList,List<DeptPositionBO> positionList, EdmMenuBO edmMenuBO) {
+        if(CollectionUtils.isNotEmpty(companyList)){
             //下级菜单
             List<EdmMenuBO> twoMenuBOS = new ArrayList<>();
-            EdmMenuBO twoMenu = new EdmMenuBO();
-            twoMenu.setId(company.getId());
-            twoMenu.setMenuName(company.getDeptName());
-            if(!org.springframework.util.CollectionUtils.isEmpty(deptList)){
-                List<EdmMenuBO> threeMenuBOS = new ArrayList<>();
-                for (DeptPositionBO deptPositionBO:deptList) {
-                    EdmMenuBO threeMenu = new EdmMenuBO();
-                    threeMenu.setId(deptPositionBO.getId());
-                    threeMenu.setMenuName(deptPositionBO.getDeptName());
-                    if(!org.springframework.util.CollectionUtils.isEmpty(positionList)) {
-                        List<EdmMenuBO> fourMenuBOS = new ArrayList<>();
-                        for (DeptPositionBO positionBO : positionList) {
-                            EdmMenuBO fourMenu = new EdmMenuBO();
-                            fourMenu.setId(positionBO.getId());
-                            fourMenu.setMenuName(positionBO.getDeptName());
-                            fourMenuBOS.add(fourMenu);
+            for (DeptPositionBO company:companyList){
+                EdmMenuBO twoMenu = new EdmMenuBO();
+                twoMenu.setId(company.getId());
+                twoMenu.setMenuName(company.getDeptName());
+                if(!org.springframework.util.CollectionUtils.isEmpty(deptList)){
+                    List<EdmMenuBO> threeMenuBOS = new ArrayList<>();
+                    for (DeptPositionBO deptPositionBO:deptList) {
+                        if(company.getId().equals(deptPositionBO.getParentId())){
+                            EdmMenuBO threeMenu = new EdmMenuBO();
+                            threeMenu.setId(deptPositionBO.getId());
+                            threeMenu.setMenuName(deptPositionBO.getDeptName());
+                            if(!org.springframework.util.CollectionUtils.isEmpty(positionList)) {
+                                List<EdmMenuBO> fourMenuBOS = new ArrayList<>();
+                                for (DeptPositionBO positionBO : positionList) {
+                                    if(deptPositionBO.getId().equals(positionBO.getParentId())){
+                                        EdmMenuBO fourMenu = new EdmMenuBO();
+                                        fourMenu.setId(positionBO.getId());
+                                        fourMenu.setMenuName(positionBO.getDeptName());
+                                        fourMenuBOS.add(fourMenu);
+                                    }
+                                }
+                                threeMenu.setEdmMenuVOList(fourMenuBOS);
+                            }
+                            threeMenuBOS.add(threeMenu);
                         }
-                        threeMenu.setEdmMenuVOList(fourMenuBOS);
                     }
-                    threeMenuBOS.add(threeMenu);
+                    twoMenu.setEdmMenuVOList(threeMenuBOS);
                 }
-                twoMenu.setEdmMenuVOList(threeMenuBOS);
+                twoMenuBOS.add(twoMenu);
             }
-            twoMenuBOS.add(twoMenu);
             edmMenuBO.setEdmMenuVOList(twoMenuBOS);
         }
     }
