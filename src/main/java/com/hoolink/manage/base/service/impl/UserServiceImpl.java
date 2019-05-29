@@ -421,6 +421,7 @@ public class UserServiceImpl implements UserService {
 		}else {
 			andCriteria(criteria, userPageParamBO);
 		}
+		userExample.setOrderByClause(" created desc ");
 		return userExample;
 	}
 	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
