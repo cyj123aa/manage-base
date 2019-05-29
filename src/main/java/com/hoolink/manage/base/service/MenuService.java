@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
+import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public interface MenuService {
 
     /**
      * 通过code码查询初始化菜单
-     * @param code
+     * @param paramBO
      * @return
      */
-    InitMenuBO listByCode(String code) throws Exception;
+    InitMenuBO listByCode(ResourceParamBO paramBO) throws Exception;
 }

@@ -30,14 +30,15 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="encry_level_company" jdbcType="INTEGER"  property="encryLevelCompany"/>
     <collection property="list" ofType="com.hoolink.manage.base.bo.DeptSecurityBO">
-      <id column="dept_id" property="id" />
-      <result column="encry_level_dept" property="encryLevelDept" />
-      <result column="dept_type" property="deptType" />
+      <id column="dept_id" jdbcType="BIGINT" property="id" />
+      <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
+      <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+      <result column="parent_id" jdbcType="BIGINT" property="parentId" />
     </collection>
   </resultMap>
 
   <select id="getUserSecurity" resultMap="UserDeptInfoMap">
-    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept,md.dept_type from manage_user mu
+    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept,md.dept_type,md.parent_id from manage_user mu
     left join middle_user_department mud on mu.id=mud.user_id
     left join manage_department md on mud.dept_id=md.id
     where mu.enabled=true and mu.id=#{userId} and md.dept_type!=1

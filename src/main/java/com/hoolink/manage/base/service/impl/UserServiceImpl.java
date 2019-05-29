@@ -520,15 +520,26 @@ public class UserServiceImpl implements UserService {
     public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
         UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
         UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
+        //部门 小组 与用户关联
         List<DeptSecurityBO> list = userSecurity.getList();
         if(CollectionUtils.isNotEmpty(list)){
             List<Long> positionList = new ArrayList<>();
+            //key positionId
             Map<String, Integer> map = new HashMap<>(list.size());
             list.forEach(deptSecurityBO -> {
-                if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())){
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //转为小组关联
+                    List<DeptSecurityBO> nextDeptList = list.stream().filter(securityBO -> deptSecurityBO.getId().equals(securityBO.getParentId())).collect(Collectors.toList());
+                    if(CollectionUtils.isNotEmpty(nextDeptList)){
+                        for (DeptSecurityBO securityBO : nextDeptList) {
+                            positionList.add(securityBO.getId());
+                            map.put(securityBO.getId().toString(),securityBO.getEncryLevelDept());
+                        }
+                    }
                 }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())){
                     positionList.add(deptSecurityBO.getId());
+                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                 }
             });
             userDeptInfoBO.setDeptMap(map);

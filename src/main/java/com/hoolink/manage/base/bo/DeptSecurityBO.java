@@ -22,4 +22,6 @@ public class DeptSecurityBO {
      * 部门密保等级
      */
     private Integer encryLevelDept;
+
+    private Long parentId;
 }
