@@ -4,9 +4,10 @@ import java.util.List;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.AccessToEDMOrHoolinkBO;
+import com.hoolink.manage.base.bo.AccessToEdmOrHoolinkBO;
 import com.hoolink.manage.base.bo.DeptTreeBO;
 import com.hoolink.manage.base.bo.DictInfoBO;
 import com.hoolink.manage.base.bo.DictParamBO;
@@ -19,6 +20,7 @@ import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
+import com.hoolink.manage.base.bo.UserExcelDataBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -190,25 +192,10 @@ public interface UserService {
     PersonalInfoBO getPersonalInfo() throws Exception;
     
     /**
-     * 用户导出
-     * @param userPageParamBO
-     * @return
-     * @throws Exception
-     */
-    ResponseEntity<Resource> exportList(ManagerUserPageParamBO userPageParamBO) throws Exception;
-    
-    /**
-     *下载模板
-     * @return
-     * @throws Exception
-     */
-    ResponseEntity<Resource> downloadTemplate() throws Exception;
-    
-    /**
      * 是否有EDM和hoolink的权限
      * @return
      */
-    AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink();
+    AccessToEdmOrHoolinkBO isAccessToEDMOrHoolink();
     
     /**
      * 修改密码

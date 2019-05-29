@@ -74,5 +74,7 @@ public class ManagerUserParamBO {
      * 用户部门关系
      */
     private List<UserDeptPairParamBO> userDeptPairParamList;
+    
+    
 }
 

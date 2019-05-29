@@ -9,7 +9,7 @@ import lombok.Data;
  * @date 2019/05/28 10:29
  */
 @Data
-public class AccessToEDMOrHoolinkBO {
+public class AccessToEdmOrHoolinkBO {
 	/**
 	 * EDM系统权限
 	 */

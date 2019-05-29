@@ -75,10 +75,6 @@ public class ManagerUserParamVO {
     /**
      * 用户头像ID
      */
-    @NotNull(
-            message = "头像不允许为空",
-            groups = {ManagerBaseGroup.CreateUser.class}
-    )
     private Long imgId;
 
     /**

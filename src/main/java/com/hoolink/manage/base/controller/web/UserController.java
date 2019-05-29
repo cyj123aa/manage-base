@@ -2,6 +2,7 @@ package com.hoolink.manage.base.controller.web;
 
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
+import com.hoolink.manage.base.bo.UserExcelDataBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
 import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
@@ -25,6 +26,7 @@ import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
 import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
 import com.hoolink.manage.base.vo.res.ManagerUserVO;
+import com.hoolink.manage.base.vo.res.UserExcelDataVO;
 import com.hoolink.manage.base.vo.res.UserInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -36,23 +38,24 @@ import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
+import com.hoolink.manage.base.service.ExcelService;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.MediaType;
 
 /**
  * @Author: xuli
@@ -65,6 +68,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private ExcelService excelService;
+    
     @PostMapping(value = "login")
     @ApiOperation(value = "用户登录")
     @LogAndParam(value = "用户登录失败，请稍后重试")
@@ -271,7 +278,7 @@ public class UserController {
     @ApiResponses({@ApiResponse(code = 200, response = File.class, message = "导出列表"),})
     public ResponseEntity<Resource> exportByParam(@RequestBody ManagerUserPageParamVO userPageParamVO) throws Exception {
     	ManagerUserPageParamBO userPageParamBO = CopyPropertiesUtil.copyBean(userPageParamVO, ManagerUserPageParamBO.class);
-        return userService.exportList(userPageParamBO);
+        return excelService.exportList(userPageParamBO);
     }
     
     @PostMapping(value = "downloadTemplate")
@@ -279,7 +286,7 @@ public class UserController {
     @LogAndParam(value = "下载模板失败")
     @ApiResponses({@ApiResponse(code = 200, response = File.class, message = "下载模板"),})
     public ResponseEntity<Resource> downloadTemplate() throws Exception {
-        return userService.downloadTemplate();
+        return excelService.downloadTemplate();
     }
     
     @PostMapping(value = "isAccessToEDMOrHoolink")
@@ -318,5 +325,14 @@ public class UserController {
     public BackVO<Void> resetPasswd(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
         userService.resetPasswd(userIdParam.getData());
         return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(value = "excel上传")
+    @LogAndParam(value = "excel上传失败")
+    public BackVO uploadExcel(@RequestPart("file") MultipartFile multipartFile, List<Long> deptIdList) throws Exception {
+    	UserExcelDataBO userExcelDataBO = excelService.uploadExcel(multipartFile, deptIdList);
+    	UserExcelDataVO userExcelDataVO=CopyPropertiesUtil.copyBean(userExcelDataBO,UserExcelDataVO.class);
+        return BackVOUtil.operateAccess(userExcelDataVO);
     }
 }

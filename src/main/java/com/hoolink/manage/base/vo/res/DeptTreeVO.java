@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.vo.res;
 
 import java.util.List;
-
 import lombok.Data;
 
 /**
@@ -12,19 +11,13 @@ import lombok.Data;
 @Data
 public class DeptTreeVO {
     /**
-     * 主键
+     * id
      */
-    private Long id;
-
+    private Long value;
     /**
      * 名称
      */
-    private String name;
-
-    /**
-     * 组织架构类型:1-公司 2-部门 3-小组
-     */
-    private Byte deptType;
+    private String label;
 
     /**
      * 子节点

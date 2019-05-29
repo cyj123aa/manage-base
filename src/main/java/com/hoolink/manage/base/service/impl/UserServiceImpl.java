@@ -25,7 +25,6 @@ import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
-import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.enums.StatusEnum;
 import com.hoolink.sdk.exception.BusinessException;
@@ -39,17 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -59,7 +47,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -748,7 +735,8 @@ public class UserServiceImpl implements UserService {
 			//找出子节点
 			List<ManageDepartmentBO> deptChildren = departmentList.stream().filter(c -> d.getId().equals(c.getParentId())).collect(Collectors.toList());
 			deptTreeBO.setChildren(getChildren(deptChildren, departmentList));
-			BeanUtils.copyProperties(d, deptTreeBO);
+			deptTreeBO.setLabel(d.getName());
+			deptTreeBO.setValue(d.getId());
 			deptTreeList.add(deptTreeBO);
 		});
 		return deptTreeList;
@@ -821,359 +809,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<org.springframework.core.io.Resource> exportList(ManagerUserPageParamBO userPageParamBO)
-			throws Exception {
-		PageInfo<ManagerUserBO> pageInfo = list(userPageParamBO);
-		List<ManagerUserBO> userList = pageInfo.getList();
-		//表头
-        List<String> head = new ArrayList<>();
-        head.add(Constant.EXCEL_USER_NO);
-        head.add(Constant.EXCEL_USER_NAME);
-        head.add(Constant.EXCEL_USER_POSITION);
-        head.add(Constant.EXCEL_USER_DEPT_PAIR);
-        head.add(Constant.EXCEL_USER_ROLENAME);
-        head.add(Constant.EXCEL_USER_COMPANY);
-        head.add(Constant.EXCEL_USER_PHONE);
-        head.add(Constant.EXCEL_USER_ACCOUNT);
-        head.add(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY);
-        head.add(Constant.EXCEL_USER_STATUS);
-        head.add(Constant.EXCEL_USER_LAST_TIME);
-        head.add(Constant.EXCEL_USER_CREATED);
-        
-        //表体
-        List<List<String>> contents = new ArrayList<>();
-        userList.stream().forEach(user -> {
-        	List<String> content = new ArrayList<>();
-            content.add(user.getUserNo());
-            content.add(user.getName());
-            content.add(user.getPosition());
-            List<UserDepartmentBO> userDeptPairList = user.getUserDeptPairList();
-            StringBuilder sb = new StringBuilder();
-            userDeptPairList.stream().forEach(udp -> {
-            	sb.append(udp.getDeptName()).append(Constant.BACKSLASH).append(udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
-            });
-            if(sb.length() > 0) {
-            	sb.deleteCharAt(sb.lastIndexOf(Constant.SEMICOLON));
-            }
-            content.add(sb.toString());
-            content.add(user.getRoleName());
-            content.add(user.getCompany());
-            content.add(user.getPhone());
-            content.add(user.getUserAccount());
-            content.add(user.getEncryLevelCompanyName());
-            content.add(user.getStatusDesc());
-            if (user.getLastTime() == null) {
-                content.add(Constant.NO_DATA);
-            }else {
-            	content.add(DateUtil.getStringByTimeStamp(user.getLastTime()));
-            }
-            if (user.getCreated() != null) {
-                content.add(DateUtil.getStringByTimeStamp(user.getCreated()));
-            }
-            contents.add(content);
-        });
-		return ExcelUtil.getResponseEntity(head, contents, Constant.USER_EXPORT_EXCEL_TITLE);
-	}
-
-	@Override
-	public ResponseEntity<org.springframework.core.io.Resource> downloadTemplate() throws Exception {
-		Workbook workbook = buildUserWorkbook();
-		return ExcelUtil.export(workbook, Constant.HOOLINK_USER_EXPORT_EXCEL_TITLE);
-	}
-	
-	private Workbook buildUserWorkbook() {
-		Workbook wb = new HSSFWorkbook();
-		setHidenSheet(wb);
-		
-		//设置表头
-		//员工编号、姓名、职位、部门密保等级、所属角色、联系电话、账号、资源库密保等级
-		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_POSITION, 
-				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_USER_PHONE, Constant.EXCEL_USER_ACCOUNT,
-			    Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY};
-		
-		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
-		Row row0 = sheet1.createRow(0);
-		for(int i=0; i<headerArray.length; i++) {
-			row0.createCell(i).setCellValue(headerArray[i]);
-		}
-		
-		
-		//设置公式
-		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		
-		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
-			List<String> headerList = Arrays.asList(headerArray);
-			if(headerList.contains(formulaForExcel.getKey())) {
-				int index = headerList.indexOf(formulaForExcel.getKey());
-				DVConstraint formula = DVConstraint.createFormulaListConstraint(formulaForExcel.getFormula());
-				CellRangeAddressList rangeAddressList = new CellRangeAddressList(1, 10000, index, index);
-				DataValidation cacse = new HSSFDataValidation(rangeAddressList, formula);
-		        //处理Excel兼容性问题
-		        if(cacse instanceof XSSFDataValidation) {
-		        	cacse.setSuppressDropDownArrow(true);
-		            cacse.createErrorBox(Constant.ERROR, formulaForExcel.getErrMsg());
-		        }else {
-		        	cacse.setSuppressDropDownArrow(false);
-		        }
-				
-				sheet1.addValidationData(cacse);					
-			}
-		}
-		
-		//隐藏的id域
-		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
-		int len = headerArray.length;
-		boolean flag = false;
-		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
-			List<String> headerList = Arrays.asList(headerArray);
-			if(headerList.contains(formulaForExcel.getKey())) {
-				int index = headerList.indexOf(formulaForExcel.getKey());
-				Cell cell = row0.createCell(len);
-				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
-				sheet1.setColumnHidden(len, true);
-				
-				int tenThousand = 10000;
-				for(int i=1; i<tenThousand; i++) {
-					Row row;
-					if(!flag) {
-						row = sheet1.createRow(i);	
-					}else {
-						row = sheet1.getRow(i);
-					}
-					
-					Cell cell1 = row.createCell(len);
-					String formula = "INDEX(INDIRECT(\"" + formulaForExcel.getFormula() + Constant.UNDERLINE + Constant.EXCEL_ID + "\"),,MATCH(INDIRECT(ADDRESS(ROW(), COLUMN(" + getExcelColumn(index)+ "1))), INDIRECT(\"" + formulaForExcel.getFormula() + "\"), 0 ))";
-					cell1.setCellFormula("IF(ISERROR("+ formula + "), \"\", " + formula + ")");
-					
-				}
-				len++;
-				flag = true;
-			}
-		}
-		sheet1.setForceFormulaRecalculation(true);
-		return wb;
-	}
-	
-	/**
-	 * 在隐藏的sheet上面赋值下拉框参数
-	 * @param wb
-	 */
-	private void setHidenSheet(Workbook wb) {
-		Sheet hideSheet = wb.createSheet(Constant.EXCEL_HIDE_SHEET);
-		wb.setSheetHidden(wb.getSheetIndex(Constant.EXCEL_HIDE_SHEET), true);
-		
-		//获取组织架构字典
-		List<DictPairForExcelBO> deptPairListForExcel = new ArrayList<>();
-		//获取角色字典
-		deptPairListForExcel.add(getRolePairForExcel());
-		//获取加密等级字典值
-		deptPairListForExcel.add(getEncryLevelPairForExcel());
-		//插入组织架构属性到隐藏的sheet
-		int rowId = 0;
-		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
-			Row row = hideSheet.createRow(rowId++);
-			//插入对应id属性
-			Row idrow = hideSheet.createRow(rowId++);
-			DictPairBO<Long, String> parentDeptPair = deptPairForExcel.getParentDictPair();
-			row.createCell(0).setCellValue(parentDeptPair.getValue());
-			idrow.createCell(0).setCellValue(parentDeptPair.getKey());
-			
-			List<DictPairBO<Long, String>> childrenDeptPairList = deptPairForExcel.getChildrenDictPairList();
-			for(int j=0; j<childrenDeptPairList.size(); j++) {
-				row.createCell(j + 1).setCellValue(childrenDeptPairList.get(j).getValue());
-				idrow.createCell(j + 1).setCellValue(childrenDeptPairList.get(j).getKey());
-			}
-			
-			// 添加名称管理器
-			String range = getRange(1, rowId-1, childrenDeptPairList.size());
-			Name name = wb.createName();
-			name.setNameName(parentDeptPair.getValue());
-			String formula = Constant.EXCEL_HIDE_SHEET + Constant.EXCLAMATION_MARK + range;
-			name.setRefersToFormula(formula);
-			
-			// 添加对应ID管理器
-			range = getRange(1, rowId, childrenDeptPairList.size());
-			name = wb.createName();
-			name.setNameName(parentDeptPair.getValue() + Constant.UNDERLINE + Constant.EXCEL_ID);
-			formula = Constant.EXCEL_HIDE_SHEET + Constant.EXCLAMATION_MARK + range;
-			name.setRefersToFormula(formula);
-		}
-	}
-	/**
-	 * 得到组织架构的excel属性
-	 * @return
-	 */
-	private List<DictPairForExcelBO> listDeptPairForExcel(){
-		List<DictPairForExcelBO> deptPairForExcelList = new ArrayList<>();
-		List<ManageDepartmentBO> deptList = departmentService.listAll();
-		List<ManageDepartmentBO> parentDeptList = deptList.stream().filter(d -> d.getParentId()==null).collect(Collectors.toList());
-		
-		//加入顶级组织
-		DictPairForExcelBO deptPairForExcel = new DictPairForExcelBO();
-		DictPairBO<Long, String> parentDeptPair = new DictPairBO<>();
-		parentDeptPair.setKey(-1L);
-		parentDeptPair.setValue(Constant.EXCEL_COMPANY_LIST);
-		deptPairForExcel.setParentDictPair(parentDeptPair);
-		List<DictPairBO<Long, String>> childrenDeptPairList = new ArrayList<>();
-		deptPairForExcel.setChildrenDictPairList(childrenDeptPairList);
-		deptPairForExcelList.add(deptPairForExcel);
-		
-		//遍历查找到每个组织的直接子级
-		parentDeptList.stream().forEach(pd -> {
-			DictPairBO<Long, String> childDeptPair = new DictPairBO<>();
-			childDeptPair.setKey(pd.getId());
-			childDeptPair.setValue(pd.getName());
-			childrenDeptPairList.add(childDeptPair);
-			
-			buildDeptPairForExcel(deptPairForExcelList, deptList, pd);
-		});
-		return deptPairForExcelList;
-	}
-	
-	/**
-	 * 遍历查找到每个组织的直接子级
-	 * @param deptPairForExcelList
-	 * @param deptList
-	 * @param parentDept
-	 */
-	private void buildDeptPairForExcel(List<DictPairForExcelBO> deptPairForExcelList, List<ManageDepartmentBO> deptList, ManageDepartmentBO parentDept) {
-		DictPairForExcelBO deptPairForExcel = new DictPairForExcelBO();
-		
-		DictPairBO<Long, String> parentDeptPair = new DictPairBO<>();
-		parentDeptPair.setKey(parentDept.getId());
-		parentDeptPair.setValue(parentDept.getName());
-		deptPairForExcel.setParentDictPair(parentDeptPair);
-		
-		//查找直接子级
-		List<DictPairBO<Long, String>> childrenDeptPairList = new ArrayList<>();
-		List<ManageDepartmentBO> childrenDeptList = deptList.stream().filter(d -> parentDept.getId().equals(d.getParentId())).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(childrenDeptList)) {
-			//存在子级
-			deptPairForExcelList.add(deptPairForExcel);
-			childrenDeptList.stream().forEach(cd -> {
-				DictPairBO<Long, String> childDeptPair = new DictPairBO<>();
-				childDeptPair.setKey(cd.getId());
-				childDeptPair.setValue(cd.getName());
-				childrenDeptPairList.add(childDeptPair);
-				buildDeptPairForExcel(deptPairForExcelList, deptList, cd);
-			});
-		}
-		deptPairForExcel.setChildrenDictPairList(childrenDeptPairList);
-	}
-	/**
-	 * 获取excel别名引用地址
-	 * @param offset
-	 * @param rowId
-	 * @param colCount
-	 * @return
-	 */
-	private String getRange(int offset, int rowId, int colCount) {
-		char start = (char)('A' + offset);
-		int twentyFive = 25;
-		int twentySix = 26;
-		int fiftyOne = 51;
-		if (colCount <= twentyFive) {
-			char end = (char)(start + colCount - 1);
-			return "$" + start + "$" + rowId + ":$" + end + "$" + rowId;
-		} else {
-			char endPrefix = 'A';
-			char endSuffix = 'A';
-			// 26-51之间，包括边界（仅两次字母表计算）
-			if ((colCount - twentyFive) / twentySix == 0 || colCount == fiftyOne) {
-				// 边界值
-				if ((colCount - twentyFive) % twentySix == 0) {
-					endSuffix = (char)('A' + twentyFive);
-				} else {
-					endSuffix = (char)('A' + (colCount - twentyFive) % twentySix - 1);
-				}
-			} else {
-				// 51以上
-				if ((colCount - twentyFive) % twentySix == 0) {
-					endSuffix = (char)('A' + twentyFive);
-					endPrefix = (char)(endPrefix + (colCount - twentyFive) / twentySix - 1);
-				} else {
-					endSuffix = (char)('A' + (colCount - twentyFive) % twentySix - 1);
-					endPrefix = (char)(endPrefix + (colCount - twentyFive) / twentySix);
-				}
-			}
-			return "$" + start + "$" + rowId + ":$" + endPrefix + endSuffix + "$" + rowId;
-		}
-	}
-
-	/**
-	 * 列换算成excel的字母标识
-	 * @param col
-	 * @return
-	 */
-	private String getExcelColumn(int col) {
-		char start = 'A';
-		int end = (int) (start + col);
-		int b =(end - 91) / 26;
-		int c =(end - 91) % 26;
-		
-		int twentyFive = 25;
-		if(col <= twentyFive) {
-			return (char)(start + col)+"";
-		}else {
-			return (char)(start + b) +""+ (char)(start + c) ;	
-		}
-	}
-	/**
-	 * 获取角色字典值
-	 * @return
-	 */
-	private DictPairForExcelBO getRolePairForExcel(){
-		DictPairForExcelBO rolePairForExcel = new DictPairForExcelBO();
-		DictPairBO<Long, String> parentRolePair = new DictPairBO<>();
-		parentRolePair.setKey(-1L);
-		parentRolePair.setValue(Constant.EXCEL_ROLE_LIST);
-		rolePairForExcel.setParentDictPair(parentRolePair);
-		
-		List<DictPairBO<Long, String>> childrenRolePairList = new ArrayList<>();
-		rolePairForExcel.setChildrenDictPairList(childrenRolePairList);
-		List<ManageRoleBO> roleList = roleService.list();
-		roleList.stream().forEach(r -> {
-			DictPairBO<Long, String> childRolePair = new DictPairBO<>();
-			childRolePair.setKey(r.getId());
-			childRolePair.setValue(r.getRoleName());
-			childrenRolePairList.add(childRolePair);
-		});
-		return rolePairForExcel;
-	}
-	
-	/**
-	 * 获取加密等级字典值
-	 * @return
-	 */
-	private DictPairForExcelBO getEncryLevelPairForExcel(){
-		DictPairForExcelBO encryLevelPairForExcel = new DictPairForExcelBO();
-		DictPairBO<Long, String> parentEncryLevelPair = new DictPairBO<>();
-		parentEncryLevelPair.setKey(-1L);
-		parentEncryLevelPair.setValue(Constant.EXCEL_ENCRY_LEVEL_LIST);
-		encryLevelPairForExcel.setParentDictPair(parentEncryLevelPair);
-		
-		List<DictPairBO<Long, String>> childrenEncryLevelPairList = new ArrayList<>();
-		encryLevelPairForExcel.setChildrenDictPairList(childrenEncryLevelPairList);
-		for(EncryLevelEnum encryLevelEnum : EncryLevelEnum.values()) {
-			DictPairBO<Long, String> childEncryLevelPair = new DictPairBO<>();
-			childEncryLevelPair.setKey(encryLevelEnum.getKey().longValue());
-			childEncryLevelPair.setValue(encryLevelEnum.getValue());
-			childrenEncryLevelPairList.add(childEncryLevelPair);
-		}
-		return encryLevelPairForExcel;
-	}
-	
-	@Override
-	public AccessToEDMOrHoolinkBO isAccessToEDMOrHoolink() {
+	public AccessToEdmOrHoolinkBO isAccessToEDMOrHoolink() {
 		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
-		AccessToEDMOrHoolinkBO accessToEDMOrHoolinkBO = new AccessToEDMOrHoolinkBO();
+		AccessToEdmOrHoolinkBO accessToEDMOrHoolinkBO = new AccessToEdmOrHoolinkBO();
 		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(currentUserRoleId);
 		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessEDM(true));
 		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessHoolink(true));
@@ -1210,5 +848,4 @@ public class UserServiceImpl implements UserService {
 		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
 		userMapper.updateByPrimaryKeySelective(user);
 	}
-
 }
