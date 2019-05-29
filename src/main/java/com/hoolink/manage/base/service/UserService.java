@@ -15,6 +15,7 @@ import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import java.util.List;
 
 /**
  * @Author: xuli
@@ -152,4 +153,11 @@ public interface UserService {
      * @throws Exception
      */
     UserDeptInfoBO getUserSecurity(Long userId) throws Exception;
+
+    /**
+     * 根据id集合获取用户
+     * @param idList
+     * @return
+     */
+    List<ManagerUserBO> getUserList(List<Long> idList);
 }

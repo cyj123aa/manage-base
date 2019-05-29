@@ -7,6 +7,7 @@ import com.hoolink.manage.base.bo.TemporaryDeptBO;
 import com.hoolink.manage.base.dao.mapper.ManageMenuMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleRoleMenuMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
+import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.manage.base.dao.model.ManageMenuExample;
@@ -18,6 +19,7 @@ import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.EdmMenuBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
+import com.hoolink.sdk.bo.manager.RoleMenuBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.enums.edm.EdmResourceRepertory;
@@ -53,6 +55,8 @@ public class MenuServiceImpl implements MenuService {
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
     @Autowired
     private UserService userService;
+    @Resource
+    private MiddleRoleMenuMapperExt middleRoleMenuMapperExt;
 
     @Override
     public List<ManageMenuBO> listByIdList(List<Long> idList) {
@@ -165,6 +169,11 @@ public class MenuServiceImpl implements MenuService {
             initMenuBO.setPositionList(userSecurity.getPositionList());
         }*/
         return initMenuBO;
+    }
+
+    @Override
+    public List<RoleMenuBO> listByRoleId(Long roleId) throws Exception {
+        return middleRoleMenuMapperExt.listMenuByRoleId(roleId);
     }
 
     /**

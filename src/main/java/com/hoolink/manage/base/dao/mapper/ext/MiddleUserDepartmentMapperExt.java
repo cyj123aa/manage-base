@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 import com.hoolink.manage.base.bo.DeptPositionBO;
+import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.bo.UserSecurityBO;
 import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
 import java.util.List;
@@ -27,6 +28,13 @@ public interface MiddleUserDepartmentMapperExt {
 	 */
 	List<DeptPositionBO> getDept(@Param("userId")Long userId);
 
+	/**
+	 * 获取用户部门信息
+	 * @param userId
+	 * @param deptType
+	 * @return
+	 */
+	List<UserDeptBO> getUserDept(@Param("userId")Long userId,@Param("deptType")Long deptType);
 	/**
 	 * 用户密保等级
 	 * @param userId

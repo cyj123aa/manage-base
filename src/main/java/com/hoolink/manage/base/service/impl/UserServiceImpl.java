@@ -23,7 +23,7 @@ import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
+import com.hoolink.sdk.bo.manager.UserDepartmentBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -116,8 +116,6 @@ public class UserServiceImpl implements UserService {
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
-
-
 
         return loginResult;
     }
@@ -357,7 +355,7 @@ public class UserServiceImpl implements UserService {
 			
 			if(CollectionUtils.isNotEmpty(userDepartmentList)) {
 				userDepartmentList.stream().forEach(up -> {
-					UserDepartmentBO userDeptPair = userBO.new UserDepartmentBO();
+					UserDepartmentBO userDeptPair = new UserDepartmentBO();
 					ManageDepartmentBO department = departmentList.stream().filter(d -> d.getId().longValue() == up.getDeptId().longValue()).findFirst().orElseGet(ManageDepartmentBO::new); 
 					userDeptPair.setDeptName(department.getName());
 					BeanUtils.copyProperties(up, userDeptPair);
@@ -513,7 +511,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ManagerUserBO getById(Long id) {
-		return CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
+        // 获取用户部门信息
+      List<UserDepartmentBO> userDepartmentBOS = CopyPropertiesUtil.copyList(middleUserDepartmentMapperExt.getUserDept(id,2L), UserDepartmentBO.class);
+       //  用户基础信息
+      ManagerUserBO managerUserBO = CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
+      managerUserBO.setUserDeptPairList(userDepartmentBOS);
+      //  获取用户公司信息
+      managerUserBO.setCompany(middleUserDepartmentMapperExt.getUserDept(id,1L).get(0).getDeptName());
+      return managerUserBO;
 	}
 
     @Override
@@ -546,5 +551,11 @@ public class UserServiceImpl implements UserService {
             userDeptInfoBO.setPositionList(positionList);
         }
         return userDeptInfoBO;
+    }
+    @Override
+    public List<ManagerUserBO> getUserList(List<Long> idList) {
+        UserExample example = new UserExample();
+        example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true).andIdIn(idList);
+        return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
     }
 }
