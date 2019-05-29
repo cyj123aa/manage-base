@@ -326,14 +326,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception {
-		UserExample example = new UserExample();
-		UserExample.Criteria criteria = example.createCriteria();
-		buildUserCriteria(criteria, userPageParamBO);
-		
-		//只有一级用户可以看到所有员工， 其他根据组织架构显示员工列表
-		if(!Constant.LEVEL_ONE.equals(ContextUtil.getManageCurrentUser().getRoleLevel())){
-			transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
-		}
+
+		UserExample example = buildUserCriteria(userPageParamBO);
 		PageInfo<User> userPageInfo = PageHelper
 				.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
 				.doSelectPageInfo(() -> userMapper.selectByExample(example));
@@ -390,16 +384,37 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * 用户列表查询条件
-	 * @param criteria
 	 * @param userPageParamBO
+	 * @return
 	 */
-	private void buildUserCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(StringUtils.isNotBlank(userPageParamBO.getName())) {
-			criteria.andNameLike("%" + userPageParamBO.getName() + "%");
+	private UserExample buildUserCriteria(ManagerUserPageParamBO userPageParamBO) {
+		UserExample userExample = new UserExample();
+		UserExample.Criteria criteria = userExample.createCriteria();
+		//姓名、职位、手机号、账号
+		if(StringUtils.isNotBlank(userPageParamBO.getGroupParam())) {
+			andCriteria(criteria, userPageParamBO);
+			criteria.andNameLike("%" + userPageParamBO.getGroupParam() + "%");
+			
+			UserExample.Criteria groupCriteria1 = userExample.createCriteria();
+			andCriteria(groupCriteria1, userPageParamBO);
+			groupCriteria1.andPositionLike("%" + userPageParamBO.getGroupParam() + "%");
+			userExample.or(groupCriteria1);
+			
+			UserExample.Criteria groupCriteria2 = userExample.createCriteria();
+			andCriteria(groupCriteria2, userPageParamBO);
+			groupCriteria2.andPhoneEqualTo(userPageParamBO.getGroupParam());
+			userExample.or(groupCriteria2);
+			
+			UserExample.Criteria groupCriteria3 = userExample.createCriteria();
+			andCriteria(groupCriteria3, userPageParamBO);
+			groupCriteria3.andUserAccountLike("%" + userPageParamBO.getGroupParam() + "%");
+			userExample.or(groupCriteria3);
+		}else {
+			andCriteria(criteria, userPageParamBO);
 		}
-		if(StringUtils.isNotBlank(userPageParamBO.getPosition())) {
-			criteria.andPositionLike("%" + userPageParamBO.getPosition() + "%");
-		}
+		return userExample;
+	}
+	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
 		if(userPageParamBO.getDeptId() != null) {
 			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(userPageParamBO.getDeptId()));
 		}
@@ -409,11 +424,9 @@ public class UserServiceImpl implements UserService {
 		if(userPageParamBO.getStatus() != null) {
 			criteria.andStatusEqualTo(userPageParamBO.getStatus());
 		}
-		if(StringUtils.isNotBlank(userPageParamBO.getPhone())) {
-			criteria.andPhoneEqualTo(userPageParamBO.getPhone());
-		}
-		if(StringUtils.isNotBlank(userPageParamBO.getUserAccount())) {
-			criteria.andUserAccountLike("%" + userPageParamBO.getUserAccount() + "%");
+		//只有一级用户可以看到所有员工， 其他根据组织架构显示员工列表
+		if(!Constant.LEVEL_ONE.equals(ContextUtil.getManageCurrentUser().getRoleLevel())){
+			transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
 		}
 		criteria.andEnabledEqualTo(true);
 	}
