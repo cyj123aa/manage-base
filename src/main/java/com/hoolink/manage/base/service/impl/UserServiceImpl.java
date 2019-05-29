@@ -117,8 +117,6 @@ public class UserServiceImpl implements UserService {
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
 
-
-
         return loginResult;
     }
 
