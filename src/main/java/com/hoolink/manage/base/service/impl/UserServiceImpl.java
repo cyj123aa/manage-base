@@ -653,9 +653,11 @@ public class UserServiceImpl implements UserService {
 				Long lastDeptId = deptIdList.get(deptIdList.size()-1);
 				List<Long> chidrenDeptId = new ArrayList<>();
 				traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
-				deptIdList.addAll(chidrenDeptId);
+				List<Long> toStoreDeptIdList = new ArrayList<>();
+				toStoreDeptIdList.addAll(deptIdList);
+				toStoreDeptIdList.addAll(chidrenDeptId);
 				DeptPairBO deptPair = new DeptPairBO();
-				deptPair.setDeptIdList(deptIdList);
+				deptPair.setDeptIdList(toStoreDeptIdList);
 				deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
 				deptPairList.add(deptPair);
 			}
