@@ -283,10 +283,6 @@ public class UserServiceImpl implements UserService {
         if (user.getStatus() == null || !user.getStatus()) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_FORBIDDEN);
         }
-        //用户被删除
-        if(!user.getEnabled()) {
-        	throw new BusinessException(HoolinkExceptionMassageEnum.USER_DELETED);
-        }
     }
 
     private String cacheSession(User user) throws Exception {
