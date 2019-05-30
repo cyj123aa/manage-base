@@ -3,6 +3,7 @@ package com.hoolink.manage.base.service;
 import java.util.List;
 
 import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.manage.base.bo.ManageDepartmentTreeBO;
 
 /**
  * @author lijunling
@@ -23,4 +24,12 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listByCompany(String company);
+
+	/**
+	 * 组织架构树形结构
+	 * @param idList 组织架构id集合
+	 * @param flag 是否查询组织架构下的员工 true:查询 false:只查询组织架构
+	 * @return
+	 */
+	List<ManageDepartmentTreeBO> listAll(List<Long> idList, Boolean flag);
 }
