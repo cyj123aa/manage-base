@@ -917,5 +917,11 @@ public class UserServiceImpl implements UserService {
 		return Constant.GREETING_YOU;
 	}
 
-
+	@Override
+	public boolean updateImage(Long imageId) {
+		User user = new User();
+		user.setId(getCurrentUserId());
+		user.setImgId(imageId);
+		return userMapper.updateByPrimaryKeySelective(user) == 1;
+	}
 }

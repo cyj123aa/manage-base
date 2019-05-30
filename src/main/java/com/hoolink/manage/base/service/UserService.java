@@ -204,4 +204,11 @@ public interface UserService {
      * @param userId
      */
     void resetPasswd(Long userId);
+    
+    /**
+     * 个人中心-保存头像
+     * @param imageId
+     * @return
+     */
+    boolean updateImage(Long imageId);
 }
