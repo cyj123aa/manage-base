@@ -490,9 +490,12 @@ public class UserServiceImpl implements UserService {
 		}
 		userInfoBO.setUserDeptPairList(deptPairList);
 		
-		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(companyIdList)) {
-			userInfoBO.setCompanyId(companyIdList.get(0));
+		ManageRoleBO role = roleService.selectById(user.getRoleId());
+		userInfoBO.setRoleName(role.getRoleName());
+		List<MiddleUserDeptWithMoreBO> companyList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(companyList)) {
+			userInfoBO.setCompanyId(companyList.get(0).getDeptId());
+			userInfoBO.setCompanyName(companyList.get(0).getDeptName());
 		}
 		return userInfoBO;
 	}
