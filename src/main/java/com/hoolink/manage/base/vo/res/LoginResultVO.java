@@ -35,4 +35,14 @@ public class LoginResultVO {
      * 问候语
      */
     private String greetings;
+
+    /**
+     * 用户名
+     */
+    private String name;
+
+    /**
+     * 图像url
+     */
+    private String image;
 }
