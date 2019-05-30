@@ -2,6 +2,7 @@ package com.hoolink.manage.base.service;
 
 import java.util.List;
 
+import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
@@ -44,10 +45,10 @@ public interface DepartmentService {
 
 	/**
 	 * 获取组织架构树
-	 * @param deptType
-	 * @param flag 是否查询组织架构下面的人员
+	 * @param
+	 * @param treeParamBO flag true 是否查询组织架构下面的人员
 	 * @return
 	 * @throws Exception
 	 */
-	List<ManageDepartmentTreeBO> getOrgList (Byte deptType, Boolean flag) throws Exception;
+	List<ManageDepartmentTreeBO> getOrgList (DepartmentTreeParamBO treeParamBO) throws Exception;
 }
