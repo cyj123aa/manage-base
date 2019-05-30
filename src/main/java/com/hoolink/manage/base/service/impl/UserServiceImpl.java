@@ -483,6 +483,7 @@ public class UserServiceImpl implements UserService {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 			}
