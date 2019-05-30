@@ -34,5 +34,5 @@ public interface ManageRoleMapperExt {
      * @param status
      * @return
      */
-    List<ManageRole> getRoleByTwo(@Param("searchValue") String searchValue,@Param("status") Boolean status);
+    List<ManageRole> getRoleByTwo(@Param("roleId") Long roleId,@Param("searchValue") String searchValue,@Param("status") Boolean status);
 }

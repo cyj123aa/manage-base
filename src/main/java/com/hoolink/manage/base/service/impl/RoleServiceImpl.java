@@ -7,6 +7,7 @@ import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleRoleMenuMapper;
+import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.ManageRoleMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
@@ -72,6 +73,8 @@ public class RoleServiceImpl implements RoleService {
     RedisUtil redisUtil;
     @Resource
     private ManageMenuMapperExt manageMenuMapperExt;
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -154,6 +157,14 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         updateRole(roleParamBO);
+        //禁用角色用户
+        UserExample example = new UserExample();
+        example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
+        User user = new User();
+        user.setStatus(roleParamBO.getRoleStatus());
+        user.setUpdated(System.currentTimeMillis());
+        user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        userMapper.updateByExampleSelective(user,example);
     }
 
     /**
@@ -414,7 +425,7 @@ public class RoleServiceImpl implements RoleService {
             if(Constant.LEVEL_THREE.equals(roleLevel)){
                 throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
-                roles = manageRoleMapperExt.getRoleByTwo(pageParamBO.getSearchValue(),pageParamBO.getStatus());
+                roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByOne(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }
