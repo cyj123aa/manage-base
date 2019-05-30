@@ -39,6 +39,7 @@ public class DepartmentController {
     public BackVO<List<ManageDepartmentTreeVO>> getOrgList(@RequestBody @Valid DepartmentTreeParamVO param) throws Exception{
         // 入参的VO转BO
         DepartmentTreeParamBO treeParamBO = CopyPropertiesUtil.copyBean(param,DepartmentTreeParamBO.class);
+        // 出参BO转VO
         List<ManageDepartmentTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.getOrgList(treeParamBO),ManageDepartmentTreeVO.class);
         return BackVOUtil.operateAccess(manageDepartmentTreeVOS);
     }
