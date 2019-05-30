@@ -18,9 +18,14 @@ public interface DepartmentService {
 	List<ManageDepartmentBO> listByIdList(List<Long> idList);
 	
 	/**
-	 * 根据公司获取所有部门
-	 * @param company
+	 *  获取组织架构树
 	 * @return
 	 */
-	List<ManageDepartmentBO> listByCompany(String company);
+	List<ManageDepartmentBO> listAll();
+	/**
+	 * 根据组织类型查询
+	 * @param deptType
+	 * @return
+	 */
+	List<ManageDepartmentBO> listByDeptType(Byte deptType);
 }

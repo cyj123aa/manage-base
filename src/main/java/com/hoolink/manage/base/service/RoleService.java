@@ -1,14 +1,10 @@
 package com.hoolink.manage.base.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.ManageRoleBO;
-import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
-import com.hoolink.manage.base.bo.RoleParamBO;
-import com.hoolink.manage.base.bo.SearchPageParamBO;
-import com.hoolink.manage.base.vo.req.PageParamVO;
-import com.hoolink.manage.base.vo.req.RoleParamVO;
+import com.hoolink.manage.base.bo.*;
 
 /**
  * @description: 角色管理
@@ -45,7 +41,29 @@ public interface RoleService {
      * @return
      * @throws Exception
      */
-    RoleParamBO getById(Long roleId) throws Exception;
+    BackRoleBO getById(Long roleId) throws Exception;
+
+    /**
+     *获取当前角色权限
+     * @return
+     * @throws Exception
+     */
+    RoleMenuBO getCurrentRoleMenu() throws Exception;
+
+    /**
+     * 获得基础菜单
+     * @param menuParamBO
+     * @return
+     */
+    List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception;
+
+    /**
+     * 获得角色基础信息
+     * @param roleId
+     * @return
+     * @throws Exception
+     */
+    ManageRoleBO getBaseRole(Long roleId) throws Exception;
 
     /**
      * 分页获得角色列表
@@ -76,4 +94,17 @@ public interface RoleService {
      * @return
      */
     List<RoleMenuPermissionBO> listMenuAccessByRoleId(Long roleId);
+    /**
+     * 根据roleId获取权限url
+     * @param roleId
+     * @return
+     */
+    Set<String> listAccessUrlByRoleId(Long roleId);
+    
+    /**
+     * 根据id获取角色
+     * @param roleId
+     * @return
+     */
+    ManageRoleBO selectById(Long roleId);
 }

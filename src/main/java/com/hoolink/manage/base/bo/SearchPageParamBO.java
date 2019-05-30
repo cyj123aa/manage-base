@@ -12,4 +12,6 @@ import lombok.Data;
 @Data
 public class SearchPageParamBO extends PageParamBO {
     private String searchValue;
+
+    private Boolean status;
 }

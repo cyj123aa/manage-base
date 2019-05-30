@@ -21,11 +21,19 @@ public class ManageDepartment implements Serializable {
 
     /**
      * <pre>
-     * 所属公司
-     * 表字段 : manage_department.company
+     * 1-公司 2-部门 3-小组
+     * 表字段 : manage_department.dept_type
      * </pre>
      */
-    private String company;
+    private Byte deptType;
+
+    /**
+     * <pre>
+     * 父级ID
+     * 表字段 : manage_department.parent_id
+     * </pre>
+     */
+    private Long parentId;
 
     /**
      * <pre>
@@ -127,27 +135,52 @@ public class ManageDepartment implements Serializable {
 
     /**
      * <pre>
-     * 获取：所属公司
-     * 表字段：manage_department.company
+     * 获取：1-公司 2-部门 3-小组
+     * 表字段：manage_department.dept_type
      * </pre>
      *
-     * @return manage_department.company：所属公司
+     * @return manage_department.dept_type：1-公司 2-部门 3-小组
      */
-    public String getCompany() {
-        return company;
+    public Byte getDeptType() {
+        return deptType;
     }
 
     /**
      * <pre>
-     * 设置：所属公司
-     * 表字段：manage_department.company
+     * 设置：1-公司 2-部门 3-小组
+     * 表字段：manage_department.dept_type
      * </pre>
      *
-     * @param company
-     *            manage_department.company：所属公司
+     * @param deptType
+     *            manage_department.dept_type：1-公司 2-部门 3-小组
      */
-    public void setCompany(String company) {
-        this.company = company == null ? null : company.trim();
+    public void setDeptType(Byte deptType) {
+        this.deptType = deptType;
+    }
+
+    /**
+     * <pre>
+     * 获取：父级ID
+     * 表字段：manage_department.parent_id
+     * </pre>
+     *
+     * @return manage_department.parent_id：父级ID
+     */
+    public Long getParentId() {
+        return parentId;
+    }
+
+    /**
+     * <pre>
+     * 设置：父级ID
+     * 表字段：manage_department.parent_id
+     * </pre>
+     *
+     * @param parentId
+     *            manage_department.parent_id：父级ID
+     */
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     /**
