@@ -121,15 +121,15 @@ public class RoleServiceImpl implements RoleService {
         if(roleParamBO.getId()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        updateRole(roleParamBO);
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
+        if(CollectionUtils.isEmpty(roleMenuVOList)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PLEASE_MENU_CONFIG);
+        }
+        updateRole(roleParamBO);
         //權限 传参：勾选的权限
         MiddleRoleMenuExample example=new MiddleRoleMenuExample();
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
-        if(CollectionUtils.isEmpty(roleMenuVOList)){
-            return;
-        }
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
     }
 
@@ -187,17 +187,18 @@ public class RoleServiceImpl implements RoleService {
         roleParamBO.setName(baseRole.getRoleName());
         roleParamBO.setStatus(baseRole.getRoleStatus());
         roleParamBO.setDescription(baseRole.getRoleDesc());
-        //查询所有菜单
-        List<ManageMenuBO> manageMenuBOS = menuService.listAll();
-        if(CollectionUtils.isEmpty(manageMenuBOS)){
+        //查询当前用户的全部菜单权限
+        RoleMenuBO currentRoleMenu = getCurrentRoleMenu();
+        //List<ManageMenuBO> manageMenuBOS = menuService.listAll();
+        if(currentRoleMenu==null || CollectionUtils.isEmpty(currentRoleMenu.getChooseMenu())){
             return roleParamBO;
         }
         //全部菜单  及  勾选菜单
         RoleMenuBO roleMenuBO = new RoleMenuBO();
-        Map<Long, List<ManageMenuTreeBO>> map = seperationMenu(manageMenuBOS);
+        //Map<Long, List<ManageMenuTreeBO>> map = seperationMenu(manageMenuBOS);
         //组合菜单列表
-        List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
-        roleMenuBO.setManageMenu(firstMenuList);
+        //List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
+        roleMenuBO.setManageMenu(currentRoleMenu.getChooseMenu());
         //角色权限列表
         List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(roleId);
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
@@ -367,7 +368,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
         }
-        //角色权限列表
+        //查询当前用户的全部菜单权限
         List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(userRole.getId());
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
             RoleMenuBO roleMenuBO = new RoleMenuBO();
@@ -471,10 +472,10 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Set<String> listAccessUrlByRoleId(Long roleId) {
-		String rolePermittedUrlKey = RedisConstant.ROLE_PERMITTED_URL_PREFIX + roleId;
-		if(redisUtil.hasKey(rolePermittedUrlKey)) {
-			return redisUtil.sGet(rolePermittedUrlKey).stream().map(u -> (String)u).collect(Collectors.toSet());
-		}else {
+//		String rolePermittedUrlKey = RedisConstant.ROLE_PERMITTED_URL_PREFIX + roleId;
+//		if(redisUtil.hasKey(rolePermittedUrlKey)) {
+//			return redisUtil.sGet(rolePermittedUrlKey).stream().map(u -> (String)u).collect(Collectors.toSet());
+//		}else {
 			Set<String> urlSet = new HashSet<>();
 			/* 1.查询角色权限菜单url */
 	        MiddleRoleMenuExample example = new MiddleRoleMenuExample();
@@ -501,9 +502,9 @@ public class RoleServiceImpl implements RoleService {
 	        	}
 	        });
 	        urlSet.removeIf(u -> u==null);
-	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
+//	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
 	        return urlSet;
-		}
+//		}
 	}
 
 	@Override

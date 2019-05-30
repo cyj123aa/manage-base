@@ -113,9 +113,18 @@ public class UserServiceImpl implements UserService {
         loginResult.setGreetings(setGreeting());
         //设置系统访问权限（EDM和管理平台）
 		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(user.getRoleId());
-		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessEDM(true));
-		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> loginResult.setAccessHoolink(true));
-
+		Optional<RoleMenuPermissionBO> edmRoleMenuPermissionOPt = roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst();
+		if(edmRoleMenuPermissionOPt.isPresent()) {
+			loginResult.setAccessEDM(true);
+		}else {
+			loginResult.setAccessEDM(false);
+		}
+		Optional<RoleMenuPermissionBO> hoolinkRoleMenuPermissionOPt = roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst();
+		if(hoolinkRoleMenuPermissionOPt.isPresent()) {
+			loginResult.setAccessHoolink(true);
+		}else {
+			loginResult.setAccessHoolink(false);
+		}
         return loginResult;
     }
 
@@ -412,11 +421,13 @@ public class UserServiceImpl implements UserService {
 		}else {
 			andCriteria(criteria, userPageParamBO);
 		}
+		userExample.setOrderByClause(" created desc ");
 		return userExample;
 	}
 	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(userPageParamBO.getDeptId() != null) {
-			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(userPageParamBO.getDeptId()));
+		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
+			List<Long> deptIdList = userPageParamBO.getDeptId();
+			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size()-1)));
 		}
 		if(userPageParamBO.getRoleId() != null) {
 			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
@@ -472,6 +483,7 @@ public class UserServiceImpl implements UserService {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 			}
@@ -479,9 +491,12 @@ public class UserServiceImpl implements UserService {
 		}
 		userInfoBO.setUserDeptPairList(deptPairList);
 		
-		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(companyIdList)) {
-			userInfoBO.setCompanyId(companyIdList.get(0));
+		ManageRoleBO role = roleService.selectById(user.getRoleId());
+		userInfoBO.setRoleName(role.getRoleName());
+		List<MiddleUserDeptWithMoreBO> companyList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(companyList)) {
+			userInfoBO.setCompanyId(companyList.get(0).getDeptId());
+			userInfoBO.setCompanyName(companyList.get(0).getDeptName());
 		}
 		return userInfoBO;
 	}
@@ -639,9 +654,11 @@ public class UserServiceImpl implements UserService {
 				Long lastDeptId = deptIdList.get(deptIdList.size()-1);
 				List<Long> chidrenDeptId = new ArrayList<>();
 				traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
-				deptIdList.addAll(chidrenDeptId);
+				List<Long> toStoreDeptIdList = new ArrayList<>();
+				toStoreDeptIdList.addAll(deptIdList);
+				toStoreDeptIdList.addAll(chidrenDeptId);
 				DeptPairBO deptPair = new DeptPairBO();
-				deptPair.setDeptIdList(deptIdList);
+				deptPair.setDeptIdList(toStoreDeptIdList);
 				deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
 				deptPairList.add(deptPair);
 			}
@@ -727,8 +744,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<DeptTreeBO> getDeptTree(List<Long> companyIdList) {
 		List<ManageDepartmentBO> departmentList = departmentService.listAll();
-		List<ManageDepartmentBO> deptParentList = departmentList.stream()
-				.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
+		List<ManageDepartmentBO> deptParentList;
+		if(CollectionUtils.isNotEmpty(companyIdList)) {
+			deptParentList = departmentList.stream()
+					.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType()) && companyIdList.contains(d.getId())).collect(Collectors.toList());
+		}else {
+			deptParentList = departmentList.stream()
+					.filter(d -> DeptTypeEnum.COMPANY.getKey().equals(d.getDeptType())).collect(Collectors.toList());
+		}
 		return getChildren(deptParentList, departmentList);
 	}
 	
@@ -816,16 +839,6 @@ public class UserServiceImpl implements UserService {
 		List<MiddleUserDeptWithMoreBO> userDeptPairList = userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType())).collect(Collectors.toList());
 		personalInfo.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDepartmentBO.class));
 		return personalInfo;
-	}
-
-	@Override
-	public AccessToEdmOrHoolinkBO isAccessToEDMOrHoolink() {
-		Long currentUserRoleId = ContextUtil.getManageCurrentUser().getRoleId();
-		AccessToEdmOrHoolinkBO accessToEDMOrHoolinkBO = new AccessToEdmOrHoolinkBO();
-		List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(currentUserRoleId);
-		roleMenuPermissionList.stream().filter(rmp -> Constant.EDM.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessEDM(true));
-		roleMenuPermissionList.stream().filter(rmp -> Constant.HOOLINK.equals(rmp.getMenuCode())).findFirst().ifPresent(a -> accessToEDMOrHoolinkBO.setAccessHoolink(true));
-		return accessToEDMOrHoolinkBO;
 	}
 
 	@Override

@@ -56,9 +56,19 @@ public class ManagerUserInfoVO {
     private Long roleId;
     
     /**
+     * 所属角色
+     */
+    private String roleName;
+    
+    /**
      * 所属公司Id
      */
     private Long companyId;
+    
+    /**
+     * 所属公司
+     */
+    private String companyName;
     
     /**
      * 联系电话

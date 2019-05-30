@@ -16,7 +16,7 @@ public class MenuParamVO {
     private String code;
 
     /**
-     * 查询村级
+     * 查询层级
      */
     private Integer level;
 }

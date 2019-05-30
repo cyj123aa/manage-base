@@ -19,8 +19,8 @@ import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
+import com.hoolink.manage.base.vo.req.GetDeptTreeParamVO;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
-import com.hoolink.manage.base.vo.res.AccessToEDMOrHoolinkVO;
 import com.hoolink.manage.base.vo.res.DeptTreeVO;
 import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -268,8 +268,12 @@ public class UserController {
     @PostMapping(value = "getDeptTree")
     @ApiOperation(value = "获取组织架构tree数据")
     @LogAndParam(value = "获取组织架构tree数据失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody BaseParam<Long> companyId) throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(Arrays.asList(companyId.getData())), DeptTreeVO.class));
+    public BackVO<List<DeptTreeVO>> getDeptTree(@RequestBody GetDeptTreeParamVO deptTreeParamVO) throws Exception{
+    	List<Long> companyIdList = new ArrayList<>();
+    	if(deptTreeParamVO.getCompanyId() != null) {
+    		companyIdList.add(deptTreeParamVO.getCompanyId());
+    	}
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyList(userService.getDeptTree(companyIdList), DeptTreeVO.class));
     }
     
     @PostMapping(value = "exportList")
@@ -288,14 +292,6 @@ public class UserController {
     public ResponseEntity<Resource> downloadTemplate() throws Exception {
         return excelService.downloadTemplate();
     }
-    
-    @PostMapping(value = "isAccessToEDMOrHoolink")
-    @ApiOperation(value = "首页获取EDM/hoolink权限")
-    @LogAndParam(value = "首页获取EDM/hoolink权限失败", check = CheckEnum.DATA_NOT_NULL)
-    public BackVO<AccessToEDMOrHoolinkVO> isAccessToEDMOrHoolink() throws Exception{
-    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.isAccessToEDMOrHoolink(), AccessToEDMOrHoolinkVO.class));
-    }
-    
     
     @PostMapping(value = "updatePassword")
     @ApiOperation(value = "修改密码")
