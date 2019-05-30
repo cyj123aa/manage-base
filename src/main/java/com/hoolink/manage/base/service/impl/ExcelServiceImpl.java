@@ -80,7 +80,7 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptId) throws Exception{
-		
+		log.info("multipartFile:{}; deptId:{}", multipartFile, deptId); 
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
         if(multipartFile==null || StringUtils.isBlank(deptId)){
