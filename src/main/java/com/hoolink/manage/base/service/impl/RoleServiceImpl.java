@@ -498,6 +498,9 @@ public class RoleServiceImpl implements RoleService {
 		criteria.andRoleIdEqualTo(roleId);
 		List<MiddleRoleMenu> roleMenuList = roleMenuMapper.selectByExample(example);
 		List<Long> menuIdList = roleMenuList.stream().map(rm -> rm.getMenuId()).collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(menuIdList)) {
+			return Collections.emptyList();
+		}
 		List<ManageMenuBO> menus = menuService.listByIdList(menuIdList);
 		
 		List<RoleMenuPermissionBO> roleMenuPermissionList = new ArrayList<>();
