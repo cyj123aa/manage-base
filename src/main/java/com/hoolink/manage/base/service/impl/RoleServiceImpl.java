@@ -189,15 +189,11 @@ public class RoleServiceImpl implements RoleService {
         roleParamBO.setDescription(baseRole.getRoleDesc());
         //查询当前用户的全部菜单权限
         RoleMenuBO currentRoleMenu = getCurrentRoleMenu();
-        //List<ManageMenuBO> manageMenuBOS = menuService.listAll();
         if(currentRoleMenu==null || CollectionUtils.isEmpty(currentRoleMenu.getChooseMenu())){
             return roleParamBO;
         }
         //全部菜单  及  勾选菜单
         RoleMenuBO roleMenuBO = new RoleMenuBO();
-        //Map<Long, List<ManageMenuTreeBO>> map = seperationMenu(manageMenuBOS);
-        //组合菜单列表
-        //List<ManageMenuTreeBO> firstMenuList = assembleMenuTree(map);
         roleMenuBO.setManageMenu(currentRoleMenu.getChooseMenu());
         //角色权限列表
         List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(roleId);
