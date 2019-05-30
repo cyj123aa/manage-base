@@ -864,19 +864,19 @@ public class UserServiceImpl implements UserService {
 		SimpleDateFormat df = new SimpleDateFormat("HH");
 		String str = df.format(date);
 		int a = Integer.parseInt(str);
-		if (a >= 0 && a <= 6) {
+		if (a >= Constant.ZERO && a <= Constant.SIX) {
 			return Constant.GREETING_MORNING;
 		}
-		if (a > 6 && a <= 12) {
+		if (a > Constant.SIX && a <= Constant.TEWLVE) {
 			return Constant.GREETING_FORENOON;
 		}
-		if (a > 12 && a <= 13) {
+		if (a > Constant.TEWLVE && a <= Constant.THIRTEEN) {
 			return Constant.GREETING_NOON;
 		}
-		if (a > 13 && a <= 18) {
+		if (a > Constant.THIRTEEN && a <= Constant.EIGHTEEN) {
 			return Constant.GREETING_AFTERNOON;
 		}
-		if (a > 18 && a <= 24) {
+		if (a > Constant.EIGHTEEN && a <= Constant.TWENTY_FOUR) {
 			return Constant.GREETING_NIGHT;
 		}
 		return Constant.GREETING_YOU;

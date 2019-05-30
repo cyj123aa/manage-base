@@ -113,6 +113,12 @@ public class Constant {
     public static final String GREETING_AFTERNOON="下午好";
     public static final String GREETING_NIGHT="晚上好";
     public static final String GREETING_YOU="你好";
+    public static final Integer ZERO=0;
+    public static final Integer SIX=6;
+    public static final Integer TEWLVE=12;
+    public static final Integer THIRTEEN=13;
+    public static final Integer EIGHTEEN=18;
+    public static final Integer TWENTY_FOUR=24;
 
 
 
