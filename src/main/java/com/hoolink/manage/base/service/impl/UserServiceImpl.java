@@ -8,6 +8,7 @@ import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
+import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
@@ -22,6 +23,7 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.UserDepartmentBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
@@ -89,6 +91,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
+
+    @Resource
+    private UserMapperExt userMapperExt;
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -557,5 +562,10 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true).andIdIn(idList);
         return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
+    }
+
+    @Override
+    public List<DeptSecurityRepertoryBO> getDeptByUser(Long id) {
+        return userMapperExt.getDeptByUser(id);
     }
 }

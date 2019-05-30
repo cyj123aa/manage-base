@@ -1,7 +1,10 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
+
+import com.hoolink.sdk.param.BaseParam;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,4 +52,12 @@ public class UserController {
     public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
         return BackBOUtil.defaultBackBO(userService.getUserList(idList));
     }
+
+    @PostMapping(value = "getDeptByUser")
+    @ApiOperation(value = "根据用户id查询用户密保等级")
+    @LogAndParam(value = "根据用户id查询用户密保等级失败，请稍后重试")
+    public BackBO<List<DeptSecurityRepertoryBO>> getDeptByUser(@RequestBody BaseParam<Long> id)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getDeptByUser(id.getData()));
+    }
+
 }
