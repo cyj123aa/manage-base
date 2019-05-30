@@ -99,6 +99,7 @@ public class ExcelServiceImpl implements ExcelService{
             	try {
             		userService.createUser(userParam);
             	}catch(Exception e) {
+            		log.error("import excel failed ..., exception:{}", e);
             		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
             	}
             }
