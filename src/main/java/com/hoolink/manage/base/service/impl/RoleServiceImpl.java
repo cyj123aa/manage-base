@@ -37,14 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -310,12 +303,33 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
+    /**
+     * 封装参数
+     * @param roleMenuBO
+     * @return
+     */
+    private ManageMenuBO toMenuBO(MiddleRoleMenuBO roleMenuBO){
+        ManageMenuBO manageMenuBO = new ManageMenuBO();
+        manageMenuBO.setId(roleMenuBO.getMenuId());
+        manageMenuBO.setMenuName(roleMenuBO.getMenuName());
+        return manageMenuBO;
+    }
+
     @Override
-    public List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) {
-        //所有菜单
-        List<ManageMenuBO> manageMenuBOS = menuService.listAll();
-        if(CollectionUtils.isEmpty(manageMenuBOS)){
+    public List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception {
+        //当前用户权限菜单
+        ManageRole userRole = getUserRole();
+        if(userRole==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
+        }
+        List<MiddleRoleMenuBO> roleMenu = manageMenuMapperExt.getRoleMenu(userRole.getId());
+        if(CollectionUtils.isEmpty(roleMenu)){
             return null;
+        }
+        List<ManageMenuBO> manageMenuBOS =new ArrayList<>();
+        for (MiddleRoleMenuBO roleMenuBO:roleMenu) {
+            ManageMenuBO manageMenuBO = toMenuBO(roleMenuBO);
+            manageMenuBOS.add(manageMenuBO);
         }
         String code = menuParamBO.getCode();
         Integer level = menuParamBO.getLevel();
@@ -380,6 +394,26 @@ public class RoleServiceImpl implements RoleService {
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
             RoleMenuBO roleMenuBO = new RoleMenuBO();
             getCurrentMenu(roleMenu, roleMenuBO);
+            if(Constant.LEVEL_TWO.equals(userRole.getRoleLevel())){
+                List<ManageMenuTreeBO> chooseMenu = roleMenuBO.getChooseMenu();
+                if(CollectionUtils.isNotEmpty(chooseMenu)){
+                    for (ManageMenuTreeBO treeBO:chooseMenu) {
+                        if(Constant.MANAGE_CENTER_NAME.equals(treeBO.getTitle())){
+                            List<ManageMenuTreeBO> children = treeBO.getChildren();
+                            if(CollectionUtils.isNotEmpty(children)) {
+                                Iterator<ManageMenuTreeBO> iterator = children.iterator();
+                                while (iterator.hasNext()){
+                                    if (Constant.ROLE_MANAGE_NAME.equals(iterator.next().getTitle())) {
+                                        iterator.remove();
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
             return roleMenuBO;
         }
         return null;
@@ -423,7 +457,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();
             if(Constant.LEVEL_THREE.equals(roleLevel)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
+                throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_VISITOR);
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){

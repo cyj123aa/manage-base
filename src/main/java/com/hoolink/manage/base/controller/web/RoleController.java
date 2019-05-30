@@ -80,7 +80,7 @@ public class RoleController {
     @PostMapping(value = "getBaseMenu")
     @ApiOperation(value = "获得管理基础动态菜单")
     @LogAndParam(value = "获得管理基础菜单失败")
-    public BackBO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO){
+    public BackBO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO) throws Exception {
         MenuParamBO menuParamBO = CopyPropertiesUtil.copyBean(menuParamVO, MenuParamBO.class);
         List<ManageMenuTreeBO> baseMenu = roleService.getBaseMenu(menuParamBO);
         List<ManageMenuTreeVO> manageMenuTreeVOS = CopyPropertiesUtil.copyList(baseMenu, ManageMenuTreeVO.class);

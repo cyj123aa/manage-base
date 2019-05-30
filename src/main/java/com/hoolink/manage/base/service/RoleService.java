@@ -55,7 +55,7 @@ public interface RoleService {
      * @param menuParamBO
      * @return
      */
-    List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO);
+    List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception;
 
     /**
      * 获得角色基础信息

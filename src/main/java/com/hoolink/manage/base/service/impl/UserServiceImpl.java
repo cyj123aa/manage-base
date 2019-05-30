@@ -112,6 +112,15 @@ public class UserServiceImpl implements UserService {
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
+        loginResult.setName(user.getName());
+        //设置头像
+		if(user.getImgId()!=null) {
+			try {
+				//如果获取头像失败，给予默认头像
+				BackBO<ObsBO> obs=abilityClient.getObs(user.getImgId());
+				loginResult.setImage(obs.getData().getObjectUrl());
+			}catch (Exception e){}
+		}
         //设置问候语
         loginResult.setGreetings(setGreeting());
         //设置系统访问权限（EDM和管理平台）
