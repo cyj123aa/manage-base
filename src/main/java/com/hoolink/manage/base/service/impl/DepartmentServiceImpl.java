@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -101,11 +102,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentTreeBO> getOrgList(Byte deptType) throws Exception {
+	public List<ManageDepartmentTreeBO> getOrgList(DepartmentTreeParamBO treeParamBO) throws Exception {
 		// 根据userId和组织架构层级type获取对应的组织架构id
 		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
 		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
-		paramBO.setDeptType(deptType);
+		paramBO.setDeptType(treeParamBO.getDeptType());
 		List<Long> deptIdList = userService.getOrganizationInfo(paramBO);
 		if(CollectionUtils.isEmpty(deptIdList)){
 			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
