@@ -5,6 +5,11 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * @description: 角色
+ * @author: WeiMin
+ * @date: 2019-05-15
+ **/
 public interface ManageRoleMapperExt {
 
     /**
