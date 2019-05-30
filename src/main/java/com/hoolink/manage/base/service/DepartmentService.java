@@ -3,7 +3,8 @@ package com.hoolink.manage.base.service;
 import java.util.List;
 
 import com.hoolink.manage.base.bo.ManageDepartmentBO;
-import com.hoolink.manage.base.bo.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 
 /**
  * @author lijunling
@@ -32,4 +33,12 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentTreeBO> listAll(List<Long> idList, Boolean flag);
+
+	/**
+	 * 获取组织机构树（人员）
+	 * @param departmetTreeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	List<ManageDepartmentTreeBO> getOrganizationList (ManageDepartmetTreeParamBO departmetTreeParamBO) throws Exception;
 }

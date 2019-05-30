@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.hoolink.manage.base.bo.ManageDepartmentTreeBO;
-import com.hoolink.manage.base.bo.SimpleDeptUserBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
+import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.DeptTreeToolUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -35,6 +37,9 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 	@Resource
 	UserService userService;
+
+	@Resource
+	private ManageDepartmentMapperExt manageDepartmentMapperExt;
 	
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
@@ -84,5 +89,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return treeBOList;
 	}
 
+	@Override
+	public List<ManageDepartmentTreeBO> getOrganizationList(ManageDepartmetTreeParamBO departmetTreeParamBO) throws Exception {
+		// 根据组织架构idList获取组织架构树
+		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrganizationList(departmetTreeParamBO.getIdList());
+		return manageDepartmentList;
+	}
 
 }

@@ -2,8 +2,8 @@ package com.hoolink.manage.base.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.hoolink.manage.base.bo.ManageDepartmentTreeBO;
-import com.hoolink.manage.base.bo.SimpleDeptUserBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.manage.base.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 

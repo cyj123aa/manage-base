@@ -3,7 +3,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hoolink.manage.base.dao.mapper.ext.UserMapperExt">
 
-  <resultMap id="BaseResultMap" type="com.hoolink.manage.base.bo.SimpleDeptUserBO">
+  <resultMap id="BaseResultMap" type="com.hoolink.sdk.bo.manager.SimpleDeptUserBO">
     <!--
     @mbggenerated
     -->

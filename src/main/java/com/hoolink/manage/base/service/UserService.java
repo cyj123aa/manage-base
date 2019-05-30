@@ -5,6 +5,7 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
 import java.util.Map;
@@ -159,4 +160,12 @@ public interface UserService {
      * @return
      */
     Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList);
+
+    /**
+     * 根据用户id获取所在公司或者部门信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO)throws Exception;
 }

@@ -23,9 +23,7 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.UserDepartmentBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;
@@ -108,7 +106,7 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
+                .andPasswdEqualTo(loginParam.getPasswd());
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误
@@ -568,5 +566,19 @@ public class UserServiceImpl implements UserService {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
         Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
         return map;
+    }
+
+    @Override
+    public List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO) throws Exception {
+        List<Long> deptIdList = new ArrayList<>();
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
+        if(Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.COMPANY_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }else if(Constant.DEPT_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }
+        return deptIdList;
     }
 }

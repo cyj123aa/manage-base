@@ -1,7 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.manage.base.bo.ManageDepartmentTreeBO;
-import com.hoolink.manage.base.bo.ManageDepartmetTreeParamBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -34,5 +35,12 @@ public class DepartmentController {
     @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
     public BackBO<List<ManageDepartmentTreeBO>> listByRole(@RequestBody ManageDepartmetTreeParamBO paramBO) throws Exception {
         return BackBOUtil.defaultBackBO(departmentService.listAll(paramBO.getIdList(), paramBO.getFlag()));
+    }
+
+    @PostMapping(value = "getOrganizationList")
+    @ApiOperation(value = "获取组织架构信息")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<List<ManageDepartmentTreeBO>> getOrganizationList(@RequestBody @Valid ManageDepartmetTreeParamBO paramBO) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getOrganizationList(paramBO));
     }
 }

@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 
-import com.hoolink.manage.base.bo.SimpleDeptUserBO;
-import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
