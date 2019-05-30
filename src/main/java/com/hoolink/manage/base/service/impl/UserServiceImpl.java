@@ -335,7 +335,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception {
-
+		if(userPageParamBO.getPageNo()==null || userPageParamBO.getPageSize()==null) {
+			throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+		}
 		UserExample example = buildUserCriteria(userPageParamBO);
 		PageInfo<User> userPageInfo = PageHelper
 				.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
@@ -483,6 +485,7 @@ public class UserServiceImpl implements UserService {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 			}
@@ -873,22 +876,27 @@ public class UserServiceImpl implements UserService {
 
 	private String setGreeting(){
 		Date date = new Date();
+		int six = 6;
+		int twelve = 12;
+		int thirteen = 13;
+		int eighteen = 18;
+		int twentyFour = 24;
 		SimpleDateFormat df = new SimpleDateFormat("HH");
 		String str = df.format(date);
 		int a = Integer.parseInt(str);
-		if (a >= 0 && a <= 6) {
+		if (a >= 0 && a <= six) {
 			return Constant.GREETING_MORNING;
 		}
-		if (a > 6 && a <= 12) {
+		if (a > six && a <= twelve) {
 			return Constant.GREETING_FORENOON;
 		}
-		if (a > 12 && a <= 13) {
+		if (a > twelve && a <= thirteen) {
 			return Constant.GREETING_NOON;
 		}
-		if (a > 13 && a <= 18) {
+		if (a > thirteen && a <= eighteen) {
 			return Constant.GREETING_AFTERNOON;
 		}
-		if (a > 18 && a <= 24) {
+		if (a > eighteen && a <= twentyFour) {
 			return Constant.GREETING_NIGHT;
 		}
 		return Constant.GREETING_YOU;
