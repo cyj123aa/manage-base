@@ -537,7 +537,7 @@ public class ExcelServiceImpl implements ExcelService{
             List<UserDepartmentBO> userDeptPairList = user.getUserDeptPairList();
             StringBuilder sb = new StringBuilder();
             userDeptPairList.stream().forEach(udp -> {
-            	sb.append(udp.getDeptName()).append(Constant.BACKSLASH).append(udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
+            	sb.append(udp.getDeptName()).append(Constant.BACKSLASH).append(StringUtils.isEmpty(udp.getEncryLevelDeptName()) ? "":udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
             });
             if(sb.length() > 0) {
             	sb.deleteCharAt(sb.lastIndexOf(Constant.SEMICOLON));

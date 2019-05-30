@@ -335,7 +335,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PageInfo<ManagerUserBO> list(ManagerUserPageParamBO userPageParamBO) throws Exception {
-
+		if(userPageParamBO.getPageNo()==null || userPageParamBO.getPageSize()==null) {
+			throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+		}
 		UserExample example = buildUserCriteria(userPageParamBO);
 		PageInfo<User> userPageInfo = PageHelper
 				.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())

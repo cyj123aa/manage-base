@@ -26,14 +26,14 @@ public class Constant {
      * 用户导出表头字段
      */
     public static final String EXCEL_USER_NO = "用户编号";
-    public static final String EXCEL_USER_NAME = "用户姓名";
+    public static final String EXCEL_USER_NAME = "姓名";
     public static final String EXCEL_USER_SEX = "用户性别";
-    public static final String EXCEL_USER_POSITION = "部门职位";
-    public static final String EXCEL_USER_DEPT_PAIR = "所属部门/密级";
+    public static final String EXCEL_USER_POSITION = "职位";
+    public static final String EXCEL_USER_DEPT_PAIR = "可见部门/密级";
     public static final String EXCEL_USER_ROLENAME = "所属角色";
     public static final String EXCEL_USER_COMPANY = "所属公司";
-    public static final String EXCEL_USER_PHONE = "联系电话";
-    public static final String EXCEL_USER_ACCOUNT = "登录账号";
+    public static final String EXCEL_USER_PHONE = "手机号码";
+    public static final String EXCEL_USER_ACCOUNT = "账号";
     public static final String EXCEL_USER_VIEW_ENCRY_PERMITTED = "是否可见员工密级";
     public static final String EXCEL_USER_ENCRY_LEVEL_COMPANY = "资源库密保等级";
     public static final String EXCEL_USER_STATUS = "账号状态";
