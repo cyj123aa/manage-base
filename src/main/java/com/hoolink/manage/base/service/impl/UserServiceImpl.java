@@ -31,8 +31,6 @@ import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.sdk.utils.DateUtil;
-import com.hoolink.sdk.utils.ExcelUtil;
 import com.hoolink.sdk.utils.MD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,7 +40,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,6 +101,12 @@ public class UserServiceImpl implements UserService {
         checkAccount(user);
         // 缓存当前用户
         String token = cacheSession(user);
+        
+        //设置登陆时间
+		User toUpdateUser = new User();
+		toUpdateUser.setId(user.getId());
+		toUpdateUser.setLastTime(System.currentTimeMillis());
+		userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
@@ -468,6 +471,7 @@ public class UserServiceImpl implements UserService {
 		
 		ManagerUserInfoBO userInfoBO = new ManagerUserInfoBO();
 		BeanUtils.copyProperties(user, userInfoBO);
+		userInfoBO.setHasLoginYet(user.getLastTime() != null ? true:false);
 		if(user.getImgId() != null) {
 			//调用obs服务获取用户头像
 			BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
@@ -519,7 +523,8 @@ public class UserServiceImpl implements UserService {
 		user.setCreated(System.currentTimeMillis());
 		user.setEnabled(true);
 		user.setFirstLogin(false);
-		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
+		//MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
+		user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
 		userMapper.insertSelective(user);
 		
 		//新增用户组织对应关系
@@ -870,7 +875,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void resetPasswd(Long userId) {
 		User user = buildUserToUpdate(userId);
-		user.setPasswd(MD5Util.MD5(Constant.INITIAL_PASSWORD));
+		//MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
+		user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
 		userMapper.updateByPrimaryKeySelective(user);
 	}
 

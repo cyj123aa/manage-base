@@ -84,6 +84,11 @@ public class ManagerUserInfoVO {
      * 账号状态: 启用/禁用
      */
     private Boolean status;
+    
+    /**
+     * 用户是否登陆过
+     */
+    private Boolean hasLoginYet;
     /**
      * 用户组织关系
      */
