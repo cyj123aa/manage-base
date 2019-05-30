@@ -310,7 +310,7 @@ public class ExcelServiceImpl implements ExcelService{
 				int index = headerList.indexOf(formulaForExcel.getKey());
 				Cell cell = row0.createCell(len);
 				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
-				//sheet1.setColumnHidden(len, true);
+				sheet1.setColumnHidden(len, true);
 				
 				int tenThousand = 10000;
 				for(int i=1; i<tenThousand; i++) {

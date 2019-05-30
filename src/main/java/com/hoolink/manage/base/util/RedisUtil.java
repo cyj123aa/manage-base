@@ -11,6 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 
+import com.hoolink.manage.base.service.impl.UserServiceImpl;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * redis工具类
  * @author lijunling
@@ -18,6 +22,7 @@ import org.springframework.util.CollectionUtils;
  * @date 2019/05/18 14:25
  */
 @Configuration
+@Slf4j
 public class RedisUtil {
 	@Resource
 	private RedisTemplate<String, Object> redisTemplate;  
@@ -35,7 +40,7 @@ public class RedisUtil {
             }  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -58,7 +63,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.hasKey(key);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -99,7 +104,7 @@ public class RedisUtil {
             redisTemplate.opsForValue().set(key, value);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
 
@@ -121,7 +126,7 @@ public class RedisUtil {
             }  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -183,7 +188,7 @@ public class RedisUtil {
             redisTemplate.opsForHash().putAll(key, map);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -203,7 +208,7 @@ public class RedisUtil {
             }  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -220,7 +225,7 @@ public class RedisUtil {
             redisTemplate.opsForHash().put(key, item, value);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -241,7 +246,7 @@ public class RedisUtil {
             }  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -297,7 +302,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForSet().members(key);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return null;  
         }  
     }  
@@ -312,7 +317,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForSet().isMember(key, value);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -327,7 +332,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForSet().add(key, values);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  
@@ -347,7 +352,7 @@ public class RedisUtil {
             } 
             return count;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  
@@ -361,7 +366,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForSet().size(key);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  
@@ -377,7 +382,7 @@ public class RedisUtil {
             Long count = redisTemplate.opsForSet().remove(key, values);  
             return count;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  
@@ -394,7 +399,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForList().range(key, start, end);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return null;  
         }  
     }  
@@ -408,7 +413,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForList().size(key);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  
@@ -423,7 +428,7 @@ public class RedisUtil {
         try {  
             return redisTemplate.opsForList().index(key, index);  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return null;  
         }  
     }  
@@ -440,7 +445,7 @@ public class RedisUtil {
             redisTemplate.opsForList().rightPush(key, value);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -460,7 +465,7 @@ public class RedisUtil {
             } 
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -477,7 +482,7 @@ public class RedisUtil {
             redisTemplate.opsForList().rightPushAll(key, value);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -497,7 +502,7 @@ public class RedisUtil {
             }
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }  
@@ -514,7 +519,7 @@ public class RedisUtil {
             redisTemplate.opsForList().set(key, index, value);  
             return true;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return false;  
         }  
     }   
@@ -531,7 +536,7 @@ public class RedisUtil {
             Long remove = redisTemplate.opsForList().remove(key, count, value);  
             return remove;  
         } catch (Exception e) {  
-            e.printStackTrace();  
+            log.error("operate redis failed...", e);;  
             return 0;  
         }  
     }  

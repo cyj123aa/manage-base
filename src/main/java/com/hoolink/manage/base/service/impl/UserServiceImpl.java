@@ -421,11 +421,13 @@ public class UserServiceImpl implements UserService {
 		}else {
 			andCriteria(criteria, userPageParamBO);
 		}
+		userExample.setOrderByClause(" created desc ");
 		return userExample;
 	}
 	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(userPageParamBO.getDeptId() != null) {
-			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(userPageParamBO.getDeptId()));
+		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
+			List<Long> deptIdList = userPageParamBO.getDeptId();
+			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size()-1)));
 		}
 		if(userPageParamBO.getRoleId() != null) {
 			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
@@ -488,9 +490,12 @@ public class UserServiceImpl implements UserService {
 		}
 		userInfoBO.setUserDeptPairList(deptPairList);
 		
-		List<Long> companyIdList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).map(udwm -> udwm.getDeptId()).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(companyIdList)) {
-			userInfoBO.setCompanyId(companyIdList.get(0));
+		ManageRoleBO role = roleService.selectById(user.getRoleId());
+		userInfoBO.setRoleName(role.getRoleName());
+		List<MiddleUserDeptWithMoreBO> companyList = userDeptWithMoreList.stream().filter(udwm -> DeptTypeEnum.COMPANY.getKey().equals(udwm.getDeptType())).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(companyList)) {
+			userInfoBO.setCompanyId(companyList.get(0).getDeptId());
+			userInfoBO.setCompanyName(companyList.get(0).getDeptName());
 		}
 		return userInfoBO;
 	}
@@ -648,9 +653,11 @@ public class UserServiceImpl implements UserService {
 				Long lastDeptId = deptIdList.get(deptIdList.size()-1);
 				List<Long> chidrenDeptId = new ArrayList<>();
 				traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
-				deptIdList.addAll(chidrenDeptId);
+				List<Long> toStoreDeptIdList = new ArrayList<>();
+				toStoreDeptIdList.addAll(deptIdList);
+				toStoreDeptIdList.addAll(chidrenDeptId);
 				DeptPairBO deptPair = new DeptPairBO();
-				deptPair.setDeptIdList(deptIdList);
+				deptPair.setDeptIdList(toStoreDeptIdList);
 				deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
 				deptPairList.add(deptPair);
 			}
