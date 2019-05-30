@@ -79,12 +79,15 @@ public class ExcelServiceImpl implements ExcelService{
     
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, List<Long> deptIdList) throws Exception{
+	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptId) throws Exception{
+		
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
-        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        if(multipartFile==null || StringUtils.isBlank(deptId)){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        List<String> deptIdStrList = Arrays.asList(deptId.split(Constant.COMMA));
+        List<Long> deptIdList = deptIdStrList.stream().map(d -> Long.parseLong(d)).collect(Collectors.toList());
         File file = FileUtil.multipartFileToFile(multipartFile);
         if(file != null) {
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
