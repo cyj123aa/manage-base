@@ -115,8 +115,11 @@ public class UserServiceImpl implements UserService {
         loginResult.setName(user.getName());
         //设置头像
 		if(user.getImgId()!=null) {
-			BackBO<ObsBO> obs=abilityClient.getObs(user.getImgId());
-			loginResult.setImage(obs.getData().getObjectUrl());
+			try {
+				//如果获取头像失败，给予默认头像
+				BackBO<ObsBO> obs=abilityClient.getObs(user.getImgId());
+				loginResult.setImage(obs.getData().getObjectUrl());
+			}catch (Exception e){}
 		}
         //设置问候语
         loginResult.setGreetings(setGreeting());
