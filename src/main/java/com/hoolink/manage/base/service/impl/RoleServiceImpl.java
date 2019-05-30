@@ -312,6 +312,7 @@ public class RoleServiceImpl implements RoleService {
         ManageMenuBO manageMenuBO = new ManageMenuBO();
         manageMenuBO.setId(roleMenuBO.getMenuId());
         manageMenuBO.setMenuName(roleMenuBO.getMenuName());
+        manageMenuBO.setParentId(roleMenuBO.getParentId());
         return manageMenuBO;
     }
 
