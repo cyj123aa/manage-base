@@ -41,4 +41,12 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	List<ManageDepartmentTreeBO> getOrganizationList (ManageDepartmetTreeParamBO departmetTreeParamBO) throws Exception;
+
+	/**
+	 * 获取组织架构树
+	 * @param deptType
+	 * @return
+	 * @throws Exception
+	 */
+	List<ManageDepartmentTreeBO> getOrgList (Byte deptType) throws Exception;
 }

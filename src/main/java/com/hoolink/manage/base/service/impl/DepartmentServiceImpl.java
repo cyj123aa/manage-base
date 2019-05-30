@@ -10,10 +10,14 @@ import javax.annotation.Resource;
 
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.DeptTreeToolUtils;
+import com.hoolink.sdk.exception.BusinessException;
+import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
+import com.hoolink.sdk.utils.ContextUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -93,6 +97,24 @@ public class DepartmentServiceImpl implements DepartmentService{
 	public List<ManageDepartmentTreeBO> getOrganizationList(ManageDepartmetTreeParamBO departmetTreeParamBO) throws Exception {
 		// 根据组织架构idList获取组织架构树
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrganizationList(departmetTreeParamBO.getIdList());
+		return manageDepartmentList;
+	}
+
+	@Override
+	public List<ManageDepartmentTreeBO> getOrgList(Byte deptType) throws Exception {
+		// 根据userId和组织架构层级type获取对应的组织架构id
+		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
+		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
+		paramBO.setDeptType(deptType);
+		List<Long> deptIdList = userService.getOrganizationInfo(paramBO);
+		if(CollectionUtils.isEmpty(deptIdList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
+		// 根据组织架构id集合和是否需要查询架构下人员标识获取组织架构树
+		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrganizationList(deptIdList);
+		if(CollectionUtils.isEmpty(manageDepartmentList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
 		return manageDepartmentList;
 	}
 
