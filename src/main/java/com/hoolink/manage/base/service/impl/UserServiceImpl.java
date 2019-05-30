@@ -104,6 +104,12 @@ public class UserServiceImpl implements UserService {
         checkAccount(user);
         // 缓存当前用户
         String token = cacheSession(user);
+        
+        //设置登陆时间
+		User toUpdateUser = new User();
+		toUpdateUser.setId(user.getId());
+		toUpdateUser.setLastTime(System.currentTimeMillis());
+		userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
@@ -468,6 +474,7 @@ public class UserServiceImpl implements UserService {
 		
 		ManagerUserInfoBO userInfoBO = new ManagerUserInfoBO();
 		BeanUtils.copyProperties(user, userInfoBO);
+		userInfoBO.setHasLoginYet(user.getLastTime() != null ? true:false);
 		if(user.getImgId() != null) {
 			//调用obs服务获取用户头像
 			BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
