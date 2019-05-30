@@ -22,9 +22,9 @@ import java.util.List;
  * @Author: tonghao
  * @Date: 2019/5/29 20:16
  */
-@RestController
+@RestController(value = "server.departmentController")
 @RequestMapping(value = "/department/")
-@RestSchema(schemaId = "departmentController")
+@RestSchema(schemaId = "server.departmentController")
 public class DepartmentController {
 
     @Resource

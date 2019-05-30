@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
-import com.hoolink.manage.base.bo.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -17,8 +16,6 @@ import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * 

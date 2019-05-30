@@ -5,6 +5,7 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
