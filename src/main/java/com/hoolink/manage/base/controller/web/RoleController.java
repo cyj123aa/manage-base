@@ -78,7 +78,7 @@ public class RoleController {
     }
 
     @PostMapping(value = "getBaseMenu")
-    @ApiOperation(value = "获得管理基础菜单")
+    @ApiOperation(value = "获得管理基础动态菜单")
     @LogAndParam(value = "获得管理基础菜单失败")
     public BackBO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO){
         MenuParamBO menuParamBO = CopyPropertiesUtil.copyBean(menuParamVO, MenuParamBO.class);
