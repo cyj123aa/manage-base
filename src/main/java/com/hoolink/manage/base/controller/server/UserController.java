@@ -1,7 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
 import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
-import com.hoolink.manage.base.bo.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
