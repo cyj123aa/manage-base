@@ -101,7 +101,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentTreeBO> getOrgList(Byte deptType) throws Exception {
+	public List<ManageDepartmentTreeBO> getOrgList(Byte deptType, Boolean flag) throws Exception {
 		// 根据userId和组织架构层级type获取对应的组织架构id
 		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
 		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
@@ -114,6 +114,14 @@ public class DepartmentServiceImpl implements DepartmentService{
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrganizationList(deptIdList);
 		if(CollectionUtils.isEmpty(manageDepartmentList)){
 			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
+		if (flag){
+			//组织架构用户map
+			List<ManageDepartmentTreeBO> boList = manageDepartmentList.stream().filter(m -> CollectionUtils.isEmpty(m.getChildTreeList())).collect(Collectors.toList());
+			Map<Long, List<SimpleDeptUserBO>> userMap = userService.mapUserByDeptIds(deptIdList);
+			boList.stream().forEach(b ->{
+				b.setUserList(userMap.get(b.getId()));
+			});
 		}
 		return manageDepartmentList;
 	}

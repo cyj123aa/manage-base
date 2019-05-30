@@ -45,8 +45,9 @@ public interface DepartmentService {
 	/**
 	 * 获取组织架构树
 	 * @param deptType
+	 * @param flag 是否查询组织架构下面的人员
 	 * @return
 	 * @throws Exception
 	 */
-	List<ManageDepartmentTreeBO> getOrgList (Byte deptType) throws Exception;
+	List<ManageDepartmentTreeBO> getOrgList (Byte deptType, Boolean flag) throws Exception;
 }
