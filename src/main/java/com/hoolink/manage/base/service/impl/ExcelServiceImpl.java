@@ -164,6 +164,7 @@ public class ExcelServiceImpl implements ExcelService{
         FileInputStream inp = new FileInputStream(file);
         Workbook wb = new HSSFWorkbook(inp);
         Sheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
+        log.info("analyse begin...");
         
         boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
@@ -180,6 +181,7 @@ public class ExcelServiceImpl implements ExcelService{
                 
                 if (rowCell != null) {
                     String value = getValue(rowCell);
+                    log.info("analyse value...,{}", value);
                     if(StringUtils.isBlank(value)) {
                     	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
                     }
