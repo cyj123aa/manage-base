@@ -16,14 +16,14 @@ import com.hoolink.manage.base.bo.UserExcelDataBO;
  * @date 2019/05/29 12:58
  */
 public interface ExcelService {
-    /**
-     * 人员导入
-     * @param multipartFile
-     * @param deptIdList
-     * @return
-     * @throws Exception
-     */
-    UserExcelDataBO uploadExcel(MultipartFile multipartFile, List<Long> deptIdList) throws Exception;
+	/**
+	 * 人员导入
+	 * @param multipartFile
+	 * @param deptIdList
+	 * @return
+	 * @throws Exception
+	 */
+    UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdList) throws Exception;
     
     /**
      *下载模板

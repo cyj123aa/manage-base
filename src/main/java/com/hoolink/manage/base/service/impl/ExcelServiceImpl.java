@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.DictPairBO;
 import com.hoolink.manage.base.bo.DictPairForExcelBO;
@@ -79,10 +80,14 @@ public class ExcelServiceImpl implements ExcelService{
     
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, List<Long> deptIdList) throws Exception{
+	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdStrList) throws Exception{
+		log.info("deptIdStrList:{}", deptIdStrList);
+		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
+		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
         if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         File file = FileUtil.multipartFileToFile(multipartFile);

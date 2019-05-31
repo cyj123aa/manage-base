@@ -46,6 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -326,7 +327,7 @@ public class UserController {
     @PostMapping(value = "uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(value = "excel上传")
     @LogAndParam(value = "excel上传失败")
-    public BackVO<UserExcelDataVO> uploadExcel(@RequestPart("file") MultipartFile multipartFile, List<Long> deptIdList) throws Exception {
+    public BackVO<UserExcelDataVO> uploadExcel(@RequestPart("file") MultipartFile multipartFile, String deptIdList) throws Exception {
     	UserExcelDataBO userExcelDataBO = excelService.uploadExcel(multipartFile, deptIdList);
     	UserExcelDataVO userExcelDataVO=CopyPropertiesUtil.copyBean(userExcelDataBO,UserExcelDataVO.class);
         return BackVOUtil.operateAccess(userExcelDataVO);
