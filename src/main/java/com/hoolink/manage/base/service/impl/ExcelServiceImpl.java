@@ -161,8 +161,11 @@ public class ExcelServiceImpl implements ExcelService{
     
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
+		log.info("begin...");
         FileInputStream inp = new FileInputStream(file);
+        log.info("inp...{}", inp);
         Workbook wb = new HSSFWorkbook(inp);
+        log.info("b...");
         Sheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
         log.info("analyse begin...");
         
