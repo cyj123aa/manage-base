@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.service;
 
+import java.util.List;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,11 +19,11 @@ public interface ExcelService {
 	/**
 	 * 人员导入
 	 * @param multipartFile
-	 * @param deptId
+	 * @param deptIdList
 	 * @return
 	 * @throws Exception
 	 */
-    UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptId) throws Exception;
+    UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdList) throws Exception;
     
     /**
      *下载模板

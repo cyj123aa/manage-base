@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.DictPairBO;
 import com.hoolink.manage.base.bo.DictPairForExcelBO;
@@ -79,15 +80,16 @@ public class ExcelServiceImpl implements ExcelService{
     
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptId) throws Exception{
-		log.info("multipartFile:{}; deptId:{}", multipartFile, deptId); 
+	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdStrList) throws Exception{
+		log.info("deptIdStrList:{}", deptIdStrList);
+		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
+		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
-        if(multipartFile==null || StringUtils.isBlank(deptId)){
+        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        List<String> deptIdStrList = Arrays.asList(deptId.split(Constant.COMMA));
-        List<Long> deptIdList = deptIdStrList.stream().map(d -> Long.parseLong(d)).collect(Collectors.toList());
         File file = FileUtil.multipartFileToFile(multipartFile);
         if(file != null) {
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
