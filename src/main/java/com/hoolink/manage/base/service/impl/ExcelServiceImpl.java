@@ -81,42 +81,37 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdStrList) throws Exception{
-		try {
-			log.info("multipartFile:{}, deptIdStrList:{}", multipartFile, deptIdStrList);
-			JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
-			List<Long> deptIdList = jsonArray.toJavaList(Long.class);
-			log.info("deptIdList:{}", deptIdList);
-			UserExcelDataBO userExcelData = new UserExcelDataBO();
-	        //校验入参
-	        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
-	        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
-	            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
-	        }
-	        File file = FileUtil.multipartFileToFile(multipartFile);
-	        if(file != null) {
-	        	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
-	            file.delete();
-	            if(CollectionUtils.isEmpty(userExcelList)) {
-	            	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
-	            }
-	        	userExcelList.stream().forEach(ue -> 
-	    			ue.getUserDeptPairParamList().stream().forEach(udp -> udp.setDeptIdList(deptIdList))
-	        	);
-	            for(ManagerUserParamBO userParam : userExcelList) {
-	            	try {
-	            		userService.createUser(userParam);
-	            	}catch(Exception e) {
-	            		log.error("import excel failed ..., exception:{}", e);
-	            		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
-	            	}
-	            }
-	            userExcelData.setTotal(userExcelList.size());
-	            return userExcelData;
-	        }	
-		}catch(Exception e) {
-			log.error("error:....", e);
-		}
-
+		log.info("multipartFile:{}, deptIdStrList:{}", multipartFile, deptIdStrList);
+		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
+		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
+		log.info("deptIdList:{}", deptIdList);
+		UserExcelDataBO userExcelData = new UserExcelDataBO();
+        //校验入参
+        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
+            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+        }
+        File file = FileUtil.multipartFileToFile(multipartFile);
+        if(file != null) {
+        	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
+            file.delete();
+            if(CollectionUtils.isEmpty(userExcelList)) {
+            	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
+            }
+        	userExcelList.stream().forEach(ue -> 
+    			ue.getUserDeptPairParamList().stream().forEach(udp -> udp.setDeptIdList(deptIdList))
+        	);
+            for(ManagerUserParamBO userParam : userExcelList) {
+            	try {
+            		userService.createUser(userParam);
+            	}catch(Exception e) {
+            		log.info("import excel failed ..., exception:{}", e);
+            		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
+            	}
+            }
+            userExcelData.setTotal(userExcelList.size());
+            return userExcelData;
+        }
 		return null;
 	}
 
