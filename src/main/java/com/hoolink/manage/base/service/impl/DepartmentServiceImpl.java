@@ -122,18 +122,10 @@ public class DepartmentServiceImpl implements DepartmentService{
 		if(CollectionUtils.isEmpty(deptIdList)){
 			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
 		}
-		// 根据组织架构id集合和是否需要查询架构下人员标识获取组织架构树
+		// 根据组织架构id集合获取组织架构树
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrganizationList(deptIdList);
 		if(CollectionUtils.isEmpty(manageDepartmentList)){
-			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
-		}
-		if (treeParamBO.getFlag()){
-			//组织架构用户map
-			List<ManageDepartmentTreeBO> boList = manageDepartmentList.stream().filter(m -> CollectionUtils.isEmpty(m.getChildTreeList())).collect(Collectors.toList());
-			Map<Long, List<SimpleDeptUserBO>> userMap = userService.mapUserByDeptIds(deptIdList);
-			boList.stream().forEach(b ->{
-				b.setUserList(userMap.get(b.getId()));
-			});
+			return null;
 		}
 		return manageDepartmentList;
 	}
