@@ -327,7 +327,7 @@ public class UserController {
     @PostMapping(value = "uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(value = "excel上传")
     @LogAndParam(value = "excel上传失败")
-    public BackVO<UserExcelDataVO> uploadExcel(@RequestPart("file") MultipartFile multipartFile, @RequestPart String deptId) throws Exception {
+    public BackVO<UserExcelDataVO> uploadExcel(@RequestPart("file") MultipartFile multipartFile, String deptId) throws Exception {
     	UserExcelDataBO userExcelDataBO = excelService.uploadExcel(multipartFile, deptId);
     	UserExcelDataVO userExcelDataVO=CopyPropertiesUtil.copyBean(userExcelDataBO,UserExcelDataVO.class);
         return BackVOUtil.operateAccess(userExcelDataVO);
