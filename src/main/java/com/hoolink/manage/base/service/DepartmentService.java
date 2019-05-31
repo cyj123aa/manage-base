@@ -29,11 +29,10 @@ public interface DepartmentService {
 
 	/**
 	 * 组织架构树形结构
-	 * @param idList 组织架构id集合
 	 * @param flag 是否查询组织架构下的员工 true:查询 false:只查询组织架构
 	 * @return
 	 */
-	List<ManageDepartmentTreeBO> listAll(List<Long> idList, Boolean flag);
+	List<ManageDepartmentTreeBO> listAll(Boolean flag);
 
 	/**
 	 * 获取组织机构树（人员）

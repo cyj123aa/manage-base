@@ -6,6 +6,10 @@ import com.hoolink.manage.base.vo.req.DepartmentTreeParamVO;
 import com.hoolink.manage.base.vo.res.ManageDepartmentTreeVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.enums.CheckEnum;
+import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.BackBOUtil;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
@@ -42,5 +46,13 @@ public class DepartmentController {
         // 出参BO转VO
         List<ManageDepartmentTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.getOrgList(treeParamBO),ManageDepartmentTreeVO.class);
         return BackVOUtil.operateAccess(manageDepartmentTreeVOS);
+    }
+
+    @PostMapping(value = "tree")
+    @ApiOperation(value = "查询组织架构")
+    @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
+    public BackBO<List<ManageDepartmentTreeVO>> listByRole(@RequestBody BaseParam<Boolean> baseParam) throws Exception {
+        List<ManageDepartmentTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.listAll(baseParam.getData()), ManageDepartmentTreeVO.class);
+        return BackBOUtil.defaultBackBO(manageDepartmentTreeVOS);
     }
 }

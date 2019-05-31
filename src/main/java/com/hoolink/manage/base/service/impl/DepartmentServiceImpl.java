@@ -8,7 +8,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
+import com.hoolink.manage.base.bo.DeptPositionBO;
+import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -45,6 +49,9 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 	@Resource
 	private ManageDepartmentMapperExt manageDepartmentMapperExt;
+
+	@Resource
+	private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
 	
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
@@ -70,25 +77,29 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentTreeBO> listAll(List<Long> idList, Boolean flag) {
+	public List<ManageDepartmentTreeBO> listAll(Boolean flag) {
+		List<DeptPositionBO> positionBOList = middleUserDepartmentMapperExt.getDept(ContextUtil.getManageCurrentUser().getUserId());
+		if (CollectionUtils.isEmpty(positionBOList)){
+			return new ArrayList<>(0);
+		}
+		List<ManageDepartment> departmentBOList = getTopDepartByDepartId(positionBOList.stream().map(DeptPositionBO::getId).collect(Collectors.toList()));
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		if (CollectionUtils.isNotEmpty(idList)){
-			criteria.andIdIn(idList);
-		}
 		criteria.andEnabledEqualTo(true);
 		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
 		if (CollectionUtils.isEmpty(deptList)){
 			return new ArrayList<>(0);
 		}
 		//拿到父节点
-		List<ManageDepartment> parentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId())).collect(Collectors.toList());
+		List<ManageDepartment> allParentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId())).collect(Collectors.toList());
+		//过滤两个list中相同的元素放到新集合中
+		List<ManageDepartment> parentList = departmentBOList.                                                                                                     stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
 		List<ManageDepartment> childList = deptList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
 		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(CopyPropertiesUtil.copyList(parentList, ManageDepartmentTreeBO.class), CopyPropertiesUtil.copyList(childList, ManageDepartmentTreeBO.class));
 		//组织架构用户map
 		Map<Long, List<SimpleDeptUserBO>> userMap = null;
 		if (flag){
-			userMap = userService.mapUserByDeptIds(idList);
+			userMap = userService.mapUserByDeptIds(null);
 		}
 		List<ManageDepartmentTreeBO> treeBOList =  toolUtils.getTree(flag, userMap);
 		return treeBOList;
@@ -125,6 +136,26 @@ public class DepartmentServiceImpl implements DepartmentService{
 			});
 		}
 		return manageDepartmentList;
+	}
+
+	/**
+	 * 传入idList是因为一个人可能属于多个部门
+	 * @param departIdList
+	 * @return
+	 */
+	private List<ManageDepartment> getTopDepartByDepartId(List<Long> departIdList){
+		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+		criteria.andParentIdIn(departIdList);
+		List<ManageDepartment> departmentList = manageDepartmentMapper.selectByExample(departmentExample);
+		if (CollectionUtils.isEmpty(departmentList)){
+			//为空说明已经是顶级节点了
+			departmentExample.clear();
+			criteria.andIdIn(departIdList);
+			List<ManageDepartment> topDepart = manageDepartmentMapper.selectByExample(departmentExample);
+			return topDepart;
+		}
+		return getTopDepartByDepartId(departmentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()));
 	}
 
 }

@@ -6,6 +6,7 @@ import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.enums.CheckEnum;
+import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -30,12 +31,6 @@ public class DepartmentController {
     @Resource
     private DepartmentService departmentService;
 
-    @PostMapping(value = "tree")
-    @ApiOperation(value = "查询组织架构")
-    @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
-    public BackBO<List<ManageDepartmentTreeBO>> listByRole(@RequestBody ManageDepartmetTreeParamBO paramBO) throws Exception {
-        return BackBOUtil.defaultBackBO(departmentService.listAll(paramBO.getIdList(), paramBO.getFlag()));
-    }
 
     @PostMapping(value = "getOrganizationList")
     @ApiOperation(value = "获取组织架构信息")
