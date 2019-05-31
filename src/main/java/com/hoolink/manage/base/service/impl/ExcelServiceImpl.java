@@ -90,7 +90,6 @@ public class ExcelServiceImpl implements ExcelService{
 		log.info("multipartFile:{}, deptIdStrList:{}", multipartFile, deptIdStrList);
 		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
 		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
-		log.info("deptIdList:{}", deptIdList);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
         if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
@@ -98,10 +97,8 @@ public class ExcelServiceImpl implements ExcelService{
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         File file = FileUtil.multipartFileToFile(multipartFile);
-        log.info("file:{}..", file);
         if(file != null) {
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
-        	log.info("data analysed..");
             file.delete();
             if(CollectionUtils.isEmpty(userExcelList)) {
             	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
@@ -111,11 +108,9 @@ public class ExcelServiceImpl implements ExcelService{
         	);
             for(ManagerUserParamBO userParam : userExcelList) {
             	try {
-            		log.info("to create user..");
             		userService.createUser(userParam);
-            		log.info("create user end..");
             	}catch(Exception e) {
-            		log.info("import excel failed ..., exception:{}", e);
+            		log.error("import excel failed ..., exception:{}", e);
             		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
             	}
             }
@@ -167,11 +162,9 @@ public class ExcelServiceImpl implements ExcelService{
     
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
-		log.info("begin...");
         FileInputStream inp = new FileInputStream(file);
         log.info("inp...{}", inp);
         XSSFWorkbook wb = new XSSFWorkbook(inp);
-        log.info("b...");
         XSSFSheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
         log.info("analyse begin...");
         
