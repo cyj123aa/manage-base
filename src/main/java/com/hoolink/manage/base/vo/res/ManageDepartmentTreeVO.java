@@ -20,7 +20,7 @@ public class ManageDepartmentTreeVO implements Serializable {
     /** 组织架构名称 */
     private String name;
 
-    /** 组织类型 */
+    /** 组织类型 1-公司 2-部门 3-小组*/
     private Byte deptType;
 
     /** 父节点id */

@@ -16,7 +16,4 @@ public class DepartmentTreeParamBO {
     @NotNull(message = "组织架构层级不能为空")
     private Byte deptType;
 
-    /** 是否需要查询架构下人员标识 */
-    @NotNull(message = "是否需要查询组织架构的人员标识不能为空")
-    private Boolean flag;
 }
