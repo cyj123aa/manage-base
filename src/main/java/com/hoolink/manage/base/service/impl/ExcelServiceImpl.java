@@ -268,6 +268,10 @@ public class ExcelServiceImpl implements ExcelService{
 		return ExcelUtil.export(workbook, Constant.HOOLINK_USER_EXPORT_EXCEL_TITLE);
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	private Workbook buildUserWorkbook() {
 		XSSFWorkbook wb = new XSSFWorkbook();
 		setHidenSheet(wb);
@@ -318,6 +322,18 @@ public class ExcelServiceImpl implements ExcelService{
 			}
 		}
 		
+		buildHiddenId(formulaForExcelList, headerArray, sheet1, row0);
+		return wb;
+	}
+	
+	/**
+	 * 隐藏的id域
+	 * @param formulaForExcelList
+	 * @param headerArray
+	 * @param sheet1
+	 * @param row0
+	 */
+	private void buildHiddenId(List<FormulaForExcelBO> formulaForExcelList, String[] headerArray, XSSFSheet sheet1, XSSFRow row0) {
 		//隐藏的id域
 		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
 		int len = headerArray.length;
@@ -349,9 +365,7 @@ public class ExcelServiceImpl implements ExcelService{
 			}
 		}
 		sheet1.setForceFormulaRecalculation(true);
-		return wb;
 	}
-	
 	/**
 	 * 在隐藏的sheet上面赋值下拉框参数
 	 * @param wb
