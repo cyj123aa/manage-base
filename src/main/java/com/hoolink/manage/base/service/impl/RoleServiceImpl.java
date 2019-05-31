@@ -216,7 +216,7 @@ public class RoleServiceImpl implements RoleService {
     private List<ManageMenuTreeBO> assembleMenuTree(Map<Long, List<ManageMenuTreeBO>> map) {
         List<ManageMenuTreeBO> firstMenuList = map.get(0L);
         if (CollectionUtils.isEmpty(firstMenuList)) {
-            throw new BusinessException(HoolinkExceptionMassageEnum.USER_MENU_INCOMPLETE);
+            return null;
         }
         for (ManageMenuTreeBO menuBO:firstMenuList){
             //menuBO 的下级菜单
