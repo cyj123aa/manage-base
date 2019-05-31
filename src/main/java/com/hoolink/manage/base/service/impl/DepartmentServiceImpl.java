@@ -93,7 +93,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 		//拿到父节点
 		List<ManageDepartment> allParentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId())).collect(Collectors.toList());
 		//过滤两个list中相同的元素放到新集合中
-		List<ManageDepartment> parentList = departmentBOList.                                                                                                     stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
+		List<ManageDepartment> parentList = departmentBOList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
 		List<ManageDepartment> childList = deptList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
 		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(CopyPropertiesUtil.copyList(parentList, ManageDepartmentTreeBO.class), CopyPropertiesUtil.copyList(childList, ManageDepartmentTreeBO.class));
 		//组织架构用户map
