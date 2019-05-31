@@ -216,7 +216,7 @@ public class RoleServiceImpl implements RoleService {
     private List<ManageMenuTreeBO> assembleMenuTree(Map<Long, List<ManageMenuTreeBO>> map) {
         List<ManageMenuTreeBO> firstMenuList = map.get(0L);
         if (CollectionUtils.isEmpty(firstMenuList)) {
-            throw new BusinessException(HoolinkExceptionMassageEnum.USER_MENU_INCOMPLETE);
+            return null;
         }
         for (ManageMenuTreeBO menuBO:firstMenuList){
             //menuBO 的下级菜单
@@ -244,6 +244,9 @@ public class RoleServiceImpl implements RoleService {
         menuTreeBO.setKey(manageMenuBO.getId());
         menuTreeBO.setTitle(manageMenuBO.getMenuName());
         menuTreeBO.setValue(manageMenuBO.getId().toString());
+        if(manageMenuBO.getPermissionFlag()!=null){
+            menuTreeBO.setReadonly(manageMenuBO.getPermissionFlag());
+        }
         return menuTreeBO;
     }
 
@@ -313,6 +316,7 @@ public class RoleServiceImpl implements RoleService {
         manageMenuBO.setId(roleMenuBO.getMenuId());
         manageMenuBO.setMenuName(roleMenuBO.getMenuName());
         manageMenuBO.setParentId(roleMenuBO.getParentId());
+        manageMenuBO.setPermissionFlag(roleMenuBO.getPermissionFlag());
         return manageMenuBO;
     }
 
@@ -465,8 +469,9 @@ public class RoleServiceImpl implements RoleService {
                 roles = manageRoleMapperExt.getRoleByOne(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }
         }
+        PageInfo pageInfo = new PageInfo<>(roles);
         List<RoleParamBO> roleParamBOS = CopyPropertiesUtil.copyList(roles, RoleParamBO.class);
-        PageInfo<RoleParamBO> pageInfo = new PageInfo<>(roleParamBOS);
+        pageInfo.setList(roleParamBOS);
         return pageInfo;
     }
 
