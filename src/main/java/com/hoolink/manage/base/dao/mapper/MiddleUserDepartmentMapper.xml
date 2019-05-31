@@ -9,6 +9,7 @@
     <result column="user_id" jdbcType="BIGINT" property="userId" />
     <result column="dept_id" jdbcType="BIGINT" property="deptId" />
     <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
+    <result column="diff_dept_group" jdbcType="VARCHAR" property="diffDeptGroup" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -78,7 +79,7 @@
     <!--
     @mbggenerated
     -->
-    id, user_id, dept_id, encry_level_dept
+    id, user_id, dept_id, encry_level_dept, diff_dept_group
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample" resultMap="BaseResultMap">
     <!--
@@ -126,10 +127,10 @@
     <!--
     @mbggenerated
     -->
-    insert into middle_user_department (user_id, dept_id, encry_level_dept
-      )
-    values (#{userId,jdbcType=BIGINT}, #{deptId,jdbcType=BIGINT}, #{encryLevelDept,jdbcType=INTEGER}
-      )
+    insert into middle_user_department (user_id, dept_id, encry_level_dept, 
+      diff_dept_group)
+    values (#{userId,jdbcType=BIGINT}, #{deptId,jdbcType=BIGINT}, #{encryLevelDept,jdbcType=INTEGER}, 
+      #{diffDeptGroup,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.MiddleUserDepartment" useGeneratedKeys="true">
     <!--
@@ -146,6 +147,9 @@
       <if test="encryLevelDept != null">
         encry_level_dept,
       </if>
+      <if test="diffDeptGroup != null">
+        diff_dept_group,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userId != null">
@@ -156,6 +160,9 @@
       </if>
       <if test="encryLevelDept != null">
         #{encryLevelDept,jdbcType=INTEGER},
+      </if>
+      <if test="diffDeptGroup != null">
+        #{diffDeptGroup,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -186,6 +193,9 @@
       <if test="record.encryLevelDept != null">
         encry_level_dept = #{record.encryLevelDept,jdbcType=INTEGER},
       </if>
+      <if test="record.diffDeptGroup != null">
+        diff_dept_group = #{record.diffDeptGroup,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -199,7 +209,8 @@
     set id = #{record.id,jdbcType=BIGINT},
       user_id = #{record.userId,jdbcType=BIGINT},
       dept_id = #{record.deptId,jdbcType=BIGINT},
-      encry_level_dept = #{record.encryLevelDept,jdbcType=INTEGER}
+      encry_level_dept = #{record.encryLevelDept,jdbcType=INTEGER},
+      diff_dept_group = #{record.diffDeptGroup,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -219,6 +230,9 @@
       <if test="encryLevelDept != null">
         encry_level_dept = #{encryLevelDept,jdbcType=INTEGER},
       </if>
+      <if test="diffDeptGroup != null">
+        diff_dept_group = #{diffDeptGroup,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -229,7 +243,8 @@
     update middle_user_department
     set user_id = #{userId,jdbcType=BIGINT},
       dept_id = #{deptId,jdbcType=BIGINT},
-      encry_level_dept = #{encryLevelDept,jdbcType=INTEGER}
+      encry_level_dept = #{encryLevelDept,jdbcType=INTEGER},
+      diff_dept_group = #{diffDeptGroup,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

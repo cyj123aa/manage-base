@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.vo.req;
 
+import java.util.List;
+
 import com.hoolink.sdk.param.PageParam;
 
 import lombok.Data;
@@ -13,19 +15,9 @@ import lombok.Data;
 @Data
 public class ManagerUserPageParamVO extends PageParam{
     /**
-     * 姓名
-     */
-    private String name;
-    
-    /**
-     * 职位
-     */
-    private String position;
-    
-    /**
      * 所属部门id
      */
-    private Long deptId;
+    private List<Long> deptId;
     
     /**
      * 所属角色id
@@ -38,12 +30,7 @@ public class ManagerUserPageParamVO extends PageParam{
     private Boolean status;
     
     /**
-     * 联系电话
+     * 姓名、职位、手机号、账号
      */
-    private String phone;
-    
-    /**
-     * 账号
-     */
-    private String userAccount;
+    private String groupParam;
 }

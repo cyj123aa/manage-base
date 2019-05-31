@@ -7,9 +7,8 @@
     <property name="FILE_LOG_PATTERN"
               value="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{100} >> %msg%n"/>
 
-    <property name="manager" value="manager_base"></property>
-    <property name="managerBaseInfo" value="manager_base_info"></property>
-    <property name="managerBaseError" value="manager_base_error"></property>
+    <property name="LOG_PATH" value="manage-base"/>
+    <property name="LOG_FILE_NAME" value="manage-base"/>
 
     <!-- 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -18,10 +17,10 @@
         </layout>
     </appender>
 
-    <!--manager服务日志输出规则-->
-    <appender name="managerBaseInfoAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--hoolink服务日志输出规则-->
+    <appender name="logAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/${manager}/${managerBaseInfo}.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd-HH}.%i.log</fileNamePattern>
             <MaxHistory>360</MaxHistory>
             <maxFileSize>200MB</maxFileSize>
         </rollingPolicy>
@@ -35,17 +34,7 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>${FILE_LOG_PATTERN}</Pattern>
-        </layout>
-    </appender>
-    <appender name="managerBaseErrorAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/${manager}/${managerBaseError}.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
-            <MaxHistory>360</MaxHistory>
-            <maxFileSize>200MB</maxFileSize>
-        </rollingPolicy>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>NEUTRAL</onMismatch>
@@ -59,12 +48,6 @@
             <Pattern>${FILE_LOG_PATTERN}</Pattern>
         </layout>
     </appender>
-
-    <!--mybatis 日志服务-->
-    <logger name=" com.hoolink.datamodels.mapper" level="debug" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <!--log4jdbc -->
 
     <logger name="jdbc.sqltiming" level="debug" additivity="false">
         <appender-ref ref="STDOUT"/>
@@ -84,29 +67,24 @@
     <logger name="com.hoolink.sdk.mq" level="info" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
-
-    <!--manager-base服务-->
+    <!--hoolink服务-->
     <logger name="com.hoolink" level="INFO" additivity="false">
-        <appender-ref ref="managerBaseInfoAppender"/>
-        <appender-ref ref="managerBaseErrorAppender"/>
+        <appender-ref ref="logAppender"/>
         <appender-ref ref="STDOUT"/>
     </logger>
     <!--spring-->
     <logger name="org.springframework" level="INFO" additivity="false">
-        <appender-ref ref="managerBaseInfoAppender"/>
-        <appender-ref ref="managerBaseErrorAppender"/>
+        <appender-ref ref="logAppender"/>
         <appender-ref ref="STDOUT"/>
     </logger>
     <!--servicecomb-->
     <logger name="org.apache.servicecomb" level="INFO" additivity="false">
-        <appender-ref ref="managerBaseInfoAppender"/>
-        <appender-ref ref="managerBaseErrorAppender"/>
+        <appender-ref ref="logAppender"/>
         <appender-ref ref="STDOUT"/>
     </logger>
     <!--huawei-->
     <logger name="com.huawei.paas.cse" level="INFO" additivity="false">
-        <appender-ref ref="managerBaseInfoAppender"/>
-        <appender-ref ref="managerBaseErrorAppender"/>
+        <appender-ref ref="logAppender"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 </configuration>

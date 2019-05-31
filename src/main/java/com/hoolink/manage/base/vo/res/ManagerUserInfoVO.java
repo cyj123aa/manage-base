@@ -19,6 +19,11 @@ public class ManagerUserInfoVO {
      * 账号
      */
     private String userAccount;
+    
+    /**
+     * 员工编号
+     */
+    private String userNo;
 	
     /**
      * 姓名
@@ -51,9 +56,19 @@ public class ManagerUserInfoVO {
     private Long roleId;
     
     /**
+     * 所属角色
+     */
+    private String roleName;
+    
+    /**
+     * 所属公司Id
+     */
+    private Long companyId;
+    
+    /**
      * 所属公司
      */
-    private String company;
+    private String companyName;
     
     /**
      * 联系电话
@@ -71,20 +86,11 @@ public class ManagerUserInfoVO {
     private Boolean status;
     
     /**
-     * 用户部门关系
+     * 用户是否登陆过
      */
-    private List<UserDeptVO> userDeptPairList;
-    
-    @Data
-    public static class UserDeptVO{
-    	/**
-    	 * 部门ID
-    	 */
-    	private Long deptId;
-    	
-    	/**
-    	 * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
-    	 */
-    	private Integer encryLevelDept;
-    } 
+    private Boolean hasLoginYet;
+    /**
+     * 用户组织关系
+     */
+    private List<DeptPairVO> userDeptPairList;
 }

@@ -24,4 +24,28 @@ public class LoginResultBO implements Serializable {
      * 手机号
      */
     private String phone;
+
+    /**
+     * EDM系统权限
+     */
+    private Boolean accessEDM;
+    /**
+     * hoolink系统权限
+     */
+    private Boolean accessHoolink;
+
+    /**
+     * 问候语
+     */
+    private String greetings;
+
+    /**
+     * 用户名
+     */
+    private String name;
+
+    /**
+     * 图像url
+     */
+    private String image;
 }

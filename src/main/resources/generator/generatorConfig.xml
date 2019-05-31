@@ -67,13 +67,13 @@
             <!--<columnOverride column="customer_address" property="address"/>-->
         <!--</table>-->
         <!-- 用户 -->
-<!--       	<table tableName="manage_user" domainObjectName="User">
+       <!--	<table tableName="manage_user" domainObjectName="User">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
             <columnOverride column="user_accent" property="accent"/>
             <columnOverride column="user_name" property="name"/>
             <columnOverride column="user_status" property="status"/>
-        </table> -->
+        </table>  -->
         <!-- 固件版本 -->
         <!--<table tableName="firmware_version" domainObjectName="FirmwareVersion">
             <property name="useActualColumnNames" value="false"></property>
@@ -118,10 +118,10 @@
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
             <columnOverride column="entry_status" property="status"/>
         </table>-->
-       <table tableName="device_entry_detail" domainObjectName="DeviceEntryDetail">
+<!--        <table tableName="device_entry_detail" domainObjectName="DeviceEntryDetail">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
-        </table>
+        </table> -->
         <!--<table tableName="device_entry_record" domainObjectName="DeviceEntryRecord">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
@@ -140,10 +140,15 @@
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
             <columnOverride column="dept_name" property="name"/>
         </table> -->
-        <!-- 用户部门表 -->
-<!--       	<table tableName="middle_user_department" domainObjectName="MiddleUserDepartment">
+        <!--用户部门表-->
+       	<table tableName="middle_user_department" domainObjectName="MiddleUserDepartment">
             <property name="useActualColumnNames" value="false"></property>
             <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
-        </table>-->
+        </table>
+        <!--按钮表-->
+<!--        <table tableName="manage_button" domainObjectName="ManageButton">
+            <property name="useActualColumnNames" value="false"></property>
+            <generatedKey column="id" sqlStatement="JDBC"></generatedKey>
+        </table>  -->
     </context>
 </generatorConfiguration>

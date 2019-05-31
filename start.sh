@@ -1,4 +1,2 @@
 #!/bin/bash
-
-# CMDVAR="-Djava.security.egd=file:/dev/./urandom","java -agentlib:jdwp=transport=dt_socket,address=0:8000,server=y,suspend=n -jar"
-java -Xmx2048m -jar ./manage-base.jar
+java -Xmx512m -Xms512m -Xmn192m -jar ./manage-base.jar

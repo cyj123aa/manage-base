@@ -18,13 +18,13 @@
     <result column="enabled" jdbcType="BIT" property="enabled" />
   </resultMap>
 
-<!--   <sql id="Base_Column_List">
+   <sql id="Base_Column_List">
     
     @mbggenerated
    
     id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created, 
     updated, enabled
-  </sql> -->
+  </sql>
 
   <select id="getUserRole" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -34,7 +34,34 @@
         manage_role.id, role_name, role_desc, parent_id, role_level, role_status, manage_role.creator, manage_role.updator, manage_role.created, 
     manage_role.updated, manage_role.enabled
     from manage_role join manage_user on manage_role.id=manage_user.role_id
-    where manage_role.id = #{userId} and manage_role.enabled=true
+    where manage_user.id = #{userId} and manage_user.enabled=true and manage_role.enabled=true
   </select>
 
+  <select id="getRoleByOne" resultMap="BaseResultMap">
+    select id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created,
+    updated, enabled from manage_role
+    where enabled=true
+    and id!=#{roleId}
+    <if test="searchValue!=null and searchValue!=''">
+    and locate(#{searchValue}, role_name)>0
+    </if>
+    <if test="status!=null">
+      and role_status=#{status}
+    </if>
+    order by created desc
+  </select>
+
+  <select id="getRoleByTwo" resultMap="BaseResultMap">
+    select id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created,
+    updated, enabled from manage_role
+    where enabled=true
+    and parent_id=#{roleId}
+    <if test="searchValue!=null and searchValue!=''">
+      and locate(#{searchValue}, role_name)>0
+    </if>
+    <if test="status!=null">
+      and role_status=#{status}
+    </if>
+    order by created desc
+  </select>
 </mapper>

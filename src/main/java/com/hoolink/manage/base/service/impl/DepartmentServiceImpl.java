@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -29,7 +30,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
 		if(CollectionUtils.isEmpty(idList)) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
@@ -40,11 +41,17 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentBO> listByCompany(String company) {
+	public List<ManageDepartmentBO> listAll() {
 		ManageDepartmentExample example = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		criteria.andCompanyEqualTo(company);
-		criteria.andEnabledEqualTo(true);
+		example.createCriteria().andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
+	@Override
+	public List<ManageDepartmentBO> listByDeptType(Byte deptType) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true).andDeptTypeEqualTo(deptType);
 		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
 		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
 	}

@@ -7,7 +7,8 @@
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="dept_name" jdbcType="VARCHAR" property="name" />
-    <result column="company" jdbcType="VARCHAR" property="company" />
+    <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
     <result column="creator" jdbcType="BIGINT" property="creator" />
     <result column="updator" jdbcType="BIGINT" property="updator" />
     <result column="created" jdbcType="BIGINT" property="created" />
@@ -82,7 +83,7 @@
     <!--
     @mbggenerated
     -->
-    id, dept_name, company, creator, updator, created, updated, enabled
+    id, dept_name, dept_type, parent_id, creator, updator, created, updated, enabled
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageDepartmentExample" resultMap="BaseResultMap">
     <!--
@@ -130,12 +131,12 @@
     <!--
     @mbggenerated
     -->
-    insert into manage_department (dept_name, company, creator, 
-      updator, created, updated, 
-      enabled)
-    values (#{name,jdbcType=VARCHAR}, #{company,jdbcType=VARCHAR}, #{creator,jdbcType=BIGINT}, 
-      #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, 
-      #{enabled,jdbcType=BIT})
+    insert into manage_department (dept_name, dept_type, parent_id, 
+      creator, updator, created, 
+      updated, enabled)
+    values (#{name,jdbcType=VARCHAR}, #{deptType,jdbcType=TINYINT}, #{parentId,jdbcType=BIGINT}, 
+      #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, 
+      #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment" useGeneratedKeys="true">
     <!--
@@ -146,8 +147,11 @@
       <if test="name != null">
         dept_name,
       </if>
-      <if test="company != null">
-        company,
+      <if test="deptType != null">
+        dept_type,
+      </if>
+      <if test="parentId != null">
+        parent_id,
       </if>
       <if test="creator != null">
         creator,
@@ -169,8 +173,11 @@
       <if test="name != null">
         #{name,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        #{company,jdbcType=VARCHAR},
+      <if test="deptType != null">
+        #{deptType,jdbcType=TINYINT},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
       </if>
       <if test="creator != null">
         #{creator,jdbcType=BIGINT},
@@ -210,8 +217,11 @@
       <if test="record.name != null">
         dept_name = #{record.name,jdbcType=VARCHAR},
       </if>
-      <if test="record.company != null">
-        company = #{record.company,jdbcType=VARCHAR},
+      <if test="record.deptType != null">
+        dept_type = #{record.deptType,jdbcType=TINYINT},
+      </if>
+      <if test="record.parentId != null">
+        parent_id = #{record.parentId,jdbcType=BIGINT},
       </if>
       <if test="record.creator != null">
         creator = #{record.creator,jdbcType=BIGINT},
@@ -240,7 +250,8 @@
     update manage_department
     set id = #{record.id,jdbcType=BIGINT},
       dept_name = #{record.name,jdbcType=VARCHAR},
-      company = #{record.company,jdbcType=VARCHAR},
+      dept_type = #{record.deptType,jdbcType=TINYINT},
+      parent_id = #{record.parentId,jdbcType=BIGINT},
       creator = #{record.creator,jdbcType=BIGINT},
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
@@ -259,8 +270,11 @@
       <if test="name != null">
         dept_name = #{name,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        company = #{company,jdbcType=VARCHAR},
+      <if test="deptType != null">
+        dept_type = #{deptType,jdbcType=TINYINT},
+      </if>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
       </if>
       <if test="creator != null">
         creator = #{creator,jdbcType=BIGINT},
@@ -286,7 +300,8 @@
     -->
     update manage_department
     set dept_name = #{name,jdbcType=VARCHAR},
-      company = #{company,jdbcType=VARCHAR},
+      dept_type = #{deptType,jdbcType=TINYINT},
+      parent_id = #{parentId,jdbcType=BIGINT},
       creator = #{creator,jdbcType=BIGINT},
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},
