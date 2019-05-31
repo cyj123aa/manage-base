@@ -462,7 +462,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();
             if(Constant.LEVEL_THREE.equals(roleLevel)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_VISITOR);
+                roles=null;
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
