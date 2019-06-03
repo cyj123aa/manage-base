@@ -87,13 +87,11 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdStrList) throws Exception{
-		log.info("multipartFile:{}, deptIdStrList:{}", multipartFile, deptIdStrList);
 		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
 		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
         if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
-        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         File file = FileUtil.multipartFileToFile(multipartFile);
@@ -163,10 +161,8 @@ public class ExcelServiceImpl implements ExcelService{
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
         FileInputStream inp = new FileInputStream(file);
-        log.info("inp...{}", inp);
         XSSFWorkbook wb = new XSSFWorkbook(inp);
         XSSFSheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
-        log.info("analyse begin...");
         
         boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
@@ -183,7 +179,6 @@ public class ExcelServiceImpl implements ExcelService{
                 
                 if (rowCell != null) {
                     String value = getValue(rowCell);
-                    log.info("analyse value...,{}", value);
                     if(StringUtils.isBlank(value)) {
                     	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
                     }
@@ -542,8 +537,7 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	public ResponseEntity<org.springframework.core.io.Resource> exportList(ManagerUserPageParamBO userPageParamBO)
 			throws Exception {
-		PageInfo<ManagerUserBO> pageInfo = userService.list(userPageParamBO);
-		List<ManagerUserBO> userList = pageInfo.getList();
+		List<ManagerUserBO> userList = userService.listWithOutPage(userPageParamBO);
 		//表头
         List<String> head = new ArrayList<>();
         head.add(Constant.EXCEL_USER_NO);

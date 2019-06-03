@@ -211,4 +211,12 @@ public interface UserService {
      * @return
      */
     boolean updateImage(Long imageId);
+    
+    /**
+     * excel导出列表(无分页)
+     * @param userPageParamBO
+     * @return
+     * @throws Exception
+     */
+    List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception;
 }
