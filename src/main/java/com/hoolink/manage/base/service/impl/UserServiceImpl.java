@@ -415,11 +415,12 @@ public class UserServiceImpl implements UserService {
 					DeptPairBO deptPair = new DeptPairBO();
 					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
 					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-					deptPair.setDeptNameStr(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG));
+					
 					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
 					}
+					deptPair.setDeptNameStr(new StringBuilder(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
 					deptPairList.add(deptPair);
 				}
 				userBO.setUserDeptPairList(deptPairList);
@@ -911,11 +912,11 @@ public class UserServiceImpl implements UserService {
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
 			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-			deptPair.setDeptNameStr(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
 			}
+			deptPair.setDeptNameStr(new StringBuilder(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
 			deptPairList.add(deptPair);
 		}
 		personalInfo.setUserDeptPairList(deptPairList);
