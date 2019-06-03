@@ -73,7 +73,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     public Long create(RoleParamBO roleParamBO ) throws Exception {
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
-        if(CollectionUtils.isEmpty(roleMenuVOList)){
+        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //role 等级
@@ -87,7 +87,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             role.setParentId(userRole.getId());
             if(Constant.LEVEL_THREE.equals(userRole.getRoleLevel())){
-                throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
+                throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_VISITOR);
             }else if (Constant.LEVEL_THREE > userRole.getRoleLevel()){
                 role.setRoleLevel((byte)((int)userRole.getRoleLevel()+1));
             }
@@ -114,7 +114,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(RoleParamBO roleParamBO) throws Exception {
-        if(roleParamBO.getId()==null){
+        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
