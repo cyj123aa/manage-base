@@ -403,6 +403,66 @@ public class MiddleUserDepartmentExample {
             return (Criteria) this;
         }
 
+        public Criteria andDeduceStatusIsNull() {
+            addCriterion("deduce_status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusIsNotNull() {
+            addCriterion("deduce_status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusEqualTo(Boolean value) {
+            addCriterion("deduce_status =", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotEqualTo(Boolean value) {
+            addCriterion("deduce_status <>", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusGreaterThan(Boolean value) {
+            addCriterion("deduce_status >", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("deduce_status >=", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusLessThan(Boolean value) {
+            addCriterion("deduce_status <", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusLessThanOrEqualTo(Boolean value) {
+            addCriterion("deduce_status <=", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusIn(List<Boolean> values) {
+            addCriterion("deduce_status in", values, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotIn(List<Boolean> values) {
+            addCriterion("deduce_status not in", values, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusBetween(Boolean value1, Boolean value2) {
+            addCriterion("deduce_status between", value1, value2, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("deduce_status not between", value1, value2, "deduceStatus");
+            return (Criteria) this;
+        }
+
         public Criteria andDiffDeptGroupIsNull() {
             addCriterion("diff_dept_group is null");
             return (Criteria) this;
