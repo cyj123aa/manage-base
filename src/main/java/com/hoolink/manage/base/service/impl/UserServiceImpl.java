@@ -356,6 +356,32 @@ public class UserServiceImpl implements UserService {
 				.doSelectPageInfo(() -> userMapper.selectByExample(example));
 		List<User> userList = userPageInfo.getList();
 		
+		//组装用户数据
+		List<ManagerUserBO> userBoList = buildUserBOList(userList);
+		PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(userPageInfo, ManagerUserBO.class);
+		userBOPageInfo.setList(userBoList);
+		return userBOPageInfo;
+	}
+	
+	/**
+	 * excel导出列表(无分页)
+	 * @param userPageParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception{
+		UserExample example = buildUserCriteria(userPageParamBO);
+		return buildUserBOList(userMapper.selectByExample(example));
+	}
+	
+	/**
+	 * 组装用户数据
+	 * @param userList
+	 * @return
+	 * @throws Exception
+	 */
+	private List<ManagerUserBO> buildUserBOList(List<User> userList) throws Exception {
 		//查询用户对应部门
 		List<Long> userIdList = userList.stream().map(user -> user.getId()).collect(Collectors.toList());
 		List<MiddleUserDeptWithMoreBO> middleUserDepartmentBOList = middleUserDepartmentService
@@ -399,10 +425,7 @@ public class UserServiceImpl implements UserService {
 			BeanUtils.copyProperties(user, userBO);
 			userBoList.add(userBO);
 		});
-		
-		PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(userPageInfo, ManagerUserBO.class);
-		userBOPageInfo.setList(userBoList);
-		return userBOPageInfo;
+		return userBoList;
 	}
 
 	/**
@@ -425,7 +448,7 @@ public class UserServiceImpl implements UserService {
 			
 			UserExample.Criteria groupCriteria2 = userExample.createCriteria();
 			andCriteria(groupCriteria2, userPageParamBO);
-			groupCriteria2.andPhoneEqualTo(userPageParamBO.getGroupParam());
+			groupCriteria2.andPhoneLike("%" + userPageParamBO.getGroupParam() + "%");
 			userExample.or(groupCriteria2);
 			
 			UserExample.Criteria groupCriteria3 = userExample.createCriteria();
@@ -438,6 +461,7 @@ public class UserServiceImpl implements UserService {
 		userExample.setOrderByClause(" created desc ");
 		return userExample;
 	}
+	
 	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
 		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
 			List<Long> deptIdList = userPageParamBO.getDeptId();

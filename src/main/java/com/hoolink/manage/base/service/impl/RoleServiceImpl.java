@@ -73,7 +73,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     public Long create(RoleParamBO roleParamBO ) throws Exception {
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
-        if(CollectionUtils.isEmpty(roleMenuVOList)){
+        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //role 等级
@@ -87,7 +87,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             role.setParentId(userRole.getId());
             if(Constant.LEVEL_THREE.equals(userRole.getRoleLevel())){
-                throw new BusinessException(HoolinkExceptionMassageEnum.NOT_AUTH);
+                throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_VISITOR);
             }else if (Constant.LEVEL_THREE > userRole.getRoleLevel()){
                 role.setRoleLevel((byte)((int)userRole.getRoleLevel()+1));
             }
@@ -114,7 +114,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(RoleParamBO roleParamBO) throws Exception {
-        if(roleParamBO.getId()==null){
+        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
@@ -216,7 +216,7 @@ public class RoleServiceImpl implements RoleService {
     private List<ManageMenuTreeBO> assembleMenuTree(Map<Long, List<ManageMenuTreeBO>> map) {
         List<ManageMenuTreeBO> firstMenuList = map.get(0L);
         if (CollectionUtils.isEmpty(firstMenuList)) {
-            throw new BusinessException(HoolinkExceptionMassageEnum.USER_MENU_INCOMPLETE);
+            return null;
         }
         for (ManageMenuTreeBO menuBO:firstMenuList){
             //menuBO 的下级菜单
@@ -244,6 +244,9 @@ public class RoleServiceImpl implements RoleService {
         menuTreeBO.setKey(manageMenuBO.getId());
         menuTreeBO.setTitle(manageMenuBO.getMenuName());
         menuTreeBO.setValue(manageMenuBO.getId().toString());
+        if(manageMenuBO.getPermissionFlag()!=null){
+            menuTreeBO.setReadonly(manageMenuBO.getPermissionFlag());
+        }
         return menuTreeBO;
     }
 
@@ -313,6 +316,7 @@ public class RoleServiceImpl implements RoleService {
         manageMenuBO.setId(roleMenuBO.getMenuId());
         manageMenuBO.setMenuName(roleMenuBO.getMenuName());
         manageMenuBO.setParentId(roleMenuBO.getParentId());
+        manageMenuBO.setPermissionFlag(roleMenuBO.getPermissionFlag());
         return manageMenuBO;
     }
 
@@ -458,15 +462,16 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();
             if(Constant.LEVEL_THREE.equals(roleLevel)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_VISITOR);
+                roles=null;
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByOne(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }
         }
+        PageInfo pageInfo = new PageInfo<>(roles);
         List<RoleParamBO> roleParamBOS = CopyPropertiesUtil.copyList(roles, RoleParamBO.class);
-        PageInfo<RoleParamBO> pageInfo = new PageInfo<>(roleParamBOS);
+        pageInfo.setList(roleParamBOS);
         return pageInfo;
     }
 

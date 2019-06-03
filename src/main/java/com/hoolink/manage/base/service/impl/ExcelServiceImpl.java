@@ -18,12 +18,18 @@ import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -81,13 +87,11 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public UserExcelDataBO uploadExcel(MultipartFile multipartFile, String deptIdStrList) throws Exception{
-		log.info("deptIdStrList:{}", deptIdStrList);
 		JSONArray jsonArray = JSONArray.parseArray(deptIdStrList);
 		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
         if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
-        	log.info("multipartFile==null:{}; deptIdList is empty:{}", multipartFile==null, CollectionUtils.isEmpty(deptIdList)); 
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         File file = FileUtil.multipartFileToFile(multipartFile);
@@ -157,16 +161,16 @@ public class ExcelServiceImpl implements ExcelService{
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
         FileInputStream inp = new FileInputStream(file);
-        Workbook wb = new HSSFWorkbook(inp);
-        Sheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
+        XSSFWorkbook wb = new XSSFWorkbook(inp);
+        XSSFSheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
         
         boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
-        	Row row = sheet.getRow(rowNum);
+        	XSSFRow row = sheet.getRow(rowNum);
         	ManagerUserParamBO managerUserParam = new ManagerUserParamBO();
             //列 获取所有单元格的数据
             for (int j = 0; j < row.getLastCellNum(); j++) {
-                Cell rowCell = row.getCell(j);
+            	XSSFCell rowCell = row.getCell(j);
                 
                 if(!sheet.isColumnHidden(j) && rowCell == null) {
                 	flag = true;
@@ -259,8 +263,12 @@ public class ExcelServiceImpl implements ExcelService{
 		return ExcelUtil.export(workbook, Constant.HOOLINK_USER_EXPORT_EXCEL_TITLE);
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	private Workbook buildUserWorkbook() {
-		Workbook wb = new HSSFWorkbook();
+		XSSFWorkbook wb = new XSSFWorkbook();
 		setHidenSheet(wb);
 		
 		//设置表头
@@ -268,8 +276,8 @@ public class ExcelServiceImpl implements ExcelService{
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_SEX, Constant.EXCEL_USER_ROLENAME, 
 				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_USER_ACCOUNT};
 		
-		Sheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
-		Row row0 = sheet1.createRow(0);
+		XSSFSheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
+		XSSFRow row0 = sheet1.createRow(0);
 		for(int i=0; i<headerArray.length; i++) {
 			row0.createCell(i).setCellValue(headerArray[i]);
 		}
@@ -291,9 +299,12 @@ public class ExcelServiceImpl implements ExcelService{
 			List<String> headerList = Arrays.asList(headerArray);
 			if(headerList.contains(formulaForExcel.getKey())) {
 				int index = headerList.indexOf(formulaForExcel.getKey());
-				DVConstraint formula = DVConstraint.createFormulaListConstraint(formulaForExcel.getFormula());
+				
+				DataValidationHelper helper = sheet1.getDataValidationHelper();
 				CellRangeAddressList rangeAddressList = new CellRangeAddressList(1, 10000, index, index);
-				DataValidation cacse = new HSSFDataValidation(rangeAddressList, formula);
+		        DataValidationConstraint formula = helper.createFormulaListConstraint(formulaForExcel.getFormula());
+		        DataValidation cacse = helper.createValidation(formula, rangeAddressList);
+		        
 		        //处理Excel兼容性问题
 		        if(cacse instanceof XSSFDataValidation) {
 		        	cacse.setSuppressDropDownArrow(true);
@@ -306,6 +317,18 @@ public class ExcelServiceImpl implements ExcelService{
 			}
 		}
 		
+		buildHiddenId(formulaForExcelList, headerArray, sheet1, row0);
+		return wb;
+	}
+	
+	/**
+	 * 隐藏的id域
+	 * @param formulaForExcelList
+	 * @param headerArray
+	 * @param sheet1
+	 * @param row0
+	 */
+	private void buildHiddenId(List<FormulaForExcelBO> formulaForExcelList, String[] headerArray, XSSFSheet sheet1, XSSFRow row0) {
 		//隐藏的id域
 		String idWithUnderline = Constant.UNDERLINE + Constant.EXCEL_ID;
 		int len = headerArray.length;
@@ -314,20 +337,20 @@ public class ExcelServiceImpl implements ExcelService{
 			List<String> headerList = Arrays.asList(headerArray);
 			if(headerList.contains(formulaForExcel.getKey())) {
 				int index = headerList.indexOf(formulaForExcel.getKey());
-				Cell cell = row0.createCell(len);
+				XSSFCell cell = row0.createCell(len);
 				cell.setCellValue(formulaForExcel.getKey() + idWithUnderline);
 				sheet1.setColumnHidden(len, true);
 				
 				int tenThousand = 10000;
 				for(int i=1; i<tenThousand; i++) {
-					Row row;
+					XSSFRow row;
 					if(!flag) {
 						row = sheet1.createRow(i);	
 					}else {
 						row = sheet1.getRow(i);
 					}
 					
-					Cell cell1 = row.createCell(len);
+					XSSFCell cell1 = row.createCell(len);
 					String formula = "INDEX(INDIRECT(\"" + formulaForExcel.getFormula() + Constant.UNDERLINE + Constant.EXCEL_ID + "\"),,MATCH(INDIRECT(ADDRESS(ROW(), COLUMN(" + getExcelColumn(index)+ "1))), INDIRECT(\"" + formulaForExcel.getFormula() + "\"), 0 ))";
 					cell1.setCellFormula("IF(ISERROR("+ formula + "), \"\", " + formula + ")");
 					
@@ -337,15 +360,13 @@ public class ExcelServiceImpl implements ExcelService{
 			}
 		}
 		sheet1.setForceFormulaRecalculation(true);
-		return wb;
 	}
-	
 	/**
 	 * 在隐藏的sheet上面赋值下拉框参数
 	 * @param wb
 	 */
-	private void setHidenSheet(Workbook wb) {
-		Sheet hideSheet = wb.createSheet(Constant.EXCEL_HIDE_SHEET);
+	private void setHidenSheet(XSSFWorkbook wb) {
+		XSSFSheet hideSheet = wb.createSheet(Constant.EXCEL_HIDE_SHEET);
 		wb.setSheetHidden(wb.getSheetIndex(Constant.EXCEL_HIDE_SHEET), true);
 		
 		//获取组织架构字典
@@ -359,9 +380,9 @@ public class ExcelServiceImpl implements ExcelService{
 		//插入组织架构属性到隐藏的sheet
 		int rowId = 0;
 		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
-			Row row = hideSheet.createRow(rowId++);
+			XSSFRow row = hideSheet.createRow(rowId++);
 			//插入对应id属性
-			Row idrow = hideSheet.createRow(rowId++);
+			XSSFRow idrow = hideSheet.createRow(rowId++);
 			DictPairBO<Long, String> parentDeptPair = deptPairForExcel.getParentDictPair();
 			row.createCell(0).setCellValue(parentDeptPair.getValue());
 			idrow.createCell(0).setCellValue(parentDeptPair.getKey());
@@ -516,8 +537,7 @@ public class ExcelServiceImpl implements ExcelService{
 	@Override
 	public ResponseEntity<org.springframework.core.io.Resource> exportList(ManagerUserPageParamBO userPageParamBO)
 			throws Exception {
-		PageInfo<ManagerUserBO> pageInfo = userService.list(userPageParamBO);
-		List<ManagerUserBO> userList = pageInfo.getList();
+		List<ManagerUserBO> userList = userService.listWithOutPage(userPageParamBO);
 		//表头
         List<String> head = new ArrayList<>();
         head.add(Constant.EXCEL_USER_NO);
