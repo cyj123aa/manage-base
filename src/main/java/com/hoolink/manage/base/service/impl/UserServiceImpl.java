@@ -522,7 +522,7 @@ public class UserServiceImpl implements UserService {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 			}
@@ -547,7 +547,7 @@ public class UserServiceImpl implements UserService {
 		checkAccountExist(userBO.getUserAccount());
 		checkUserNoExist(userBO.getUserNo());
 		//得到将要入库的deptIdList
-		List<DeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), true);
+		List<UserDeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), true);
 		
 		//创建用户
 		User user = CopyPropertiesUtil.copyBean(userBO, User.class);
@@ -630,7 +630,7 @@ public class UserServiceImpl implements UserService {
 	 * @param flag
 	 * @return
 	 */
-	private List<DeptPairBO> parseGetToCreateDeptId(List<UserDeptPairParamBO> userDeptPairParamList, boolean flag){
+	private List<UserDeptPairBO> parseGetToCreateDeptId(List<UserDeptPairParamBO> userDeptPairParamList, boolean flag){
 		if(flag && CollectionUtils.isEmpty(userDeptPairParamList)) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
 		}
@@ -644,8 +644,8 @@ public class UserServiceImpl implements UserService {
 	 * @param userDeptPairParamList
 	 * @return
 	 */
-	private List<DeptPairBO> validUserDeptPairParam(List<ManageDepartmentBO> deptList, List<UserDeptPairParamBO> userDeptPairParamList){
-		List<DeptPairBO> deptPairList = new ArrayList<>();
+	private List<UserDeptPairBO> validUserDeptPairParam(List<ManageDepartmentBO> deptList, List<UserDeptPairParamBO> userDeptPairParamList){
+		List<UserDeptPairBO> deptPairList = new ArrayList<>();
 		if(CollectionUtils.isNotEmpty(userDeptPairParamList)) {
 			List<List<Long>> allDeptIdList = new ArrayList<>();
 			for(UserDeptPairParamBO userDeptPairParam : userDeptPairParamList) {
@@ -697,8 +697,25 @@ public class UserServiceImpl implements UserService {
 				List<Long> toStoreDeptIdList = new ArrayList<>();
 				toStoreDeptIdList.addAll(deptIdList);
 				toStoreDeptIdList.addAll(chidrenDeptId);
-				DeptPairBO deptPair = new DeptPairBO();
-				deptPair.setDeptIdList(toStoreDeptIdList);
+				
+				
+				List<DeptIdDeduceStatusPairBO> deptStatusPairList = new ArrayList<>();
+				deptIdList.stream().forEach(di -> {
+					DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
+					pair.setDeptId(di);
+					pair.setDeduceStatus(true);
+					deptStatusPairList.add(pair);
+				});
+
+				chidrenDeptId.stream().forEach(cdi -> {
+					DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
+					pair.setDeptId(cdi);
+					pair.setDeduceStatus(false);
+					deptStatusPairList.add(pair);
+				});
+				
+				UserDeptPairBO deptPair = new UserDeptPairBO();
+				deptPair.setDeptStatusPairList(deptStatusPairList);
 				deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
 				deptPairList.add(deptPair);
 			}
@@ -711,13 +728,14 @@ public class UserServiceImpl implements UserService {
 	 * @param deptPairList
 	 * @param userId
 	 */
-	private void batchInsertUserDept(List<DeptPairBO> deptPairList, Long userId) {
+	private void batchInsertUserDept(List<UserDeptPairBO> deptPairList, Long userId) {
 		List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
 		deptPairList.stream().forEach(dp -> {
 			String diffDeptGroup = generateRandom();
-			for(Long deptId : dp.getDeptIdList()) {
+			for(DeptIdDeduceStatusPairBO deptIdDeduceStatusPair : dp.getDeptStatusPairList()) {
 				MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
-				middleUserDept.setDeptId(deptId);
+				middleUserDept.setDeptId(deptIdDeduceStatusPair.getDeptId());
+				middleUserDept.setDeduceStatus(deptIdDeduceStatusPair.getDeduceStatus());
 				middleUserDept.setUserId(userId);
 				middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
 				middleUserDept.setDiffDeptGroup(diffDeptGroup);
@@ -752,7 +770,7 @@ public class UserServiceImpl implements UserService {
 			checkUserNoExist(userBO.getUserNo());
 		}
 		//得到将要入库的deptIdList
-		List<DeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), false);
+		List<UserDeptPairBO> deptPairList = parseGetToCreateDeptId(userBO.getUserDeptPairParamList(), false);
 		
 		if(CollectionUtils.isNotEmpty(deptPairList)) {
 			//删除原有用户部门对应关系

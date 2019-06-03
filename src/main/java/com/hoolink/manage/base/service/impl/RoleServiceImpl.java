@@ -492,7 +492,7 @@ public class RoleServiceImpl implements RoleService {
 	public List<ManageRoleBO> list(){
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
-        criteria.andEnabledEqualTo(true);
+        criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
         List<ManageRole> roleList = roleMapper.selectByExample(example);
 		return CopyPropertiesUtil.copyList(roleList, ManageRoleBO.class);
 	}
