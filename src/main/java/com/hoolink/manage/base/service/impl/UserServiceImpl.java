@@ -902,7 +902,6 @@ public class UserServiceImpl implements UserService {
 			companySet.add(ud.getDeptName());
 		});
 		personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
-		
 		// 用户组织关系
 		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 		
