@@ -82,11 +82,11 @@ public interface RoleService {
     List<ManageRoleBO> listByIdList(List<Long> idList) throws Exception;
     
     /**
-     * 获取所有角色
+     * 根据当前用户角色获取角色及其所有子角色
+     * @param currentRoleId
      * @return
-     * @throws Exception
      */
-    List<ManageRoleBO> list();
+    List<ManageRoleBO> listCurrentAndChildrenRoleByRoleId(Long currentRoleId);
     
     /**
      * 根据roleId获取菜单的权限类别

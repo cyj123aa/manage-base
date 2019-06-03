@@ -489,14 +489,35 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public List<ManageRoleBO> list(){
+	public List<ManageRoleBO> listCurrentAndChildrenRoleByRoleId(Long currentRoleId){
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
         criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
-        List<ManageRole> roleList = roleMapper.selectByExample(example);
+        List<ManageRole> allRoleList = roleMapper.selectByExample(example);
+        
+        List<ManageRole> roleList = new ArrayList<>();
+        Optional<ManageRole> roleOpt = allRoleList.stream().filter(r -> r.getId().equals(currentRoleId)).findFirst();
+        roleOpt.ifPresent(role -> {
+        	roleList.add(role);
+        	traverseAllChildrenRole(allRoleList, roleList, role.getId());
+        });
 		return CopyPropertiesUtil.copyList(roleList, ManageRoleBO.class);
 	}
 
+	/**
+	 * 遍历得到所有的子角色
+	 * @param allRoleList
+	 * @param roleList
+	 * @param currentRoleId
+	 */
+	private void traverseAllChildrenRole(List<ManageRole> allRoleList, List<ManageRole> roleList, Long currentRoleId) {
+		List<ManageRole> childrenRoleList = allRoleList.stream().filter(r -> r.getParentId()!=null && r.getParentId().equals(currentRoleId)).collect(Collectors.toList());
+		childrenRoleList.stream().forEach(cr -> {
+			roleList.add(cr);
+			traverseAllChildrenRole(allRoleList, roleList, cr.getId());
+		});
+	}
+	
 	@Override
 	public List<RoleMenuPermissionBO> listMenuAccessByRoleId(Long roleId) {
 		MiddleRoleMenuExample example = new MiddleRoleMenuExample();
