@@ -526,6 +526,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
         UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
+        if(userSecurity==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
+        }
         UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
         //部门 小组 与用户关联
         List<DeptSecurityBO> list = userSecurity.getList();
