@@ -415,6 +415,7 @@ public class UserServiceImpl implements UserService {
 					DeptPairBO deptPair = new DeptPairBO();
 					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
 					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+					deptPair.setDeptNameStr(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG));
 					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
@@ -910,6 +911,7 @@ public class UserServiceImpl implements UserService {
 			DeptPairBO deptPair = new DeptPairBO();
 			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
 			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			deptPair.setDeptNameStr(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
