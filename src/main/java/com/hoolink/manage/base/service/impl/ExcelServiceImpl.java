@@ -93,9 +93,14 @@ public class ExcelServiceImpl implements ExcelService{
 		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
-        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        if(multipartFile==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        
+        if(CollectionUtils.isEmpty(deptIdList)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.DEPT_NOT_SELECTED);
+        }
+        
         File file = FileUtil.multipartFileToFile(multipartFile);
         if(file != null) {
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
@@ -566,6 +571,7 @@ public class ExcelServiceImpl implements ExcelService{
             List<DeptPairBO> userDeptPairList = user.getUserDeptPairList();
             StringBuilder sb = new StringBuilder();
             userDeptPairList.stream().forEach(udp -> {
+            	log.info("aaa:",udp.getDeptNameList());
             	sb.append(StringUtils.join(udp.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(udp.getEncryLevelDeptName()) ? "":udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
             });
             if(sb.length() > 0) {
