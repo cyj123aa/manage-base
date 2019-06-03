@@ -2,6 +2,8 @@ package com.hoolink.manage.base.bo;
 
 import java.util.List;
 
+import com.hoolink.sdk.bo.manager.DeptPairBO;
+
 import lombok.Data;
 
 /**

@@ -21,8 +21,8 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.manager.DeptPairBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
@@ -404,18 +404,25 @@ public class UserServiceImpl implements UserService {
 			userBO.setRoleName(role.getRoleName());
 			
 			List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
-			List<UserDepartmentBO> userDeptPairList = new ArrayList<>();
-			userBO.setUserDeptPairList(userDeptPairList);
 			
 			if(CollectionUtils.isNotEmpty(userDepartmentList)) {
 				// 用户组织关系
-				userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType()))
-						.forEach(ud -> {
-							UserDepartmentBO userDeptPair = new UserDepartmentBO();
-							BeanUtils.copyProperties(ud, userDeptPair);
-							userDeptPairList.add(userDeptPair);
-						});
-
+				Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+				
+				List<DeptPairBO> deptPairList = new ArrayList<>();
+				for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+					List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+					DeptPairBO deptPair = new DeptPairBO();
+					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+					}
+					deptPairList.add(deptPair);
+				}
+				userBO.setUserDeptPairList(deptPairList);
+				
 				Set<String> companySet = new HashSet<>();
 				userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
 						.forEach(ud -> companySet.add(ud.getDeptName()));
@@ -894,8 +901,22 @@ public class UserServiceImpl implements UserService {
 		});
 		personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
 		
-		List<MiddleUserDeptWithMoreBO> userDeptPairList = userDepartmentList.stream().filter(ud -> DeptTypeEnum.DEPARTMENT.getKey().equals(ud.getDeptType())).collect(Collectors.toList());
-		personalInfo.setUserDeptPairList(CopyPropertiesUtil.copyList(userDeptPairList, UserDepartmentBO.class));
+		// 用户组织关系
+		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+		
+		List<DeptPairBO> deptPairList = new ArrayList<>();
+		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+			DeptPairBO deptPair = new DeptPairBO();
+			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+			}
+			deptPairList.add(deptPair);
+		}
+		personalInfo.setUserDeptPairList(deptPairList);
 		return personalInfo;
 	}
 
