@@ -29,11 +29,19 @@ public class MiddleUserDepartment implements Serializable {
 
     /**
      * <pre>
-     * 部门密保等级(0-特级,1-一级,2-二级,3-三级,4-四级)
+     * 部门密保等级(1-特级,2-一级,3-二级,4-三级,5-四级)
      * 表字段 : middle_user_department.encry_level_dept
      * </pre>
      */
     private Integer encryLevelDept;
+
+    /**
+     * <pre>
+     * 选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     * 表字段 : middle_user_department.deduce_status
+     * </pre>
+     */
+    private Boolean deduceStatus;
 
     /**
      * <pre>
@@ -128,11 +136,11 @@ public class MiddleUserDepartment implements Serializable {
 
     /**
      * <pre>
-     * 获取：部门密保等级(0-特级,1-一级,2-二级,3-三级,4-四级)
+     * 获取：部门密保等级(1-特级,2-一级,3-二级,4-三级,5-四级)
      * 表字段：middle_user_department.encry_level_dept
      * </pre>
      *
-     * @return middle_user_department.encry_level_dept：部门密保等级(0-特级,1-一级,2-二级,3-三级,4-四级)
+     * @return middle_user_department.encry_level_dept：部门密保等级(1-特级,2-一级,3-二级,4-三级,5-四级)
      */
     public Integer getEncryLevelDept() {
         return encryLevelDept;
@@ -140,15 +148,40 @@ public class MiddleUserDepartment implements Serializable {
 
     /**
      * <pre>
-     * 设置：部门密保等级(0-特级,1-一级,2-二级,3-三级,4-四级)
+     * 设置：部门密保等级(1-特级,2-一级,3-二级,4-三级,5-四级)
      * 表字段：middle_user_department.encry_level_dept
      * </pre>
      *
      * @param encryLevelDept
-     *            middle_user_department.encry_level_dept：部门密保等级(0-特级,1-一级,2-二级,3-三级,4-四级)
+     *            middle_user_department.encry_level_dept：部门密保等级(1-特级,2-一级,3-二级,4-三级,5-四级)
      */
     public void setEncryLevelDept(Integer encryLevelDept) {
         this.encryLevelDept = encryLevelDept;
+    }
+
+    /**
+     * <pre>
+     * 获取：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     * 表字段：middle_user_department.deduce_status
+     * </pre>
+     *
+     * @return middle_user_department.deduce_status：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     */
+    public Boolean getDeduceStatus() {
+        return deduceStatus;
+    }
+
+    /**
+     * <pre>
+     * 设置：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     * 表字段：middle_user_department.deduce_status
+     * </pre>
+     *
+     * @param deduceStatus
+     *            middle_user_department.deduce_status：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     */
+    public void setDeduceStatus(Boolean deduceStatus) {
+        this.deduceStatus = deduceStatus;
     }
 
     /**

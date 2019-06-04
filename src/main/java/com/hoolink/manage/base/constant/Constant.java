@@ -54,7 +54,7 @@ public class Constant {
     /**
      * 用户列表导出文件名称
      */
-    public static final String USER_EXPORT_EXCEL_TITLE = "用户列表导出.xls";
+    public static final String USER_EXPORT_EXCEL_TITLE = "用户列表";
     public static final String HOOLINK_USER_EXPORT_EXCEL_TITLE = "互灵公司员工表格.xls";
     
     /**

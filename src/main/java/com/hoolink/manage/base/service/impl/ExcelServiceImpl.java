@@ -53,13 +53,15 @@ import com.hoolink.manage.base.service.ExcelService;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.FileUtil;
+import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.bo.manager.DeptPairBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO.UserDepartmentBO;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
+import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.DateUtil;
 import com.hoolink.sdk.utils.ExcelUtil;
 
@@ -91,9 +93,14 @@ public class ExcelServiceImpl implements ExcelService{
 		List<Long> deptIdList = jsonArray.toJavaList(Long.class);
 		UserExcelDataBO userExcelData = new UserExcelDataBO();
         //校验入参
-        if(multipartFile==null || CollectionUtils.isEmpty(deptIdList)){
+        if(multipartFile==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        
+        if(CollectionUtils.isEmpty(deptIdList)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.DEPT_NOT_SELECTED);
+        }
+        
         File file = FileUtil.multipartFileToFile(multipartFile);
         if(file != null) {
         	List<ManagerUserParamBO> userExcelList = dataAnalysis(file);
@@ -440,7 +447,8 @@ public class ExcelServiceImpl implements ExcelService{
 		
 		List<DictPairBO<Long, String>> childrenRolePairList = new ArrayList<>();
 		rolePairForExcel.setChildrenDictPairList(childrenRolePairList);
-		List<ManageRoleBO> roleList = roleService.list();
+		CurrentUserBO user = ContextUtil.getManageCurrentUser();
+		List<ManageRoleBO> roleList = roleService.listCurrentAndChildrenRoleByRoleId(user.getRoleId());
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> childRolePair = new DictPairBO<>();
 			childRolePair.setKey(r.getId());
@@ -560,11 +568,13 @@ public class ExcelServiceImpl implements ExcelService{
             content.add(user.getUserNo());
             content.add(user.getName());
             content.add(user.getPosition());
-            List<UserDepartmentBO> userDeptPairList = user.getUserDeptPairList();
+            List<DeptPairBO> userDeptPairList = user.getUserDeptPairList();
             StringBuilder sb = new StringBuilder();
-            userDeptPairList.stream().forEach(udp -> {
-            	sb.append(udp.getDeptName()).append(Constant.BACKSLASH).append(StringUtils.isEmpty(udp.getEncryLevelDeptName()) ? "":udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
-            });
+            if(CollectionUtils.isNotEmpty(userDeptPairList)) {
+                userDeptPairList.stream().forEach(udp -> {
+                	sb.append(StringUtils.join(udp.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(udp.getEncryLevelDeptName()) ? "":udp.getEncryLevelDeptName()).append(Constant.SEMICOLON);
+                });	
+            }
             if(sb.length() > 0) {
             	sb.deleteCharAt(sb.lastIndexOf(Constant.SEMICOLON));
             }
