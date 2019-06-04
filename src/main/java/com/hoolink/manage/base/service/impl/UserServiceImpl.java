@@ -487,6 +487,8 @@ public class UserServiceImpl implements UserService {
 			transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
 		}
 		criteria.andEnabledEqualTo(true);
+		//登录用户本身应该过滤掉，不可以看到
+		criteria.andIdNotEqualTo(getCurrentUserId());
 	}
 
 	/**
