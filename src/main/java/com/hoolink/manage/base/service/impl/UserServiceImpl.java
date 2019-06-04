@@ -985,8 +985,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean updateImage(Long imageId) {
 		User user = new User();
-		user.setId(getCurrentUserId());
+		Long userId = getCurrentUserId();
+		user.setId(userId);
 		user.setImgId(imageId);
+        user.setUpdator(userId);
+        user.setUpdated(System.currentTimeMillis());
 		return userMapper.updateByPrimaryKeySelective(user) == 1;
 	}
 }
