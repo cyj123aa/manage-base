@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 
+import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,5 +18,12 @@ public interface ManageDepartmentMapperExt {
      * @return
      */
     List<ManageDepartmentTreeBO> getOrganizationList (@Param("ids")List<Long> ids);
+
+    /**
+     * 根据公司查询小组
+     * @param ids
+     * @return
+     */
+    List<ManageDepartment> getPositionByCompany(@Param("ids")List<Long> ids);
 
 }

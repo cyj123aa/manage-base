@@ -43,4 +43,20 @@
             AND md.parent_id = #{id}
     </select>
 
+    <resultMap id="BasicBaseResultMap" type="com.hoolink.manage.base.dao.model.ManageDepartment">
+        <id column="mp.id" jdbcType="BIGINT" property="id" />
+        <result column="mc.id" jdbcType="BIGINT" property="parentId" />
+    </resultMap>
+
+    <select id="getPositionByCompany" resultMap="BasicBaseResultMap">
+        SELECT mp.id,mc.id
+        FROM manage_department mp left join manage_department md on mp.parent_id = md.id and mp.enabled=true and md.enabled=true
+        left join manage_department mc on md.parent_id = mc.id and mc.enabled=true
+        WHERE
+        mc.id IN
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>
