@@ -487,6 +487,8 @@ public class UserServiceImpl implements UserService {
 			transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
 		}
 		criteria.andEnabledEqualTo(true);
+		//登录用户本身应该过滤掉，不可以看到
+		criteria.andIdNotEqualTo(getCurrentUserId());
 	}
 
 	/**
@@ -985,8 +987,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean updateImage(Long imageId) {
 		User user = new User();
-		user.setId(getCurrentUserId());
+		Long userId = getCurrentUserId();
+		user.setId(userId);
 		user.setImgId(imageId);
+        user.setUpdator(userId);
+        user.setUpdated(System.currentTimeMillis());
 		return userMapper.updateByPrimaryKeySelective(user) == 1;
 	}
 }
