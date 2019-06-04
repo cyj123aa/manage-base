@@ -6,9 +6,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
+import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
+import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
+import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
@@ -91,6 +95,13 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserMapperExt userMapperExt;
+
+    @Resource
+    private ManageDepartmentMapper manageDepartmentMapper;
+
+    @Resource
+    private ManageDepartmentMapperExt manageDepartmentMapperExt;
+
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -536,27 +547,62 @@ public class UserServiceImpl implements UserService {
             List<Long> positionList = new ArrayList<>();
             //key positionId
             Map<String, Integer> map = new HashMap<>(list.size());
+            Map<Long, Integer> company = new HashMap<>(list.size());
+            Map<Long, Integer> dept = new HashMap<>(list.size());
             list.forEach(deptSecurityBO -> {
-                if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                if(EdmDeptEnum.COMPANY.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    //转为小组关联
-                    List<DeptSecurityBO> nextDeptList = list.stream().filter(securityBO -> deptSecurityBO.getId().equals(securityBO.getParentId())).collect(Collectors.toList());
-                    if(CollectionUtils.isNotEmpty(nextDeptList)){
-                        for (DeptSecurityBO securityBO : nextDeptList) {
-                            positionList.add(securityBO.getId());
-                            map.put(securityBO.getId().toString(),securityBO.getEncryLevelDept());
-                        }
-                    }
-                }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())){
+                    //公司密保等级 转为小组关联
+                    company.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
+                }else if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //部门密保等级 转为小组关联
+                    dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
+                }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //小组密保等级
                     positionList.add(deptSecurityBO.getId());
                     map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                 }
             });
+            if(!org.springframework.util.CollectionUtils.isEmpty(company)){
+                List<Long> companyList = new ArrayList<>(company.keySet());
+                List<ManageDepartment> positionByCompany = manageDepartmentMapperExt.getPositionByCompany(companyList);
+                getPositionSecurity(positionList, map, company, positionByCompany);
+            }
+            if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
+                List<Long> deptList = new ArrayList<>(dept.keySet());
+                ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+                ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+                criteria.andParentIdIn(deptList).andEnabledEqualTo(true);
+                List<ManageDepartment> departmentList = manageDepartmentMapper.selectByExample(departmentExample);
+                getPositionSecurity(positionList, map, dept, departmentList);
+            }
             userDeptInfoBO.setDeptMap(map);
             userDeptInfoBO.setPositionList(positionList);
         }
         return userDeptInfoBO;
     }
+
+    /**
+     * 将公司 部门 转为小组层面
+     * @param positionList
+     * @param map
+     * @param company
+     * @param positionByCompany
+     */
+    private void getPositionSecurity(List<Long> positionList, Map<String, Integer> map, Map<Long, Integer> company, List<ManageDepartment> positionByCompany) {
+        if (CollectionUtils.isNotEmpty(positionByCompany)) {
+            positionByCompany.forEach(manageDepartment -> {
+                Integer security = company.get(manageDepartment.getParentId());
+                if (security != null) {
+                    positionList.add(manageDepartment.getId());
+                    map.put(manageDepartment.getId().toString(), security);
+                }
+            });
+        }
+    }
+
     @Override
     public List<ManagerUserBO> getUserList(List<Long> idList) {
         UserExample example = new UserExample();

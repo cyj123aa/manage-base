@@ -180,7 +180,7 @@ public class MenuServiceImpl implements MenuService {
         menuTreeBO.setKey(deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
-        menuTreeBO.setEnableUpdate(true);
+        menuTreeBO.setEnableUpdate(false);
         return menuTreeBO;
     }
 
@@ -206,12 +206,12 @@ public class MenuServiceImpl implements MenuService {
                     List<EdmMenuTreeBO> threeMenuBOS = new ArrayList<>();
                     for (DeptPositionBO deptPositionBO:deptList) {
                         if(company.getId().equals(deptPositionBO.getParentId())){
-                            EdmMenuTreeBO threeMenu = getEdmMenuTreeBO(company);
+                            EdmMenuTreeBO threeMenu = getEdmMenuTreeBO(deptPositionBO);
                             if(CollectionUtils.isNotEmpty(positionList)) {
                                 List<EdmMenuTreeBO> fourMenuBOS = new ArrayList<>();
                                 for (DeptPositionBO positionBO : positionList) {
                                     if(deptPositionBO.getId().equals(positionBO.getParentId())){
-                                        EdmMenuTreeBO fourMenu = getEdmMenuTreeBO(company);
+                                        EdmMenuTreeBO fourMenu = getEdmMenuTreeBO(positionBO);
                                         fourMenuBOS.add(fourMenu);
                                     }
                                 }
