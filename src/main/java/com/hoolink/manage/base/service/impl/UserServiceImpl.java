@@ -23,10 +23,12 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.UserDepartmentBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.CompanyEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.StatusEnum;
@@ -529,6 +531,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
         UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
+        if(userSecurity==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
+        }
         UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
         //部门 小组 与用户关联
         List<DeptSecurityBO> list = userSecurity.getList();
@@ -567,5 +572,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id) {
         return userMapperExt.getDeptByUser(id);
+    }
+    @Override
+    public Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList) {
+        List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
+        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+        return map;
+    }
+
+    @Override
+    public List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO) throws Exception {
+        List<Long> deptIdList = new ArrayList<>();
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
+        if(Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.COMPANY_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }else if(Constant.DEPT_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }
+        return deptIdList;
     }
 }

@@ -5,6 +5,7 @@ import com.hoolink.manage.base.bo.UserSecurityBO;
 import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
 import java.util.List;
 
+import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import org.apache.ibatis.annotations.Param;
 
@@ -41,4 +42,11 @@ public interface MiddleUserDepartmentMapperExt {
 	 * @return
 	 */
 	UserSecurityBO getUserSecurity(@Param("userId")Long userId);
+
+	/**
+	 * 根据用户id获取所在公司或者部门信息
+	 * @param userId
+	 * @return
+	 */
+	List<UserDeptAssociationBO> getOrganizationInfo(@Param("userId")Long userId);
 }

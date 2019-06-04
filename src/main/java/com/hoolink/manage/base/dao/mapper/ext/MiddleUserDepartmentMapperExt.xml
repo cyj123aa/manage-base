@@ -25,6 +25,12 @@
     <result column="encry_level_dept" jdbcType="TINYINT" property="encryLevelDept"/>
   </resultMap>
 
+  <resultMap id="UserDeptAssociationMap" type="com.hoolink.sdk.bo.manager.UserDeptAssociationBO">
+    <id column="dept_id" jdbcType="BIGINT" property="deptId"/>
+    <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+    <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+  </resultMap>
+
   <select id="getDept" resultMap="UserCompanyMap">
     select md.id,md.dept_name,md.dept_type,md.parent_id from  middle_user_department mud
     left join manage_department md on mud.dept_id=md.id
@@ -66,4 +72,18 @@ WHERE
 ORDER BY
 	md.created ASC
   </select>
+
+  <select id="getOrganizationInfo" resultMap="UserDeptAssociationMap">
+    SELECT
+      md.id AS dept_id,
+      md.dept_name,
+      md.dept_type
+    FROM
+      middle_user_department mud
+      LEFT JOIN manage_department md ON mud.dept_id=md.id
+    WHERE
+      mud.user_id=#{userId}
+    AND md.enabled=true
+  </select>
+
 </mapper>

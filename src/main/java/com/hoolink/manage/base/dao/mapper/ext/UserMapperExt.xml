@@ -13,4 +13,44 @@
         inner join manage_user mu on mu.id=mud.user_id
         where mud.user_id=#{id}
     </select>
+  <resultMap id="BaseResultMap" type="com.hoolink.sdk.bo.manager.SimpleDeptUserBO">
+    <!--
+    @mbggenerated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_no" jdbcType="VARCHAR" property="userNo" />
+    <result column="user_account" jdbcType="VARCHAR" property="userAccount" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="position" jdbcType="VARCHAR" property="position" />
+    <result column="encry_level_company" jdbcType="INTEGER" property="encryLevelCompany" />
+    <result column="view_encry_level_permitted" jdbcType="BIT" property="viewEncryLevelPermitted" />
+    <result column="dept_id" jdbcType="BIGINT" property="deptId" />
+  </resultMap>
+
+  <select id="selectAllByDeptIds" resultMap="BaseResultMap">
+  SELECT
+        u.id,
+        u.user_no,
+        u.user_account,
+        u.user_name,
+        u.role_id,
+        u.phone,
+        u.position,
+        u.encry_level_company,
+        u.view_encry_level_permitted,
+        m.dept_id AS dept_id
+    FROM
+        middle_user_department m
+        LEFT JOIN manage_user u ON m.user_id = u.id
+        WHERE u.enabled = TRUE
+        <if test="idList != null and idList.size() > 0">
+            AND
+            m.dept_id in
+            <foreach collection="idList" separator="," open="(" close=")" item="id">
+                #{id}
+            </foreach>
+        </if>
+  </select>
 </mapper>
