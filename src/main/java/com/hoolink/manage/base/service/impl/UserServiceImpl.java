@@ -420,7 +420,7 @@ public class UserServiceImpl implements UserService {
 						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
 					}
-					deptPair.setDeptNameStr(new StringBuilder(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
+					deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
 					deptPairList.add(deptPair);
 				}
 				userBO.setUserDeptPairList(deptPairList);
@@ -915,7 +915,7 @@ public class UserServiceImpl implements UserService {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
 			}
-			deptPair.setDeptNameStr(new StringBuilder(StringUtils.join(deptPair.getDeptIdList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
+			deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
 			deptPairList.add(deptPair);
 		}
 		personalInfo.setUserDeptPairList(deptPairList);
