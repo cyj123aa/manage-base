@@ -45,18 +45,18 @@ public class DeptTreeToolUtils {
     public void getChild(ManageDepartmentTreeBO treeDto, Map<Long, Long> map, Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap) {
         List<ManageDepartmentTreeBO> childList = Lists.newArrayList();
         bodyList.stream()
-                .filter(c -> !map.containsKey(c.getId()))
-                .filter(c -> c.getParentId().equals(treeDto.getId()))
+                .filter(c -> !map.containsKey(c.getKey()))
+                .filter(c -> c.getParentId().equals(treeDto.getKey()))
                 .forEach(c -> {
-                    map.put(c.getId(), c.getParentId());
+                    map.put(c.getKey(), c.getParentId());
                     getChild(c, map, flag, userMap);
                     childList.add(c);
-                    Boolean hasAddUser = CollectionUtils.isEmpty(c.getChildTreeList()) && flag && (userMap != null && !userMap.isEmpty());
+                    Boolean hasAddUser = CollectionUtils.isEmpty(c.getChildren()) && flag && (userMap != null && !userMap.isEmpty());
                     if (hasAddUser) {
-                        c.setUserList(userMap.get(c.getId()));
+                        c.setUserList(userMap.get(c.getKey()));
                     }
                 });
-        treeDto.setChildTreeList(childList);
+        treeDto.setChildren(childList);
 
     }
 }

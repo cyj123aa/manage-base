@@ -3,11 +3,11 @@
 <mapper namespace="com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt">
 
   <resultMap id="BaseResultMap" type="com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO">
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="dept_name" jdbcType="VARCHAR" property="name" />
+    <id column="id" jdbcType="BIGINT" property="key" />
+    <result column="dept_name" jdbcType="VARCHAR" property="title" />
     <result column="dept_type" jdbcType="TINYINT" property="deptType" />
     <result column="parent_id" jdbcType="BIGINT" property="parentId" />
-    <collection property="childTreeList" select="getOrganizationListByParentId" column="id"></collection>
+    <collection property="children" select="getOrganizationListByParentId" column="id"></collection>
   </resultMap>
 
     <!-- 获取所在公司或者部门-->
