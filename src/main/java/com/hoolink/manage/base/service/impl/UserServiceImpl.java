@@ -482,10 +482,10 @@ public class UserServiceImpl implements UserService {
 		if(userPageParamBO.getStatus() != null) {
 			criteria.andStatusEqualTo(userPageParamBO.getStatus());
 		}
-		//只有一级用户可以看到所有员工， 其他根据组织架构显示员工列表
-		if(!Constant.LEVEL_ONE.equals(ContextUtil.getManageCurrentUser().getRoleLevel())){
-			transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
-		}
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
+		
 		criteria.andEnabledEqualTo(true);
 		//登录用户本身应该过滤掉，不可以看到
 		criteria.andIdNotEqualTo(getCurrentUserId());
