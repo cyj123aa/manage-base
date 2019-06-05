@@ -165,6 +165,12 @@ public class ExcelServiceImpl implements ExcelService{
         return value;
     }
     
+    /**
+     * 解析excel
+     * @param file
+     * @return
+     * @throws Exception
+     */
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
         FileInputStream inp = new FileInputStream(file);
