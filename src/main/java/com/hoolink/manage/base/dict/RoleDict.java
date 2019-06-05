@@ -28,7 +28,7 @@ public class RoleDict extends AbstractDict<Long, String>{
 	public List<DictPairBO<Long, String>> getDictPairInfo(Object param) {
 		List<DictPairBO<Long, String>> dictPairList = new ArrayList<>();
 		CurrentUserBO user = ContextUtil.getManageCurrentUser();
-		List<ManageRoleBO> roleList = roleService.listCurrentAndChildrenRoleByRoleId(user.getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId());
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> dictPair = new DictPairBO<>();
 			dictPair.setKey(r.getId());

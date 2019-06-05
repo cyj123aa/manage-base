@@ -489,7 +489,7 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public List<ManageRoleBO> listCurrentAndChildrenRoleByRoleId(Long currentRoleId){
+	public List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId){
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
         criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
@@ -498,7 +498,6 @@ public class RoleServiceImpl implements RoleService {
         List<ManageRole> roleList = new ArrayList<>();
         Optional<ManageRole> roleOpt = allRoleList.stream().filter(r -> r.getId().equals(currentRoleId)).findFirst();
         roleOpt.ifPresent(role -> {
-        	roleList.add(role);
         	traverseAllChildrenRole(allRoleList, roleList, role.getId());
         });
 		return CopyPropertiesUtil.copyList(roleList, ManageRoleBO.class);
