@@ -37,7 +37,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.hoolink.sdk.enums.edm.EdmResourceRepertory.*;
 
@@ -117,6 +120,7 @@ public class MenuServiceImpl implements MenuService {
             //临时文件所属组织架构 部门库存在
             List<Long> positions = paramBO.getPositionList();
             if (CollectionUtils.isNotEmpty(positions)) {
+                //TODO
                 List<TemporaryDeptBO> temporaryDept = manageMenuMapperExt.getTemporaryDept(positions);
                 if (CollectionUtils.isNotEmpty(temporaryDept)) {
                     for (TemporaryDeptBO temporaryDeptBO : temporaryDept) {
@@ -131,27 +135,18 @@ public class MenuServiceImpl implements MenuService {
                 deptAllList = ArrayUtil.removeDuplict(deptAllList);
             }
         }
-        List<DeptPositionBO> companyList = new ArrayList<>();
-        List<DeptPositionBO> deptList = new ArrayList<>();
-        List<DeptPositionBO> positionList = new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(deptAllList)){
-            for (DeptPositionBO deptPositionBO : deptAllList){
-                if(EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    companyList.add(deptPositionBO);
-                }else if(EdmDeptEnum.DEPT.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    deptList.add(deptPositionBO);
-                }else if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    positionList.add(deptPositionBO);
-                }
-            }
-        }
         switch (byType) {
             case DEPT_RESOURCE_CODE:
                 //部门资源
-                getDeptInitMenu(companyList,deptList,positionList, edmMenuTreeBO);
+                getDeptInitMenu(deptAllList, edmMenuTreeBO);
                 break;
             case COMPANY_RESOURCE_CODE:
                 //资源库 二级菜单
+                List<DeptPositionBO> companyList = null;
+                if(CollectionUtils.isNotEmpty(deptAllList)){
+                    companyList = deptAllList.stream().filter(deptPositionBO -> EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()))
+                            .collect(Collectors.toList());
+                }
                 if(CollectionUtils.isEmpty(companyList)){
                     break;
                 }
@@ -191,40 +186,55 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 部门资源菜单初始化
-     * @param companyList
-     * @param deptList
-     * @param positionList
+     * @param deptAllList
      * @param edmMenuBO
      */
-    private void getDeptInitMenu(List<DeptPositionBO> companyList,List<DeptPositionBO> deptList,List<DeptPositionBO> positionList, EdmMenuTreeBO edmMenuBO) {
-        if(CollectionUtils.isNotEmpty(companyList)){
-            //下级菜单
-            List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
-            for (DeptPositionBO company:companyList){
-                EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,false);
-                if(CollectionUtils.isNotEmpty(deptList)){
-                    List<EdmMenuTreeBO> threeMenuBOS = new ArrayList<>();
-                    for (DeptPositionBO deptPositionBO:deptList) {
-                        if(company.getId().equals(deptPositionBO.getParentId())){
-                            EdmMenuTreeBO threeMenu = getEdmMenuTreeBO(deptPositionBO,false);
-                            if(CollectionUtils.isNotEmpty(positionList)) {
-                                List<EdmMenuTreeBO> fourMenuBOS = new ArrayList<>();
-                                for (DeptPositionBO positionBO : positionList) {
-                                    if(deptPositionBO.getId().equals(positionBO.getParentId())){
-                                        EdmMenuTreeBO fourMenu = getEdmMenuTreeBO(positionBO,true);
-                                        fourMenuBOS.add(fourMenu);
-                                    }
-                                }
-                                threeMenu.setChildren(fourMenuBOS);
-                            }
-                            threeMenuBOS.add(threeMenu);
-                        }
-                    }
-                    twoMenu.setChildren(threeMenuBOS);
+    private void getDeptInitMenu(List<DeptPositionBO> deptAllList, EdmMenuTreeBO edmMenuBO) {
+        if(CollectionUtils.isNotEmpty(deptAllList)){
+            //key 父级id 封装BO
+            Map<Long, List<EdmMenuTreeBO>> map = new HashMap<>(deptAllList.size());
+            deptAllList.forEach(deptPositionBO -> {
+                Long parentId=0L;
+                if(deptPositionBO.getParentId()!=null && deptPositionBO.getParentId()!=0){
+                    parentId=deptPositionBO.getParentId();
                 }
-                twoMenuBOS.add(twoMenu);
+                EdmMenuTreeBO edmMenuTreeBO;
+                if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
+                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false);
+                }else{
+                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true);
+                }
+                if(map.containsKey(parentId)){
+                    map.get(parentId).add(edmMenuTreeBO);
+                }else{
+                    List<EdmMenuTreeBO> edmMenuTreeBOS = new ArrayList<>();
+                    edmMenuTreeBOS.add(edmMenuTreeBO);
+                    map.put(parentId,edmMenuTreeBOS);
+                }
+            });
+            //封装子集菜单
+            List<EdmMenuTreeBO> firstMenus = map.get(0L);
+            if(CollectionUtils.isNotEmpty(firstMenus)){
+                fillNextMenu(map,firstMenus);
             }
-            edmMenuBO.setChildren(twoMenuBOS);
+            edmMenuBO.setChildren(firstMenus);
+        }
+    }
+
+    /**
+     * 封装下级递归目录
+     * @param map
+     * @param edmMenuTreeBOList
+     */
+    private void fillNextMenu(Map<Long, List<EdmMenuTreeBO>> map,List<EdmMenuTreeBO> edmMenuTreeBOList){
+        for (EdmMenuTreeBO childMenu : edmMenuTreeBOList) {
+            Long menuId = childMenu.getKey();
+            List<EdmMenuTreeBO> menuBOS = map.get(menuId);
+            if (org.springframework.util.CollectionUtils.isEmpty(menuBOS)) {
+                continue;
+            }
+            fillNextMenu(map,menuBOS);
+            childMenu.setChildren(menuBOS);
         }
     }
 
