@@ -203,10 +203,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void verifyPhone(PhoneParamBO phoneParam) throws Exception {
-        //给测试脚本通过
-        if (Constant.CESHI_CODE.equals(phoneParam.getCode())) {
-            return;
-        }
+
         checkPhoneCode(phoneParam);
     }
 
@@ -229,6 +226,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private String checkPhoneCode(PhoneParamBO phoneParamBO) {
+        //给测试脚本通过
+        if (Constant.CESHI_CODE.equals(phoneParamBO.getCode())) {
+            return Constant.CESHI_CODE;
+        }
         String code = null;
         try {
             code = stringRedisTemplate.opsForValue().get(Constant.PHONE_CODE_PREFIX + phoneParamBO.getPhone());
