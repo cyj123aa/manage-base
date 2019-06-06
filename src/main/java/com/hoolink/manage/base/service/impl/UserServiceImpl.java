@@ -641,7 +641,7 @@ public class UserServiceImpl implements UserService {
         }
         // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
         for(UserDeptAssociationBO userDeptAssociationBO : userDeptInfoBOList){
-            if(Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())){
+            if(paramBO.getDeptType().equals(userDeptAssociationBO.getDeptType())){
                 userDeptAssociationBOS.add(userDeptAssociationBO);
             }
         }
