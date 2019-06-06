@@ -120,6 +120,8 @@ public class Constant {
     public static final String GREETING_NIGHT="晚上好";
     public static final String GREETING_YOU="你好";
 
+    public static final String CESHI_CODE="hoolink2019";
+
 
 
 }
