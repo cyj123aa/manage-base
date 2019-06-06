@@ -165,6 +165,12 @@ public class ExcelServiceImpl implements ExcelService{
         return value;
     }
     
+    /**
+     * 解析excel
+     * @param file
+     * @return
+     * @throws Exception
+     */
 	private List<ManagerUserParamBO> dataAnalysis(File file) throws Exception{
 		List<ManagerUserParamBO> userExcelList = new ArrayList<>();
         FileInputStream inp = new FileInputStream(file);
@@ -448,7 +454,7 @@ public class ExcelServiceImpl implements ExcelService{
 		List<DictPairBO<Long, String>> childrenRolePairList = new ArrayList<>();
 		rolePairForExcel.setChildrenDictPairList(childrenRolePairList);
 		CurrentUserBO user = ContextUtil.getManageCurrentUser();
-		List<ManageRoleBO> roleList = roleService.listCurrentAndChildrenRoleByRoleId(user.getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId());
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> childRolePair = new DictPairBO<>();
 			childRolePair.setKey(r.getId());

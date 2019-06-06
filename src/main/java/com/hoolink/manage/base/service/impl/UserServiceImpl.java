@@ -396,108 +396,107 @@ public class UserServiceImpl implements UserService {
         Map<Long, List<MiddleUserDeptWithMoreBO>> middleUserDepartmentMap = middleUserDepartmentBOList.stream()
                 .collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getUserId));
 
-        //查询用户对应角色
-        List<Long> roleIdList = userList.stream().map(user -> user.getRoleId()).collect(Collectors.toList());
-        List<ManageRoleBO> roleList = roleService.listByIdList(roleIdList);
+		//查询用户对应角色
+		List<Long> roleIdList = userList.stream().map(user -> user.getRoleId()).collect(Collectors.toList());
+		List<ManageRoleBO> roleList = roleService.listByIdList(roleIdList);
+		
+		List<ManagerUserBO> userBoList = new ArrayList<>();
+		userList.stream().forEach(user -> {
+			//封装结果
+			ManagerUserBO userBO = new ManagerUserBO();
+			userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+			userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+			ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
+					.orElseGet(ManageRoleBO::new);
+			userBO.setRoleName(role.getRoleName());
+			
+			List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
+			
+			if(CollectionUtils.isNotEmpty(userDepartmentList)) {
+				// 用户组织关系
+				Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+				
+				List<DeptPairBO> deptPairList = new ArrayList<>();
+				for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+					List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+					DeptPairBO deptPair = new DeptPairBO();
+					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+					
+					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+					}
+					deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
+					deptPairList.add(deptPair);
+				}
+				userBO.setUserDeptPairList(deptPairList);
+				
+				Set<String> companySet = new HashSet<>();
+				userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
+						.forEach(ud -> companySet.add(ud.getDeptName()));
+				userBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
+			}
+			
+			BeanUtils.copyProperties(user, userBO);
+			userBoList.add(userBO);
+		});
+		return userBoList;
+	}
 
-        List<ManagerUserBO> userBoList = new ArrayList<>();
-        userList.stream().forEach(user -> {
-            //封装结果
-            ManagerUserBO userBO = new ManagerUserBO();
-            userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
-            userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-            ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
-                    .orElseGet(ManageRoleBO::new);
-            userBO.setRoleName(role.getRoleName());
+	/**
+	 * 用户列表查询条件
+	 * @param userPageParamBO
+	 * @return
+	 */
+	private UserExample buildUserCriteria(ManagerUserPageParamBO userPageParamBO) {
+		UserExample userExample = new UserExample();
+		UserExample.Criteria criteria = userExample.createCriteria();
+		//姓名、职位、手机号、账号
+		if(StringUtils.isNotBlank(userPageParamBO.getGroupParam())) {
+			andCriteria(criteria, userPageParamBO);
+			criteria.andNameLike("%" + userPageParamBO.getGroupParam() + "%");
+			
+			UserExample.Criteria groupCriteria1 = userExample.createCriteria();
+			andCriteria(groupCriteria1, userPageParamBO);
+			groupCriteria1.andPositionLike("%" + userPageParamBO.getGroupParam() + "%");
+			userExample.or(groupCriteria1);
+			
+			UserExample.Criteria groupCriteria2 = userExample.createCriteria();
+			andCriteria(groupCriteria2, userPageParamBO);
+			groupCriteria2.andPhoneLike("%" + userPageParamBO.getGroupParam() + "%");
+			userExample.or(groupCriteria2);
+			
+			UserExample.Criteria groupCriteria3 = userExample.createCriteria();
+			andCriteria(groupCriteria3, userPageParamBO);
+			groupCriteria3.andUserAccountLike("%" + userPageParamBO.getGroupParam() + "%");
+			userExample.or(groupCriteria3);
+		}else {
+			andCriteria(criteria, userPageParamBO);
+		}
+		userExample.setOrderByClause(" created desc ");
+		return userExample;
+	}
+	
+	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
+		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
+			List<Long> deptIdList = userPageParamBO.getDeptId();
+			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size()-1)));
+		}
+		if(userPageParamBO.getRoleId() != null) {
+			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
+		}
+		if(userPageParamBO.getStatus() != null) {
+			criteria.andStatusEqualTo(userPageParamBO.getStatus());
+		}
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
 
-            List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
-
-            if (CollectionUtils.isNotEmpty(userDepartmentList)) {
-                // 用户组织关系
-                Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
-
-                List<DeptPairBO> deptPairList = new ArrayList<>();
-                for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
-                    List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
-                    DeptPairBO deptPair = new DeptPairBO();
-                    deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-                    deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-
-                    if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
-                        deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
-                        deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
-                    }
-                    deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "" : deptPair.getEncryLevelDeptName()).toString());
-                    deptPairList.add(deptPair);
-                }
-                userBO.setUserDeptPairList(deptPairList);
-
-                Set<String> companySet = new HashSet<>();
-                userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
-                        .forEach(ud -> companySet.add(ud.getDeptName()));
-                userBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
-            }
-
-            BeanUtils.copyProperties(user, userBO);
-            userBoList.add(userBO);
-        });
-        return userBoList;
-    }
-
-    /**
-     * 用户列表查询条件
-     *
-     * @param userPageParamBO
-     * @return
-     */
-    private UserExample buildUserCriteria(ManagerUserPageParamBO userPageParamBO) {
-        UserExample userExample = new UserExample();
-        UserExample.Criteria criteria = userExample.createCriteria();
-        //姓名、职位、手机号、账号
-        if (StringUtils.isNotBlank(userPageParamBO.getGroupParam())) {
-            andCriteria(criteria, userPageParamBO);
-            criteria.andNameLike("%" + userPageParamBO.getGroupParam() + "%");
-
-            UserExample.Criteria groupCriteria1 = userExample.createCriteria();
-            andCriteria(groupCriteria1, userPageParamBO);
-            groupCriteria1.andPositionLike("%" + userPageParamBO.getGroupParam() + "%");
-            userExample.or(groupCriteria1);
-
-            UserExample.Criteria groupCriteria2 = userExample.createCriteria();
-            andCriteria(groupCriteria2, userPageParamBO);
-            groupCriteria2.andPhoneLike("%" + userPageParamBO.getGroupParam() + "%");
-            userExample.or(groupCriteria2);
-
-            UserExample.Criteria groupCriteria3 = userExample.createCriteria();
-            andCriteria(groupCriteria3, userPageParamBO);
-            groupCriteria3.andUserAccountLike("%" + userPageParamBO.getGroupParam() + "%");
-            userExample.or(groupCriteria3);
-        } else {
-            andCriteria(criteria, userPageParamBO);
-        }
-        userExample.setOrderByClause(" created desc ");
-        return userExample;
-    }
-
-    private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-        if (CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
-            List<Long> deptIdList = userPageParamBO.getDeptId();
-            transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size() - 1)));
-        }
-        if (userPageParamBO.getRoleId() != null) {
-            criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
-        }
-        if (userPageParamBO.getStatus() != null) {
-            criteria.andStatusEqualTo(userPageParamBO.getStatus());
-        }
-        //只有一级用户可以看到所有员工， 其他根据组织架构显示员工列表
-        if (!Constant.LEVEL_ONE.equals(ContextUtil.getManageCurrentUser().getRoleLevel())) {
-            transformDeptQueryToUserIdQuery(criteria, ContextUtil.getManageCurrentUser().getComanyIdSet().stream().collect(Collectors.toList()));
-        }
-        criteria.andEnabledEqualTo(true);
-        //登录用户本身应该过滤掉，不可以看到
-        criteria.andIdNotEqualTo(getCurrentUserId());
-    }
+		criteria.andEnabledEqualTo(true);
+		//登录用户本身应该过滤掉，不可以看到
+		criteria.andIdNotEqualTo(getCurrentUserId());
+	}
 
     /**
      * 将组织相关的查询条件转换为id条件
@@ -890,58 +889,58 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Override
-    public PersonalInfoBO getPersonalInfo() throws Exception {
-        User user = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
-        if (user == null) {
-            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
-        }
-
-        PersonalInfoBO personalInfo = new PersonalInfoBO();
-        BeanUtils.copyProperties(user, personalInfo);
-        if (user.getImgId() != null) {
-            //调用obs服务获取用户头像
-            BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
-            if (obsBackBo.getData() != null) {
-                personalInfo.setImgUrl(obsBackBo.getData().getObjectUrl());
-            }
-        }
-
-        List<ManageRoleBO> roleList = roleService.listByIdList(Arrays.asList(user.getRoleId()));
-        if (CollectionUtils.isNotEmpty(roleList)) {
-            personalInfo.setRoleName(roleList.get(0).getRoleName());
-        }
-        personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
-        personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-        personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
-
-        // 获取组织树
-        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
-                .listWithMoreByUserIdList(Arrays.asList(user.getId()));
-        Set<String> companySet = new HashSet<>();
-        userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
-            companySet.add(ud.getDeptName());
-        });
-        personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
-        // 用户组织关系
-        Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
-
-        List<DeptPairBO> deptPairList = new ArrayList<>();
-        for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
-            List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
-            DeptPairBO deptPair = new DeptPairBO();
-            deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-            deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-            if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
-                deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
-                deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
-            }
-            deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "" : deptPair.getEncryLevelDeptName()).toString());
-            deptPairList.add(deptPair);
-        }
-        personalInfo.setUserDeptPairList(deptPairList);
-        return personalInfo;
-    }
+	@Override
+	public PersonalInfoBO getPersonalInfo() throws Exception{
+		User user = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
+		if(user == null) {
+			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+		}
+		
+		PersonalInfoBO personalInfo = new PersonalInfoBO();
+		BeanUtils.copyProperties(user, personalInfo);
+		if(user.getImgId() != null) {
+			//调用obs服务获取用户头像
+			BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
+			if(obsBackBo.getData() != null) {
+				personalInfo.setImgUrl(obsBackBo.getData().getObjectUrl());
+			}
+		}
+		
+		List<ManageRoleBO> roleList = roleService.listByIdList(Arrays.asList(user.getRoleId()));
+		if(CollectionUtils.isNotEmpty(roleList)) {
+			personalInfo.setRoleName(roleList.get(0).getRoleName());
+		}
+		personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+		personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
+		
+		// 获取组织树
+		List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
+				.listWithMoreByUserIdList(Arrays.asList(user.getId()));
+		Set<String> companySet = new HashSet<>();
+		userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
+			companySet.add(ud.getDeptName());
+		});
+		personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
+		// 用户组织关系
+		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+		
+		List<DeptPairBO> deptPairList = new ArrayList<>();
+		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+			DeptPairBO deptPair = new DeptPairBO();
+			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+			}
+			deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
+			deptPairList.add(deptPair);
+		}
+		personalInfo.setUserDeptPairList(deptPairList);
+		return personalInfo;
+	}
 
     @Override
     public void updatePasswd(UpdatePasswdParamBO updatePasswdParam) {
