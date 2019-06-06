@@ -157,7 +157,7 @@ public class MenuServiceImpl implements MenuService {
                 }
                 List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
                 companyList.forEach(company -> {
-                    EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company);
+                    EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,true);
                     twoMenuBOS.add(twoMenu);
                 });
                 edmMenuTreeBO.setChildren(twoMenuBOS);
@@ -175,12 +175,12 @@ public class MenuServiceImpl implements MenuService {
      * @param deptPositionBO
      * @return
      */
-    private EdmMenuTreeBO getEdmMenuTreeBO(DeptPositionBO deptPositionBO) {
+    private EdmMenuTreeBO getEdmMenuTreeBO(DeptPositionBO deptPositionBO,boolean flag) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
         menuTreeBO.setKey(deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
-        menuTreeBO.setEnableUpdate(false);
+        menuTreeBO.setEnableUpdate(flag);
         return menuTreeBO;
     }
 
@@ -201,17 +201,17 @@ public class MenuServiceImpl implements MenuService {
             //下级菜单
             List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
             for (DeptPositionBO company:companyList){
-                EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company);
+                EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,false);
                 if(CollectionUtils.isNotEmpty(deptList)){
                     List<EdmMenuTreeBO> threeMenuBOS = new ArrayList<>();
                     for (DeptPositionBO deptPositionBO:deptList) {
                         if(company.getId().equals(deptPositionBO.getParentId())){
-                            EdmMenuTreeBO threeMenu = getEdmMenuTreeBO(deptPositionBO);
+                            EdmMenuTreeBO threeMenu = getEdmMenuTreeBO(deptPositionBO,false);
                             if(CollectionUtils.isNotEmpty(positionList)) {
                                 List<EdmMenuTreeBO> fourMenuBOS = new ArrayList<>();
                                 for (DeptPositionBO positionBO : positionList) {
                                     if(deptPositionBO.getId().equals(positionBO.getParentId())){
-                                        EdmMenuTreeBO fourMenu = getEdmMenuTreeBO(positionBO);
+                                        EdmMenuTreeBO fourMenu = getEdmMenuTreeBO(positionBO,true);
                                         fourMenuBOS.add(fourMenu);
                                     }
                                 }
