@@ -13,6 +13,7 @@ import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.manage.base.dao.model.ManageMenuExample;
 import com.hoolink.manage.base.dao.model.MiddleRoleMenu;
 import com.hoolink.manage.base.dao.model.MiddleRoleMenuExample;
+import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -61,6 +62,8 @@ public class MenuServiceImpl implements MenuService {
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
     @Resource
     private MiddleRoleMenuMapperExt middleRoleMenuMapperExt;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public List<ManageMenuBO> listByIdList(List<Long> idList) {
@@ -98,14 +101,7 @@ public class MenuServiceImpl implements MenuService {
         for (MiddleRoleMenu middleRoleMenu : middleRoleMenus) {
             if (manageMenu.getId().equals(middleRoleMenu.getMenuId())) {
                 //转为EdmMenuTreeBO
-                edmMenuTreeBO = new EdmMenuTreeBO();
-                edmMenuTreeBO.setKey(manageMenu.getId());
-                edmMenuTreeBO.setValue(manageMenu.getId().toString());
-                edmMenuTreeBO.setCode(manageMenu.getMenuCode());
-                edmMenuTreeBO.setEnableUpdate(false);
-                edmMenuTreeBO.setReadOnly(middleRoleMenu.getPermissionFlag());
-                edmMenuTreeBO.setTitle(manageMenu.getMenuName());
-                edmMenuTreeBO.setType(paramBO.getType());
+                edmMenuTreeBO = getEdmMenuTreeBO(paramBO, manageMenu, middleRoleMenu);
                 break;
             }
         }
@@ -117,6 +113,31 @@ public class MenuServiceImpl implements MenuService {
         //用户权限下所有组织架构列表
         List<DeptPositionBO> deptAllList = middleUserDepartmentMapperExt.getDept(userId);
         if (DEPT_RESOURCE_CODE.getKey().equals(paramBO.getType())) {
+            //用户处在 公司级别 体系中心级别 部门级别 todo
+            List<Long> companyIds = new ArrayList<>();
+            List<Long> deptIds = new ArrayList<>();
+            for (DeptPositionBO deptPositionBO:deptAllList) {
+                if(EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getEncryLevelDept()!=null && deptPositionBO.getEncryLevelDept()!=0){
+                    companyIds.add(deptPositionBO.getId());
+                }/*else if(EdmDeptEnum.SYSTEM_CENTER.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getEncryLevelDept()!=null && deptPositionBO.getEncryLevelDept()!=0){
+
+                }*/else if(EdmDeptEnum.DEPT.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getEncryLevelDept()!=null && deptPositionBO.getEncryLevelDept()!=0){
+                    deptIds.add(deptPositionBO.getId());
+                }
+            }
+            if(CollectionUtils.isNotEmpty(companyIds)){
+                List<DeptPositionBO> deptPositionBOS = departmentService.listByParentIdList(companyIds);
+                if(CollectionUtils.isNotEmpty(deptPositionBOS)){
+                    deptAllList.addAll(deptPositionBOS);
+                    deptPositionBOS.forEach(deptPositionBO -> deptIds.add(deptPositionBO.getId()));
+                }
+            }
+            if(CollectionUtils.isNotEmpty(deptIds)){
+                List<DeptPositionBO> deptPositionBOS = departmentService.listByParentIdList(companyIds);
+                if(CollectionUtils.isNotEmpty(deptPositionBOS)){
+                    deptAllList.addAll(deptPositionBOS);
+                }
+            }
             //临时文件所属组织架构 部门库存在
             List<Long> positions = paramBO.getPositionList();
             if (CollectionUtils.isNotEmpty(positions)) {
@@ -159,9 +180,30 @@ public class MenuServiceImpl implements MenuService {
                 break;
             case CACHE_RESOURCE_CODE:
                 //缓冲库
+                edmMenuTreeBO.setEnableUpdate(true);
                 break;
             default:break;
         }
+        return edmMenuTreeBO;
+    }
+
+    /**
+     * 数据封装 一级目录
+     * @param paramBO
+     * @param manageMenu
+     * @param middleRoleMenu
+     * @return
+     */
+    private EdmMenuTreeBO getEdmMenuTreeBO(ResourceParamBO paramBO, ManageMenu manageMenu, MiddleRoleMenu middleRoleMenu) {
+        EdmMenuTreeBO edmMenuTreeBO;
+        edmMenuTreeBO = new EdmMenuTreeBO();
+        edmMenuTreeBO.setKey(manageMenu.getId());
+        edmMenuTreeBO.setValue(manageMenu.getId().toString());
+        edmMenuTreeBO.setCode(manageMenu.getMenuCode());
+        edmMenuTreeBO.setEnableUpdate(false);
+        edmMenuTreeBO.setReadOnly(middleRoleMenu.getPermissionFlag());
+        edmMenuTreeBO.setTitle(manageMenu.getMenuName());
+        edmMenuTreeBO.setType(paramBO.getType());
         return edmMenuTreeBO;
     }
 
@@ -200,9 +242,9 @@ public class MenuServiceImpl implements MenuService {
                 }
                 EdmMenuTreeBO edmMenuTreeBO;
                 if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false);
-                }else{
                     edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true);
+                }else{
+                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false);
                 }
                 if(map.containsKey(parentId)){
                     map.get(parentId).add(edmMenuTreeBO);

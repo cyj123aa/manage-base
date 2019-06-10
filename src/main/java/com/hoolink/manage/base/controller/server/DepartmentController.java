@@ -5,6 +5,8 @@ import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
+import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
+import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackBOUtil;
@@ -37,5 +39,12 @@ public class DepartmentController {
     @LogAndParam(value = "获取组织架构信息失败")
     public BackBO<List<ManageDepartmentTreeBO>> getOrganizationList(@RequestBody @Valid ManageDepartmetTreeParamBO paramBO) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrganizationList(paramBO));
+    }
+
+    @PostMapping(value = "getOrganization")
+    @ApiOperation(value = "获取组织架构信息")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<OrganizationDeptBO> getOrganization(@RequestBody @Valid OrganizationDeptParamBO paramBO) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getOrganization(paramBO));
     }
 }

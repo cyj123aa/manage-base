@@ -59,4 +59,22 @@
         </foreach>
     </select>
 
+    <resultMap id="UserCompanyMap" type="com.hoolink.manage.base.bo.DeptPositionBO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+        <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+    </resultMap>
+
+    <select id="listByParentIdList" resultMap="UserCompanyMap">
+        SELECT mp.id,mc.id
+        FROM manage_department
+        WHERE
+        enabled=true
+        and parent_id IN
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

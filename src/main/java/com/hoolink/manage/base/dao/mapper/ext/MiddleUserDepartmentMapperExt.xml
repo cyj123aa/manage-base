@@ -17,6 +17,7 @@
     <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
     <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
     <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+    <result column="encry_level_dept" jdbcType="TINYINT" property="encryLevelDept"/>
   </resultMap>
 
   <resultMap id="UserDeptMap" type="com.hoolink.manage.base.bo.UserDeptBO">
@@ -32,7 +33,7 @@
   </resultMap>
 
   <select id="getDept" resultMap="UserCompanyMap">
-    select md.id,md.dept_name,md.dept_type,md.parent_id from  middle_user_department mud
+    select md.id,md.dept_name,md.dept_type,md.parent_id,mud.encry_level_dept from  middle_user_department mud
     left join manage_department md on mud.dept_id=md.id
     where mud.user_id=#{userId}
     and md.enabled=true
