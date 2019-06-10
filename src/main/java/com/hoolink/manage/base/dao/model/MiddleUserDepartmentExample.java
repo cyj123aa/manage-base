@@ -402,6 +402,136 @@ public class MiddleUserDepartmentExample {
             addCriterion("encry_level_dept not between", value1, value2, "encryLevelDept");
             return (Criteria) this;
         }
+
+        public Criteria andDeduceStatusIsNull() {
+            addCriterion("deduce_status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusIsNotNull() {
+            addCriterion("deduce_status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusEqualTo(Boolean value) {
+            addCriterion("deduce_status =", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotEqualTo(Boolean value) {
+            addCriterion("deduce_status <>", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusGreaterThan(Boolean value) {
+            addCriterion("deduce_status >", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("deduce_status >=", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusLessThan(Boolean value) {
+            addCriterion("deduce_status <", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusLessThanOrEqualTo(Boolean value) {
+            addCriterion("deduce_status <=", value, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusIn(List<Boolean> values) {
+            addCriterion("deduce_status in", values, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotIn(List<Boolean> values) {
+            addCriterion("deduce_status not in", values, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusBetween(Boolean value1, Boolean value2) {
+            addCriterion("deduce_status between", value1, value2, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeduceStatusNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("deduce_status not between", value1, value2, "deduceStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupIsNull() {
+            addCriterion("diff_dept_group is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupIsNotNull() {
+            addCriterion("diff_dept_group is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupEqualTo(String value) {
+            addCriterion("diff_dept_group =", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupNotEqualTo(String value) {
+            addCriterion("diff_dept_group <>", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupGreaterThan(String value) {
+            addCriterion("diff_dept_group >", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupGreaterThanOrEqualTo(String value) {
+            addCriterion("diff_dept_group >=", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupLessThan(String value) {
+            addCriterion("diff_dept_group <", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupLessThanOrEqualTo(String value) {
+            addCriterion("diff_dept_group <=", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupLike(String value) {
+            addCriterion("diff_dept_group like", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupNotLike(String value) {
+            addCriterion("diff_dept_group not like", value, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupIn(List<String> values) {
+            addCriterion("diff_dept_group in", values, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupNotIn(List<String> values) {
+            addCriterion("diff_dept_group not in", values, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupBetween(String value1, String value2) {
+            addCriterion("diff_dept_group between", value1, value2, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andDiffDeptGroupNotBetween(String value1, String value2) {
+            addCriterion("diff_dept_group not between", value1, value2, "diffDeptGroup");
+            return (Criteria) this;
+        }
     }
 
     /**

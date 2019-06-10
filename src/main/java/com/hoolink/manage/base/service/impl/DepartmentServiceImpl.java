@@ -5,6 +5,7 @@ import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
 import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,11 +57,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 	@Resource
 	private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
-	
+
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
 		if(CollectionUtils.isEmpty(idList)) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
@@ -80,8 +81,17 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentBO> listByCompany(String company) {
+	public List<ManageDepartmentBO> listAll() {
 		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
+	@Override
+	public List<ManageDepartmentBO> listByDeptType(Byte deptType) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true).andDeptTypeEqualTo(deptType);
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
 		//criteria.andCompanyEqualTo(company);
 		criteria.andEnabledEqualTo(true);

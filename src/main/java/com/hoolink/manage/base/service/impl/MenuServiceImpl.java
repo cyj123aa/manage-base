@@ -291,4 +291,25 @@ public class MenuServiceImpl implements MenuService {
         List<MiddleRoleMenu> middleRoleMenus = middleRoleMenuMapper.selectByExample(example);
         return middleRoleMenus;
     }
+
+    @Override
+    public List<ManageMenuBO> listAll() {
+        ManageMenuExample example = new ManageMenuExample();
+        example.createCriteria().andEnabledEqualTo(true);
+        List<ManageMenu> menus = manageMenuMapper.selectByExample(example);
+        return CopyPropertiesUtil.copyList(menus, ManageMenuBO.class);
+    }
+
+    @Override
+    public ManageMenu getByCode(String code) {
+        ManageMenuExample example = new ManageMenuExample();
+        example.createCriteria().andEnabledEqualTo(true).andMenuCodeEqualTo(code);
+        List<ManageMenu> menus = manageMenuMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(menus)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+        }
+        //当前menu
+        ManageMenu menu = menus.get(0);
+        return menu;
+    }
 }

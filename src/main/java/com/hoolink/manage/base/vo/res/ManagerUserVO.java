@@ -1,6 +1,9 @@
 package com.hoolink.manage.base.vo.res;
 
 import java.util.List;
+
+import com.hoolink.sdk.bo.manager.DeptPairBO;
+
 import lombok.Data;
 
 /**
@@ -51,6 +54,16 @@ public class ManagerUserVO {
     private String phone;
     
     /**
+     * 性别: 1/0 男/女
+     */
+    private Boolean sex;
+    
+    /**
+     * 性别
+     */
+    private String sexDesc;
+    
+    /**
      * 账号
      */
     private String userAccount;
@@ -73,7 +86,7 @@ public class ManagerUserVO {
     /**
      * 账号状态: 启用/禁用
      */
-    private String statusName;
+    private String statusDesc;
     
     /**
      *创建时间 
@@ -88,28 +101,5 @@ public class ManagerUserVO {
     /**
      * 用户部门关系
      */
-    private List<UserDepartmentVO> userDeptPairList;
-    
-    @Data
-    public class UserDepartmentVO{
-    	/**
-    	 * 部门ID
-    	 */
-    	private Long deptId;
-    	
-        /**
-         * 所属部门
-         */
-        private String deptName;
-        
-    	/**
-    	 * 部门密保等级(1-一级,2-二级,3-三级,4-四级)
-    	 */
-    	private Integer encryLevelDept;
-    	
-        /**
-         * 部门密保等级
-         */
-        private String encryLevelDeptName;
-    } 
+    private List<DeptPairVO> userDeptPairList;
 }

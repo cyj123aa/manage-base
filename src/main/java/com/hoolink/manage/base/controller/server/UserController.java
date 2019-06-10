@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
+import java.util.List;
+
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
@@ -40,6 +42,13 @@ public class UserController {
     @LogAndParam(value = "根据id获取用户失败，请稍后重试")
 	public BackBO<ManagerUserBO> getById(@RequestBody Long id)throws Exception{
 		return BackBOUtil.defaultBackBO(userService.getById(id));
+	}
+
+    @PostMapping(value = "listByIdList")
+    @ApiOperation(value = "根据id集合获取用户")
+    @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")
+	public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
+		return BackBOUtil.defaultBackBO(userService.listByIdList(idList));
 	}
 
     @PostMapping(value = "getUserSecurity")

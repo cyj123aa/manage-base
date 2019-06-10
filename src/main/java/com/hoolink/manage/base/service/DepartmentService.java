@@ -29,12 +29,18 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<DeptPositionBO> listByParentIdList(List<Long> idList);
-	
+
 	/**
-	 * 根据公司获取所有部门
-	 * @param company
+	 *  获取组织架构树
 	 * @return
 	 */
+	List<ManageDepartmentBO> listAll();
+	/**
+	 * 根据组织类型查询
+	 * @param deptType
+	 * @return
+	 */
+	List<ManageDepartmentBO> listByDeptType(Byte deptType);
 	List<ManageDepartmentBO> listByCompany(String company);
 
 	/**
