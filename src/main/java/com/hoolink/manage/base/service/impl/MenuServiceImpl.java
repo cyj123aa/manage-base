@@ -79,7 +79,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public EdmMenuTreeBO listByCode(ResourceParamBO paramBO) throws Exception {
         String code = paramBO.getCode();
-        if(StringUtils.isEmpty(code) || paramBO.getType()==null){
+        if(StringUtils.isEmpty(code) || paramBO.getRepertoryType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         CurrentUserBO user = ContextUtil.getManageCurrentUser();
@@ -91,7 +91,7 @@ public class MenuServiceImpl implements MenuService {
         //角色的edm权限
         List<MiddleRoleMenu> middleRoleMenus = listByRole(roleId);
         //EDM 一级菜单
-        EdmResourceRepertory byType = getByType(paramBO.getType());
+        EdmResourceRepertory byType = getByType(paramBO.getRepertoryType());
         ManageMenu manageMenu = manageMenuMapperExt.selectByExample(code, byType.getCode());
         if(CollectionUtils.isEmpty(middleRoleMenus) || manageMenu==null){
             return null;
@@ -112,7 +112,7 @@ public class MenuServiceImpl implements MenuService {
         //部门资源库存在四级菜单 岗级菜单
         //用户权限下所有组织架构列表
         List<DeptPositionBO> deptAllList = middleUserDepartmentMapperExt.getDept(userId);
-        if (DEPT_RESOURCE_CODE.getKey().equals(paramBO.getType())) {
+        if (DEPT_RESOURCE_CODE.getKey().equals(paramBO.getRepertoryType())) {
             //用户处在 公司级别 体系中心级别 部门级别 todo
             List<Long> companyIds = new ArrayList<>();
             List<Long> deptIds = new ArrayList<>();
@@ -181,6 +181,7 @@ public class MenuServiceImpl implements MenuService {
             case CACHE_RESOURCE_CODE:
                 //缓冲库
                 edmMenuTreeBO.setEnableUpdate(true);
+                edmMenuTreeBO.setMenuType(true);
                 break;
             default:break;
         }
@@ -203,7 +204,7 @@ public class MenuServiceImpl implements MenuService {
         edmMenuTreeBO.setEnableUpdate(false);
         edmMenuTreeBO.setReadOnly(middleRoleMenu.getPermissionFlag());
         edmMenuTreeBO.setTitle(manageMenu.getMenuName());
-        edmMenuTreeBO.setType(paramBO.getType());
+        edmMenuTreeBO.setRepertoryType(paramBO.getRepertoryType());
         return edmMenuTreeBO;
     }
 
@@ -218,6 +219,7 @@ public class MenuServiceImpl implements MenuService {
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
         menuTreeBO.setEnableUpdate(flag);
+        menuTreeBO.setMenuType(true);
         return menuTreeBO;
     }
 
