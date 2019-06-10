@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.service;
 
+import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
+import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import java.util.List;
 
 import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
@@ -50,4 +52,11 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	List<ManageDepartmentTreeBO> getOrgList (DepartmentTreeParamBO treeParamBO) throws Exception;
+	/**
+	 * 获取组织
+	 * @param paramBO
+	 * @return
+	 * @throws Exception
+	 */
+	OrganizationDeptBO getOrganization (OrganizationDeptParamBO paramBO) throws Exception;
 }

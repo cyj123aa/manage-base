@@ -1,5 +1,9 @@
 package com.hoolink.manage.base.service.impl;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
+import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
+import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
+import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +133,43 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}
 		return manageDepartmentList;
 	}
+
+	@Override
+	public OrganizationDeptBO getOrganization(OrganizationDeptParamBO paramBO) throws Exception {
+      OrganizationDeptBO organizationDeptBO = new OrganizationDeptBO();
+      ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getDeptId());
+      if(manageDepartment != null){
+         if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
+             organizationDeptBO.setGroupName(manageDepartment.getName());
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+          if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setDeptName(manageDepartment.getName());
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+
+      }
+      return organizationDeptBO;
+	}
+	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
+      ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+      ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+      criteria.andIdEqualTo(parentId).andEnabledEqualTo(true);
+      List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
+      if(CollectionUtils.isNotEmpty(manageDepartments)){
+          ManageDepartment manageDepartment = manageDepartments.get(0);
+          if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setDeptName(manageDepartment.getName());
+          }
+          if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setCompanyName(manageDepartment.getName());
+          }
+          if(manageDepartment.getParentId() != null){
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+
+      }
+  }
 
 	/**
 	 * 传入idList是因为一个人可能属于多个部门
