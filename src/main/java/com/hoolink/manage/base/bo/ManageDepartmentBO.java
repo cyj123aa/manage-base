@@ -18,11 +18,16 @@ public class ManageDepartmentBO {
      * 名称
      */
     private String name;
+    
+    /**
+     * 组织类型:1-公司 2-部门 3-小组
+     */
+    private Byte deptType;
 
     /**
-     * 所属公司
+     * 父级ID
      */
-    private String company;
+    private Long parentId;
 
     /**
      * 创建人

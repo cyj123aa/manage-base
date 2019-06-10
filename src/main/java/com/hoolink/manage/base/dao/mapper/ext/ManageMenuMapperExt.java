@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 
+import com.hoolink.manage.base.bo.MiddleRoleMenuBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.bo.TemporaryDeptBO;
 import com.hoolink.manage.base.dao.model.ManageMenu;
@@ -27,5 +28,12 @@ public interface ManageMenuMapperExt {
      * @return
      */
     List<TemporaryDeptBO> getTemporaryDept(@Param("positions")List<Long> positions);
+
+    /**
+     *查询用户当前权限菜单
+     * @param roleId
+     * @return
+     */
+    List<MiddleRoleMenuBO> getRoleMenu(@Param("roleId") Long roleId);
 
 }

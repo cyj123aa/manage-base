@@ -12,8 +12,7 @@ public interface SessionService {
 
     /**
      * 缓存当前用户信息，将token返回出去
-     *
-     * @param
+     * @param currentUserBO
      * @return
      */
     String cacheCurrentUser(CurrentUserBO currentUserBO);
@@ -45,8 +44,8 @@ public interface SessionService {
 
     /**
      * 删除用户及其token
-     *
      * @param userId
+     * @return
      */
     Boolean deleteSession(Long userId);
 

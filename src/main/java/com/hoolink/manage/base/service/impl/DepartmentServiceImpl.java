@@ -1,6 +1,11 @@
 package com.hoolink.manage.base.service.impl;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
+import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
+import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
+import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,11 +57,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 	@Resource
 	private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
-	
+
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
 		if(CollectionUtils.isEmpty(idList)) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
@@ -76,8 +81,17 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentBO> listByCompany(String company) {
+	public List<ManageDepartmentBO> listAll() {
 		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
+	@Override
+	public List<ManageDepartmentBO> listByDeptType(Byte deptType) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		example.createCriteria().andEnabledEqualTo(true).andDeptTypeEqualTo(deptType);
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
 		//criteria.andCompanyEqualTo(company);
 		criteria.andEnabledEqualTo(true);
@@ -139,6 +153,43 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return manageDepartmentList;
 	}
 
+	@Override
+	public OrganizationDeptBO getOrganization(OrganizationDeptParamBO paramBO) throws Exception {
+      OrganizationDeptBO organizationDeptBO = new OrganizationDeptBO();
+      ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getDeptId());
+      if(manageDepartment != null){
+         if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
+             organizationDeptBO.setGroupName(manageDepartment.getName());
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+          if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setDeptName(manageDepartment.getName());
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+
+      }
+      return organizationDeptBO;
+	}
+	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
+      ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+      ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+      criteria.andIdEqualTo(parentId).andEnabledEqualTo(true);
+      List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
+      if(CollectionUtils.isNotEmpty(manageDepartments)){
+          ManageDepartment manageDepartment = manageDepartments.get(0);
+          if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setDeptName(manageDepartment.getName());
+          }
+          if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setCompanyName(manageDepartment.getName());
+          }
+          if(manageDepartment.getParentId() != null){
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+          }
+
+      }
+  }
+
 	/**
 	 * 传入idList是因为一个人可能属于多个部门
 	 * @param departIdList
@@ -157,6 +208,16 @@ public class DepartmentServiceImpl implements DepartmentService{
 			return topDepart;
 		}
 		return getTopDepartByDepartId(departmentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<ManageDepartmentBO> listByCompany(String company) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = example.createCriteria();
+		//criteria.andCompanyEqualTo(company);
+		criteria.andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
 	}
 
 }

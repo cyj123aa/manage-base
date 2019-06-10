@@ -3,6 +3,8 @@ package com.hoolink.manage.base.service;
 import com.hoolink.manage.base.bo.ManageMenuBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
+import com.hoolink.manage.base.dao.model.ManageMenu;
+import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
 
@@ -36,4 +38,17 @@ public interface MenuService {
      * @throws Exception
      */
     List<RoleMenuBO> listByRoleId(Long roleId) throws Exception;
+
+    /**
+     * 查询所有的菜单
+     * @return
+     */
+    List<ManageMenuBO> listAll();
+
+    /**
+     * 查找menu
+     * @param code
+     * @return
+     */
+    ManageMenu getByCode(String code);
 }
