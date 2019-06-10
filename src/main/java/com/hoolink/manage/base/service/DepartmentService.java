@@ -5,6 +5,7 @@ import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import java.util.List;
 
 import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
+import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
@@ -21,6 +22,13 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listByIdList(List<Long> idList);
+
+	/**
+	 * 根据父节点集合获取部门信息
+	 * @param idList
+	 * @return
+	 */
+	List<DeptPositionBO> listByParentIdList(List<Long> idList);
 	
 	/**
 	 * 根据公司获取所有部门

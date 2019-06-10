@@ -630,4 +630,21 @@ public class UserServiceImpl implements UserService {
         }
         return deptIdList;
     }
+
+    @Override
+    public List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO) throws Exception {
+        List<UserDeptAssociationBO> userDeptAssociationBOS = new ArrayList<>();
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        if(CollectionUtils.isEmpty(userDeptInfoBOList)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+        }
+        // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
+        for(UserDeptAssociationBO userDeptAssociationBO : userDeptInfoBOList){
+            if(paramBO.getDeptType().equals(userDeptAssociationBO.getDeptType())){
+                userDeptAssociationBOS.add(userDeptAssociationBO);
+            }
+        }
+        return userDeptAssociationBOS;
+    }
 }

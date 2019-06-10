@@ -4,10 +4,8 @@ import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -169,4 +167,12 @@ public interface UserService {
      * @throws Exception
      */
     List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 根据用户id获取所在公司的信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO)throws Exception;
 }
