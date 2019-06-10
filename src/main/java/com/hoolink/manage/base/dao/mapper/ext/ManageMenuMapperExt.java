@@ -19,7 +19,7 @@ public interface ManageMenuMapperExt {
      * @param code
      * @return
      */
-    List<ManageMenu> selectByExample(@Param("code") String code);
+    ManageMenu selectByExample(@Param("code") String code,@Param("currentCode")String currentCode);
 
     /**
      * 用户临时权限组织架构信息

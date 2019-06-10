@@ -3,6 +3,7 @@ package com.hoolink.manage.base.controller.server;
 import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
+import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
@@ -32,7 +33,7 @@ public class MenuController {
     @PostMapping(value = "listByCode")
     @ApiOperation(value = "获得初始化菜单")
     @LogAndParam(value = "获得初始化菜单失败",check = CheckEnum.DATA_NOT_NULL)
-    public BackBO<InitMenuBO> listByCode(@RequestBody ResourceParamBO paramBO) throws Exception {
+    public BackBO<EdmMenuTreeBO> listByCode(@RequestBody ResourceParamBO paramBO) throws Exception {
         return BackBOUtil.defaultBackBO(menuService.listByCode(paramBO));
     }
 

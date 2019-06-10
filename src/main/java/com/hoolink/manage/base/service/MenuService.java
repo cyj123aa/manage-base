@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
+import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
@@ -26,8 +27,7 @@ public interface MenuService {
      * @param paramBO
      * @return
      */
-
-    InitMenuBO listByCode(ResourceParamBO paramBO) throws Exception;
+    EdmMenuTreeBO listByCode(ResourceParamBO paramBO) throws Exception;
 
     /**
      * 根据角色获取菜单

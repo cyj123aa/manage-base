@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
@@ -60,4 +62,11 @@ public class UserController {
         return BackBOUtil.defaultBackBO(userService.getDeptByUser(id.getData()));
     }
 
+
+    @PostMapping(value = "getOrgInfoToCompany")
+    @ApiOperation(value = "根据用户id获取所在公司信息")
+    @LogAndParam(value = "获取公司信息失败，请稍后重试")
+    public BackBO<List<UserDeptAssociationBO>> getOrgInfoToCompany(@RequestBody OrganizationInfoParamBO paramBO)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getOrgInfoToCompany(paramBO));
+    }
 }
