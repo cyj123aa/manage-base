@@ -67,6 +67,15 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
+	public List<DeptPositionBO> listByParentIdList(List<Long> idList) {
+		if(CollectionUtils.isEmpty(idList)) {
+			return new ArrayList<>();
+		}
+		List<DeptPositionBO> deptPositionBOS =manageDepartmentMapperExt.listByParentIdList(idList);
+		return deptPositionBOS;
+	}
+
+	@Override
 	public List<ManageDepartmentBO> listByCompany(String company) {
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
