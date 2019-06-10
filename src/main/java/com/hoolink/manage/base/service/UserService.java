@@ -228,7 +228,6 @@ public interface UserService {
      * @throws Exception
      */
     List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception;
-    ManagerUserBO getById(Long id);
 
     /**
      * 用户密保等级

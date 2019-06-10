@@ -1,8 +1,8 @@
 package com.hoolink.manage.base.service.impl;
 
-import com.hoolink.manage.base.bo.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
@@ -15,11 +15,7 @@ import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
-import com.hoolink.manage.base.service.DepartmentService;
-import com.hoolink.manage.base.service.MiddleUserDepartmentService;
-import com.hoolink.manage.base.service.RoleService;
-import com.hoolink.manage.base.service.SessionService;
-import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.BackBO;
@@ -27,15 +23,8 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
-import com.hoolink.sdk.bo.manager.DeptPairBO;
-
-import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.enums.DeptTypeEnum;
-import com.hoolink.sdk.bo.manager.UserDepartmentBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.bo.manager.*;
-import com.hoolink.sdk.enums.CompanyEnum;
+import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
 import com.hoolink.sdk.enums.StatusEnum;
@@ -58,9 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import com.hoolink.manage.base.service.RoleService;
-
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -1041,5 +1027,122 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(userId);
         user.setUpdated(System.currentTimeMillis());
         return userMapper.updateByPrimaryKeySelective(user) == 1;
+    }
+    @Override
+    public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
+        UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
+        if(userSecurity==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
+        }
+        UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
+        //部门 小组 与用户关联
+        List<DeptSecurityBO> list = userSecurity.getList();
+        if(CollectionUtils.isNotEmpty(list)){
+            List<Long> positionList = new ArrayList<>();
+            //key positionId
+            Map<String, Integer> map = new HashMap<>(list.size());
+            Map<Long, Integer> company = new HashMap<>(list.size());
+            Map<Long, Integer> dept = new HashMap<>(list.size());
+            list.forEach(deptSecurityBO -> {
+                if(EdmDeptEnum.COMPANY.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //公司密保等级 转为小组关联
+                    company.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
+                }else if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //部门密保等级 转为小组关联
+                    dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
+                }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                    //小组密保等级
+                    positionList.add(deptSecurityBO.getId());
+                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                }
+            });
+            if(!org.springframework.util.CollectionUtils.isEmpty(company)){
+                List<Long> companyList = new ArrayList<>(company.keySet());
+                List<ManageDepartment> positionByCompany = manageDepartmentMapperExt.getPositionByCompany(companyList);
+                getPositionSecurity(positionList, map, company, positionByCompany);
+            }
+            if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
+                List<Long> deptList = new ArrayList<>(dept.keySet());
+                ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+                ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+                criteria.andParentIdIn(deptList).andEnabledEqualTo(true);
+                List<ManageDepartment> departmentList = manageDepartmentMapper.selectByExample(departmentExample);
+                getPositionSecurity(positionList, map, dept, departmentList);
+            }
+            userDeptInfoBO.setDeptMap(map);
+            userDeptInfoBO.setPositionList(positionList);
+        }
+        return userDeptInfoBO;
+    }
+
+    /**
+     * 将公司 部门 转为小组层面
+     * @param positionList
+     * @param map
+     * @param company
+     * @param positionByCompany
+     */
+    private void getPositionSecurity(List<Long> positionList, Map<String, Integer> map, Map<Long, Integer> company, List<ManageDepartment> positionByCompany) {
+        if (CollectionUtils.isNotEmpty(positionByCompany)) {
+            positionByCompany.forEach(manageDepartment -> {
+                Integer security = company.get(manageDepartment.getParentId());
+                if (security != null) {
+                    positionList.add(manageDepartment.getId());
+                    map.put(manageDepartment.getId().toString(), security);
+                }
+            });
+        }
+    }
+
+    @Override
+    public List<ManagerUserBO> getUserList(List<Long> idList) {
+        UserExample example = new UserExample();
+        example.createCriteria().andStatusEqualTo(true).andEnabledEqualTo(true).andIdIn(idList);
+        return CopyPropertiesUtil.copyList(userMapper.selectByExample(example), ManagerUserBO.class);
+    }
+
+    @Override
+    public Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList) {
+        List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
+        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+        return map;
+    }
+
+    @Override
+    public List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO) throws Exception {
+        List<Long> deptIdList = new ArrayList<>();
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
+        if(Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.COMPANY_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }else if(Constant.DEPT_LEVEL.equals(paramBO.getDeptType())){
+            deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+        }
+        return deptIdList;
+    }
+
+    @Override
+    public List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO) throws Exception {
+        List<UserDeptAssociationBO> userDeptAssociationBOS = new ArrayList<>();
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        if(CollectionUtils.isEmpty(userDeptInfoBOList)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+        }
+        // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
+        for(UserDeptAssociationBO userDeptAssociationBO : userDeptInfoBOList){
+            if(paramBO.getDeptType().equals(userDeptAssociationBO.getDeptType())){
+                userDeptAssociationBOS.add(userDeptAssociationBO);
+            }
+        }
+        return userDeptAssociationBOS;
+    }
+
+    public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
+        return null;
     }
 }

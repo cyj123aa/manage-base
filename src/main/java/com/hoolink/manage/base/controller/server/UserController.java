@@ -57,10 +57,11 @@ public class UserController {
     public BackBO<UserDeptInfoBO> getUserSecurity(@RequestBody Long userId)throws Exception{
         return BackBOUtil.defaultBackBO(userService.getUserSecurity(userId));
     }
+
     @PostMapping(value = "getUserList")
     @ApiOperation(value = "根据id集合获取用户")
     @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")
-    public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
+    public BackBO<List<ManagerUserBO>> listByIdLists(@RequestBody List<Long> idList)throws Exception{
         return BackBOUtil.defaultBackBO(userService.getUserList(idList));
     }
 

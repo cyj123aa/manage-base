@@ -84,6 +84,7 @@ ORDER BY
     WHERE
       mud.user_id=#{userId}
     AND md.enabled=true
+  </select>
   <select id="getDeptMenu" resultMap="UserDeptMap">
     select mu.company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
     on mu.id=mud.user_id

@@ -22,7 +22,7 @@
         where mud.user_id=#{id}
     </select>
 
-    <select id="getDeptIdByParentId" resultType="DeptUserResult">
+    <select id="getDeptIdByParentId" resultMap="DeptUserResult">
         select
         id deptId
         from manage_department

@@ -210,4 +210,14 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return getTopDepartByDepartId(departmentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()));
 	}
 
+	@Override
+	public List<ManageDepartmentBO> listByCompany(String company) {
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = example.createCriteria();
+		//criteria.andCompanyEqualTo(company);
+		criteria.andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
 }
