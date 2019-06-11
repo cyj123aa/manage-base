@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.service;
 
+import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
 import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import java.util.List;
@@ -42,6 +43,13 @@ public interface DepartmentService {
 	 */
 	List<ManageDepartmentBO> listByDeptType(Byte deptType);
 	List<ManageDepartmentBO> listByCompany(String company);
+
+	/**
+	 * 父级查询组织类型
+	 * @param parentList
+	 * @return
+	 */
+	List<ManageDepartment> listByParentList(List<Long> parentList);
 
 	/**
 	 * 组织架构树形结构

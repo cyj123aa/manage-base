@@ -220,4 +220,16 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
 	}
 
+	@Override
+	public List<ManageDepartment> listByParentList(List<Long> companyList) {
+		if (CollectionUtils.isEmpty(companyList)){
+			return null;
+		}
+		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+		criteria.andParentIdIn(companyList).andEnabledEqualTo(true);
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(departmentExample);
+		return deptList;
+	}
+
 }
