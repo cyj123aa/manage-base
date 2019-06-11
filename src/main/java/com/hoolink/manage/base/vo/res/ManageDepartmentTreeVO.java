@@ -29,6 +29,12 @@ public class ManageDepartmentTreeVO implements Serializable {
     /** 父节点id */
     private Long parentId;
 
+    /*** 是否展开子节点 */
+    private Boolean expand;
+
+    /*** 是否勾选 */
+    private Boolean checked;
+
     /*** 组织架构下的子节点*/
     private List<ManageDepartmentTreeVO> children;
 
