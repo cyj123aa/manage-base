@@ -11,7 +11,6 @@ import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
 import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;

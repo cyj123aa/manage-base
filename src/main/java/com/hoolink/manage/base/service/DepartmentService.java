@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 

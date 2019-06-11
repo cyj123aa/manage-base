@@ -1,6 +1,5 @@
 package com.hoolink.manage.base.service.impl;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
 import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
 import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
@@ -13,8 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
@@ -35,7 +32,7 @@ import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 
 /**
