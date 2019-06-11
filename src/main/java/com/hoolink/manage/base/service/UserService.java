@@ -219,4 +219,12 @@ public interface UserService {
      * @throws Exception
      */
     List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception;
+
+    /**
+     * 校验密码
+     * @param password
+     * @return
+     * @throws Exception
+     */
+    boolean checkPassword(String password) throws Exception;
 }

@@ -382,6 +382,19 @@ public class UserServiceImpl implements UserService {
         return buildUserBOList(userMapper.selectByExample(example));
     }
 
+    @Override
+    public boolean checkPassword(String password) throws Exception {
+        UserExample example = new UserExample();
+        example.createCriteria().andEnabledEqualTo(true)
+                .andUserAccountEqualTo(ContextUtil.getManageCurrentUser().getAccount())
+                .andPasswdEqualTo(MD5Util.MD5(password));
+        User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if(user!=null){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 组装用户数据
      *

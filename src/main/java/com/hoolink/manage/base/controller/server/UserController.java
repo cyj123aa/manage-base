@@ -40,7 +40,14 @@ public class UserController {
     @PostMapping(value = "listByIdList")
     @ApiOperation(value = "根据id集合获取用户")
     @LogAndParam(value = "根据id集合获取用户失败，请稍后重试")
-	public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
-		return BackBOUtil.defaultBackBO(userService.listByIdList(idList));
-	}
+    public BackBO<List<ManagerUserBO>> listByIdList(@RequestBody List<Long> idList)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.listByIdList(idList));
+    }
+
+    @PostMapping(value = "checkPassword")
+    @ApiOperation(value = "校验密码")
+    @LogAndParam(value = "校验密码失败，请稍后重试")
+    public BackBO<Boolean> checkPassword(@RequestBody String password)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.checkPassword(password));
+    }
 }
