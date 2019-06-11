@@ -1035,58 +1035,41 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
         }
         UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
-        //部门 小组 与用户关联
+        //组织架构都可与用户关联
         List<DeptSecurityBO> list = userSecurity.getList();
         if(CollectionUtils.isNotEmpty(list)){
             List<Long> positionList = new ArrayList<>();
             //key positionId
             Map<String, Integer> map = new HashMap<>(list.size());
-            Map<Long, Integer> company = new HashMap<>(list.size());
+            //组织架构（最低层级的所有上级）
             Map<Long, Integer> dept = new HashMap<>(list.size());
             list.forEach(deptSecurityBO -> {
                 positionList.add(deptSecurityBO.getId());
-                if(EdmDeptEnum.COMPANY.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    //公司密保等级 转为最小组织结构关联(有下级的话转为最下级 同时 本身保留)
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
-                    company.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
-                }else if(EdmDeptEnum.DEPT.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    //部门密保等级 转为最小组织结构关联(有下级的话转为最下级 同时 本身保留)
                     map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
-                }else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
                     //小组密保等级
                     map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                 }
             });
-            if(!org.springframework.util.CollectionUtils.isEmpty(company)){
-                List<Long> companyList = new ArrayList<>(company.keySet());
-                int count=0;
-                while(true){
-                    count++;
-                    List<ManageDepartment> manageDepartments = departmentService.listByParentList(companyList);
-                    if(CollectionUtils.isEmpty(manageDepartments)){
-                        break;
-                    }
-                    manageDepartments.forEach(manageDepartment ->
-                        map.put(manageDepartment.getId().toString(),company.get(manageDepartment.getParentId()))
-                    );
-                    companyList=manageDepartments.stream().map(ManageDepartment::getId).collect(Collectors.toList());
-                    positionList.addAll(companyList);
-                    if(count==3){
-                        break;
-                    }
-                }
-            }
             if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
                 List<Long> deptList = new ArrayList<>(dept.keySet());
-                List<ManageDepartment> manageDepartments = departmentService.listByParentList(deptList);
-                if(CollectionUtils.isNotEmpty(manageDepartments)){
-                    manageDepartments.forEach(manageDepartment -> {
-                        map.put(manageDepartment.getId().toString(),company.get(manageDepartment.getParentId()));
-                        positionList.add(manageDepartment.getId());
+                List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByParentIdCode(deptList);
+                if(CollectionUtils.isNotEmpty(deptPositionBOS)){
+                    deptPositionBOS.forEach(deptPositionBO -> {
+                        String parentIdCode = deptPositionBO.getParentIdCode();
+                        String[] split = parentIdCode.split(Constant.UNDERLINE);
+                        for (int i=0;i<split.length;i++){
+                            boolean flag = dept.containsKey(Long.parseLong(split[i]));
+                            if(flag){
+                                map.put(deptPositionBO.getId().toString(),dept.get(Long.parseLong(split[i])));
+                                break;
+                            }
+                        }
+                        positionList.add(deptPositionBO.getId());
                     });
                 }
             }

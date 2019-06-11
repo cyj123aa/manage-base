@@ -27,4 +27,6 @@ public class DeptPositionBO {
     private Long parentId;
 
     private Byte encryLevelDept;
+
+    private String parentIdCode;
 }

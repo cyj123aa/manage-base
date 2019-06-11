@@ -4,6 +4,7 @@ import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
+import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
@@ -42,5 +43,12 @@ public class MenuController {
     @LogAndParam(value = "根据角色获取菜单",check = CheckEnum.DATA_NOT_NULL)
     public BackBO<List<RoleMenuBO>> listByRole(@RequestBody BaseParam<Long> baseParam) throws Exception {
         return BackBOUtil.defaultBackBO(menuService.listByRoleId(baseParam.getData()));
+    }
+
+    @PostMapping(value = "getOrganizationHead")
+    @ApiOperation(value = "获取组织架构信息集合")
+    @LogAndParam(value = "获取组织架构信息集合失败",check = CheckEnum.DATA_NOT_NULL)
+    public BackBO<List<EdmMenuTreeBO>> getOrganizationHead(@RequestBody MenuParamBO paramBO) throws Exception {
+        return BackBOUtil.defaultBackBO(menuService.getOrganizationHead(paramBO));
     }
 }

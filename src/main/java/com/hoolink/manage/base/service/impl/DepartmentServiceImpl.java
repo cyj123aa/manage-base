@@ -211,16 +211,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentBO> listByCompany(String company) {
-		ManageDepartmentExample example = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		//criteria.andCompanyEqualTo(company);
-		criteria.andEnabledEqualTo(true);
-		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
-		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
-	}
-
-	@Override
 	public List<ManageDepartment> listByParentList(List<Long> companyList) {
 		if (CollectionUtils.isEmpty(companyList)){
 			return null;

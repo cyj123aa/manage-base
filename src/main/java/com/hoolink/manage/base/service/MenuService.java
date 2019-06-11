@@ -2,6 +2,7 @@ package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
+import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.manage.base.dao.model.ManageMenu;
@@ -30,6 +31,14 @@ public interface MenuService {
      * @return
      */
     EdmMenuTreeBO listByCode(ResourceParamBO paramBO) throws Exception;
+
+    /**
+     *获取组织架构信息List
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<EdmMenuTreeBO> getOrganizationHead(MenuParamBO paramBO) throws Exception;
 
     /**
      * 根据角色获取菜单

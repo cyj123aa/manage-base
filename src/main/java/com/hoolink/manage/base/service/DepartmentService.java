@@ -42,7 +42,6 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listByDeptType(Byte deptType);
-	List<ManageDepartmentBO> listByCompany(String company);
 
 	/**
 	 * 父级查询组织类型

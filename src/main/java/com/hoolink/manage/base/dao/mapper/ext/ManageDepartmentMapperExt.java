@@ -34,4 +34,18 @@ public interface ManageDepartmentMapperExt {
      */
     List<DeptPositionBO> listByParentIdList(@Param("parentIds") List<Long> parentIds);
 
+    /**
+     * 查询当前一级
+     * @param ids
+     * @return
+     */
+    List<DeptPositionBO> listByIdList(@Param("ids") List<Long> ids);
+
+    /**
+     * 根据父节点查询所有下级
+     * @param parentIds
+     * @return
+     */
+    List<DeptPositionBO> listByParentIdCode(@Param("parentIds") List<Long> parentIds);
+
 }
