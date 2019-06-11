@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.hoolink.manage.base.bo.DictPairBO;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 
 /**
