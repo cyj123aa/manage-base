@@ -63,4 +63,11 @@ public class ManageRoleBO {
      * 数据有效性
      */
     private Boolean enabled;
+    /**
+     * <pre>
+     * 角色类型【0：普通角色  1：文控角色】
+     * 表字段 : manage_role.role_type
+     * </pre>
+     */
+    private Boolean roleType;
 }

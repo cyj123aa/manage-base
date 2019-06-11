@@ -73,7 +73,8 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     public Long create(RoleParamBO roleParamBO ) throws Exception {
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
-        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
+        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())
+                || StringUtils.isEmpty(roleParamBO.getRoleDesc()) || roleParamBO.getRoleType()!=null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //role 等级
@@ -114,7 +115,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(RoleParamBO roleParamBO) throws Exception {
-        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
+        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())
+                || StringUtils.isEmpty(roleParamBO.getRoleDesc()) || roleParamBO.getRoleType()!=null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
@@ -149,7 +151,12 @@ public class RoleServiceImpl implements RoleService {
         if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        updateRole(roleParamBO);
+        ManageRole role = new ManageRole();
+        role.setId(roleParamBO.getId());
+        role.setRoleStatus(roleParamBO.getRoleStatus());
+        role.setUpdated(System.currentTimeMillis());
+        role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        roleMapper.updateByPrimaryKeySelective(role);
         //禁用角色用户
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
