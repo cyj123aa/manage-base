@@ -162,6 +162,7 @@ public class DepartmentServiceImpl implements DepartmentService{
           if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
               organizationDeptBO.setDeptName(manageDepartment.getName());
               getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+						  getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
           }
 
       }
@@ -186,6 +187,19 @@ public class DepartmentServiceImpl implements DepartmentService{
 
       }
   }
+
+	private void getChildrenOrganization(Long id, OrganizationDeptBO organizationDeptBO){
+		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+		criteria.andParentIdEqualTo(id).andEnabledEqualTo(true);
+		List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
+		if(CollectionUtils.isNotEmpty(manageDepartments)){
+			ManageDepartment manageDepartment = manageDepartments.get(0);
+			if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
+				organizationDeptBO.setGroupName(manageDepartment.getName());
+			}
+		}
+	}
 
 	/**
 	 * 传入idList是因为一个人可能属于多个部门

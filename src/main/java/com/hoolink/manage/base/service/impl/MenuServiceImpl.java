@@ -19,6 +19,7 @@ import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
 import com.hoolink.sdk.bo.manager.EdmMenuBO;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.constants.Constants;

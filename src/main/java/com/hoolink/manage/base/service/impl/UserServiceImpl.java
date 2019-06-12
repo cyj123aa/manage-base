@@ -3,9 +3,11 @@ package com.hoolink.manage.base.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
+import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
@@ -839,6 +841,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public ManagerUserBO getById(Long id) {
         return CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManagerUserBO.class);
+    }
+
+    @Override
+    public ManageUserInfoBO getUserInfoById(Long id) {
+        ManageUserInfoBO manageUserInfoBO = CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManageUserInfoBO.class);
+
+        List<UserDeptBO> userCompany = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
+        if (CollectionUtils.isNotEmpty(userCompany)) {
+            manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
+        }
+        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+        manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
+        return manageUserInfoBO;
     }
 
     @Override
