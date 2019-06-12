@@ -17,10 +17,8 @@ import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
-import com.hoolink.sdk.bo.manager.EdmMenuBO;
-import com.hoolink.sdk.bo.manager.InitMenuBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.constants.Constants;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.enums.edm.EdmResourceRepertory;
@@ -30,6 +28,7 @@ import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +164,7 @@ public class MenuServiceImpl implements MenuService {
                             .collect(Collectors.toList());
                 }
                 if(CollectionUtils.isEmpty(companyList)){
+                    edmMenuTreeBO.setExistChild(false);
                     break;
                 }
                 List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
@@ -173,6 +173,7 @@ public class MenuServiceImpl implements MenuService {
                     twoMenuBOS.add(twoMenu);
                 });
                 edmMenuTreeBO.setChildren(twoMenuBOS);
+                edmMenuTreeBO.setExistChild(true);
                 break;
             case CACHE_RESOURCE_CODE:
                 //缓冲库
@@ -198,6 +199,7 @@ public class MenuServiceImpl implements MenuService {
         edmMenuTreeBO.setValue(manageMenu.getId().toString());
         edmMenuTreeBO.setCode(manageMenu.getMenuCode());
         edmMenuTreeBO.setEnableUpdate(false);
+        edmMenuTreeBO.setMenuType(null);
         if(middleRoleMenu!=null){
             edmMenuTreeBO.setReadOnly(middleRoleMenu.getPermissionFlag());
         }
@@ -272,8 +274,11 @@ public class MenuServiceImpl implements MenuService {
             List<EdmMenuTreeBO> firstMenus = map.get(0L);
             if(CollectionUtils.isNotEmpty(firstMenus)){
                 fillNextMenu(map,firstMenus);
+                edmMenuBO.setChildren(firstMenus);
+                edmMenuBO.setExistChild(true);
+            }else{
+                edmMenuBO.setExistChild(false);
             }
-            edmMenuBO.setChildren(firstMenus);
         }
     }
 
@@ -287,10 +292,13 @@ public class MenuServiceImpl implements MenuService {
             Long menuId = childMenu.getKey();
             List<EdmMenuTreeBO> menuBOS = map.get(menuId);
             if (org.springframework.util.CollectionUtils.isEmpty(menuBOS)) {
+                childMenu.setExistChild(false);
+                childMenu.setMenuType(true);
                 continue;
             }
             fillNextMenu(map,menuBOS);
             childMenu.setChildren(menuBOS);
+            childMenu.setExistChild(true);
         }
     }
 
