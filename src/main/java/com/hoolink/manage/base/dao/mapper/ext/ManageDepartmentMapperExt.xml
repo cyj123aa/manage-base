@@ -7,8 +7,17 @@
     <result column="dept_name" jdbcType="VARCHAR" property="title" />
     <result column="dept_type" jdbcType="TINYINT" property="deptType" />
     <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="expand" jdbcType="BIT" property="expand" />
     <collection property="children" select="getOrganizationListByParentId" column="id"></collection>
   </resultMap>
+
+    <resultMap id="OrgResultMap" type="com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO">
+        <id column="id" jdbcType="BIGINT" property="key" />
+        <result column="dept_name" jdbcType="VARCHAR" property="title" />
+        <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="expand" jdbcType="BIT" property="expand" />
+    </resultMap>
 
     <!-- 获取所在公司或者部门-->
     <select id="getOrganizationList" resultMap="BaseResultMap">
@@ -16,7 +25,8 @@
             id,
             dept_name,
             dept_type,
-            parent_id
+            parent_id,
+            true as expand
         FROM
             manage_department md
         WHERE
@@ -35,7 +45,8 @@
             id,
             dept_name,
             dept_type,
-            parent_id
+            parent_id,
+            true as expand
         FROM
             manage_department md
         WHERE
@@ -64,10 +75,11 @@
         <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
         <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
         <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+        <result column="parent_id_code" jdbcType="VARCHAR" property="parentIdCode"/>
     </resultMap>
 
     <select id="listByParentIdList" resultMap="UserCompanyMap">
-        SELECT mp.id,mc.id
+        SELECT id,dept_name,dept_type,parent_id
         FROM manage_department
         WHERE
         enabled=true
@@ -75,6 +87,47 @@
         <foreach collection="parentIds" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
+    </select>
+
+    <select id="listByIdList" resultMap="UserCompanyMap">
+        SELECT id,dept_name,dept_type,parent_id,parent_id_code
+        FROM manage_department
+        WHERE
+        enabled=true
+        and id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="listByParentIdCode" resultMap="UserCompanyMap">
+        SELECT id,dept_name,dept_type,parent_id
+        FROM manage_department
+        WHERE
+        enabled=true
+        and
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
+          locate(concat("_",#{id},"_"),parent_id_code)>0
+        </foreach>
+    </select>
+
+    <select id="getOrgInfoList" resultMap="OrgResultMap">
+        SELECT
+        id,
+        dept_name,
+        dept_type,
+        parent_id,
+        true as expand
+        FROM
+        manage_department md
+        WHERE
+        md.enabled = TRUE
+        <if test="ids != null">
+            AND md.id IN
+            <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
     </select>
 
 </mapper>

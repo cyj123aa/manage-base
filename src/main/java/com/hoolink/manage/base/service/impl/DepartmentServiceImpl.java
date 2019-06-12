@@ -1,6 +1,5 @@
 package com.hoolink.manage.base.service.impl;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
 import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
 import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
@@ -13,9 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
-import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
+import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
@@ -35,7 +32,7 @@ import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 
 /**
@@ -165,11 +162,31 @@ public class DepartmentServiceImpl implements DepartmentService{
           if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
               organizationDeptBO.setDeptName(manageDepartment.getName());
               getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+						  getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
           }
 
       }
       return organizationDeptBO;
 	}
+
+	@Override
+	public List<ManageDepartmentTreeBO> getOrgInfoList(DepartmentTreeParamBO treeParamBO) throws Exception {
+		// 根据userId和组织架构层级type获取对应的组织架构id
+		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
+		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
+		paramBO.setDeptType(treeParamBO.getDeptType());
+		List<Long> deptIdList = userService.getOrganizationInfo(paramBO);
+		if(CollectionUtils.isEmpty(deptIdList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
+		// 根据组织架构id集合获取组织架信息
+		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrgInfoList(deptIdList);
+		if(CollectionUtils.isEmpty(manageDepartmentList)){
+			return null;
+		}
+		return manageDepartmentList;
+	}
+
 	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
       ManageDepartmentExample departmentExample = new ManageDepartmentExample();
       ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
@@ -190,6 +207,19 @@ public class DepartmentServiceImpl implements DepartmentService{
       }
   }
 
+	private void getChildrenOrganization(Long id, OrganizationDeptBO organizationDeptBO){
+		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+		criteria.andParentIdEqualTo(id).andEnabledEqualTo(true);
+		List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
+		if(CollectionUtils.isNotEmpty(manageDepartments)){
+			ManageDepartment manageDepartment = manageDepartments.get(0);
+			if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
+				organizationDeptBO.setGroupName(manageDepartment.getName());
+			}
+		}
+	}
+
 	/**
 	 * 传入idList是因为一个人可能属于多个部门
 	 * @param departIdList
@@ -208,16 +238,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 			return topDepart;
 		}
 		return getTopDepartByDepartId(departmentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()));
-	}
-
-	@Override
-	public List<ManageDepartmentBO> listByCompany(String company) {
-		ManageDepartmentExample example = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		//criteria.andCompanyEqualTo(company);
-		criteria.andEnabledEqualTo(true);
-		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
-		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
 	}
 
 	@Override

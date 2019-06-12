@@ -124,6 +124,13 @@ public interface UserService {
     ManagerUserBO getById(Long id);
 
     /**
+     * 根据id获取用户
+     * @param id
+     * @return
+     */
+    ManageUserInfoBO getUserInfoById(Long id);
+
+    /**
      * 根据id集合获取用户
      * @param idList
      * @return

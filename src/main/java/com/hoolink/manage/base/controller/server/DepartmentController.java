@@ -1,14 +1,10 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
+import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
-import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
-import com.hoolink.sdk.enums.CheckEnum;
-import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -46,5 +42,19 @@ public class DepartmentController {
     @LogAndParam(value = "获取组织架构信息失败")
     public BackBO<OrganizationDeptBO> getOrganization(@RequestBody @Valid OrganizationDeptParamBO paramBO) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrganization(paramBO));
+    }
+
+    @PostMapping(value = "getOrgListByIdList")
+    @ApiOperation(value = "获取组织架构信息集合")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<List<ManageDepartmentBO>> getOrgListByIdList(@RequestBody List<Long> idList) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.listByIdList(idList));
+    }
+
+    @PostMapping(value = "getOrgInfoList")
+    @ApiOperation(value = "组织架构树")
+    @LogAndParam(value = "获取组织架构树失败")
+    public BackBO<List<ManageDepartmentTreeBO>> getOrgTree(@RequestBody DepartmentTreeParamBO param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getOrgList(param));
     }
 }

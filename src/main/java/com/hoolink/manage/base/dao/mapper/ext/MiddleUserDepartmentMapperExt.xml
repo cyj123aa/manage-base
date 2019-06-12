@@ -22,6 +22,7 @@
   <resultMap id="UserDeptMap" type="com.hoolink.manage.base.bo.UserDeptBO">
     <id column="id" jdbcType="BIGINT" property="deptId"/>
     <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+    <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
     <result column="encry_level_dept" jdbcType="TINYINT" property="encryLevelDept"/>
   </resultMap>
 
@@ -61,6 +62,7 @@
   SELECT
 	md.id,
 	md.dept_name,
+	md.dept_type,
 	mud.encry_level_dept
 FROM
 	middle_user_department mud
