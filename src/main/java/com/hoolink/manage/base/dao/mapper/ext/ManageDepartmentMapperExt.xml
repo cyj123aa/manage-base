@@ -94,7 +94,7 @@
 
 
     <select id="listByParentIdCode" resultMap="UserCompanyMap">
-        SELECT id,dept_name,dept_type,parent_id
+        SELECT id,dept_name,dept_type,parent_id,parent_id_code
         FROM manage_department
         WHERE
         enabled=true
@@ -102,6 +102,36 @@
         <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
           locate(concat("_",#{id},"_"),parent_id_code)>0
         </foreach>
+    </select>
+
+    <resultMap id="BaseResultMapBO" type="com.hoolink.sdk.bo.manager.ManageDepartmentBO">
+        <!--
+        @mbggenerated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dept_name" jdbcType="VARCHAR" property="name" />
+        <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="creator" jdbcType="BIGINT" property="creator" />
+        <result column="updator" jdbcType="BIGINT" property="updator" />
+        <result column="created" jdbcType="BIGINT" property="created" />
+        <result column="updated" jdbcType="BIGINT" property="updated" />
+        <result column="enabled" jdbcType="BIT" property="enabled" />
+    </resultMap>
+
+    <select id="listByIdOrder" parameterType="java.util.List" resultMap="BaseResultMapBO">
+        select id, dept_name, dept_type, parent_id, creator, updator, created, updated, enabled
+        from manage_department
+        where id in
+        <foreach collection="ids" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+        order by field(
+        id,
+        <foreach collection="ids" separator="," item="id">
+            #{id}
+        </foreach>
+        )
     </select>
 
 </mapper>

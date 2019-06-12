@@ -13,6 +13,7 @@ import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.util.DeptTreeToolUtils;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.MenuParamBO;
@@ -148,8 +149,8 @@ public class MenuServiceImpl implements MenuService {
                     List<DeptPositionBO> deptPositionBOList = manageDepartmentMapperExt.listByIdList(parentList);
                     deptAllList.addAll(deptPositionBOList);
                 }
-                deptAllList = ArrayUtil.removeDuplict(deptAllList);
             }
+            deptAllList = removeDuplict(deptAllList);
         }
         switch (byType) {
             case DEPT_RESOURCE_CODE:
@@ -183,6 +184,17 @@ public class MenuServiceImpl implements MenuService {
             default:break;
         }
         return edmMenuTreeBO;
+    }
+
+    /**
+     * 去重
+     * @param list
+     * @return
+     */
+    private List<DeptPositionBO> removeDuplict(List<DeptPositionBO> list) {
+        Set<DeptPositionBO> set = new TreeSet<>((o1, o2) -> o1.getId().compareTo(o2.getId()));
+        set.addAll(list);
+        return new ArrayList<>(set);
     }
 
     /**
@@ -304,7 +316,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<EdmMenuTreeBO> getOrganizationHead(MenuParamBO paramBO) throws Exception {
-        if(paramBO.getRepertoryType()!=null){
+        if(paramBO.getRepertoryType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         EdmResourceRepertory byType = EdmResourceRepertory.getByType(paramBO.getRepertoryType());
@@ -328,9 +340,12 @@ public class MenuServiceImpl implements MenuService {
                 edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
                 return edmMenuTreeBOS;
             }
-            List<String> ids = Arrays.asList(split);
+            String[] split1 = new String[split.length-1];
+            System.arraycopy(split, 1, split1, 0, split1.length);
+            List<String> ids = Arrays.asList(split1);
             List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
-            List<ManageDepartmentBO> manageDepartmentBOS = departmentService.listByIdList(collect);
+            //List<ManageDepartmentBO> manageDepartmentBOS = departmentService.listByIdList(collect);
+            List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
             if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
                 manageDepartmentBOS.forEach(manageDepartmentBO -> edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO)));
             }

@@ -2,6 +2,7 @@ package com.hoolink.manage.base.dao.mapper.ext;
 
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import org.apache.ibatis.annotations.Param;
 
@@ -47,5 +48,12 @@ public interface ManageDepartmentMapperExt {
      * @return
      */
     List<DeptPositionBO> listByParentIdCode(@Param("parentIds") List<Long> parentIds);
+
+    /**
+     * 主键查询 （结果集按参数顺序排列）
+     * @param ids
+     * @return
+     */
+    List<ManageDepartmentBO> listByIdOrder(@Param("ids") List<Long> ids);
 
 }

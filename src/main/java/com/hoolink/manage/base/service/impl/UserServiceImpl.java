@@ -30,6 +30,7 @@ import com.hoolink.sdk.enums.StatusEnum;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
+import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.utils.MD5Util;
@@ -1073,7 +1074,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             userDeptInfoBO.setDeptMap(map);
-            userDeptInfoBO.setPositionList(positionList);
+            userDeptInfoBO.setPositionList(ArrayUtil.removeDuplict(positionList));
         }
         return userDeptInfoBO;
     }
