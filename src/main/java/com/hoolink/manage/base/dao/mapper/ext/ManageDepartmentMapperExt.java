@@ -48,4 +48,11 @@ public interface ManageDepartmentMapperExt {
      */
     List<DeptPositionBO> listByParentIdCode(@Param("parentIds") List<Long> parentIds);
 
+    /**
+     * 获取组织架构信息
+     * @param ids
+     * @return
+     */
+    List<ManageDepartmentTreeBO> getOrgInfoList (@Param("ids")List<Long> ids);
+
 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
+import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
@@ -168,6 +168,25 @@ public class DepartmentServiceImpl implements DepartmentService{
       }
       return organizationDeptBO;
 	}
+
+	@Override
+	public List<ManageDepartmentTreeBO> getOrgInfoList(DepartmentTreeParamBO treeParamBO) throws Exception {
+		// 根据userId和组织架构层级type获取对应的组织架构id
+		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
+		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
+		paramBO.setDeptType(treeParamBO.getDeptType());
+		List<Long> deptIdList = userService.getOrganizationInfo(paramBO);
+		if(CollectionUtils.isEmpty(deptIdList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
+		// 根据组织架构id集合获取组织架信息
+		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrgInfoList(deptIdList);
+		if(CollectionUtils.isEmpty(manageDepartmentList)){
+			return null;
+		}
+		return manageDepartmentList;
+	}
+
 	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
       ManageDepartmentExample departmentExample = new ManageDepartmentExample();
       ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
