@@ -3,9 +3,12 @@ package com.hoolink.manage.base.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
+import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
@@ -153,6 +156,17 @@ public class UserServiceImpl implements UserService {
         } else {
             loginResult.setAccessHoolink(false);
         }
+        List<Integer> edmRepertory=new ArrayList<>();
+        if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
+            edmRepertory.add(Constant.REPERTORY_ONE);
+        }
+        if(roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
+            edmRepertory.add(Constant.REPERTORY_TWO);
+        }
+        if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
+            edmRepertory.add(Constant.REPERTORY_THREE);
+        }
+        loginResult.setEdmRepertory(edmRepertory);
         return loginResult;
     }
 
@@ -843,6 +857,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ManageUserInfoBO getUserInfoById(Long id) {
+        ManageUserInfoBO manageUserInfoBO = CopyPropertiesUtil.copyBean(userMapper.selectByPrimaryKey(id), ManageUserInfoBO.class);
+
+        List<UserDeptBO> userCompany = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
+        if (CollectionUtils.isNotEmpty(userCompany)) {
+            manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
+        }
+        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+        manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
+        return manageUserInfoBO;
+    }
+
+    @Override
     public List<DeptTreeBO> getDeptTree(List<Long> companyIdList) {
         List<ManageDepartmentBO> departmentList = departmentService.listAll();
         List<ManageDepartmentBO> deptParentList;
@@ -1124,7 +1151,8 @@ public class UserServiceImpl implements UserService {
         return userDeptAssociationBOS;
     }
 
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
-        return null;
+        return userMapperExt.getDeptByUser(id);
     }
 }

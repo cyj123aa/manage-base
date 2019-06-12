@@ -56,4 +56,11 @@ public interface ManageDepartmentMapperExt {
      */
     List<ManageDepartmentBO> listByIdOrder(@Param("ids") List<Long> ids);
 
+    /**
+     * 获取组织架构信息
+     * @param ids
+     * @return
+     */
+    List<ManageDepartmentTreeBO> getOrgInfoList (@Param("ids")List<Long> ids);
+
 }

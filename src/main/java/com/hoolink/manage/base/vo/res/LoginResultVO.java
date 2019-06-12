@@ -2,6 +2,8 @@ package com.hoolink.manage.base.vo.res;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author: xuli
  * @Date: 2019/4/23 17:41
@@ -45,4 +47,9 @@ public class LoginResultVO {
      * 图像url
      */
     private String image;
+
+    /**
+     * edm库的权限，1 部门资源，2 缓存库，3 资源库
+     */
+    private List<Integer> edmRepertory;
 }

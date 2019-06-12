@@ -11,6 +11,14 @@
     <collection property="children" select="getOrganizationListByParentId" column="id"></collection>
   </resultMap>
 
+    <resultMap id="OrgResultMap" type="com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO">
+        <id column="id" jdbcType="BIGINT" property="key" />
+        <result column="dept_name" jdbcType="VARCHAR" property="title" />
+        <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="expand" jdbcType="BIT" property="expand" />
+    </resultMap>
+
     <!-- 获取所在公司或者部门-->
     <select id="getOrganizationList" resultMap="BaseResultMap">
         SELECT
@@ -92,7 +100,6 @@
         </foreach>
     </select>
 
-
     <select id="listByParentIdCode" resultMap="UserCompanyMap">
         SELECT id,dept_name,dept_type,parent_id,parent_id_code
         FROM manage_department
@@ -132,6 +139,25 @@
             #{id}
         </foreach>
         )
+    </select>
+
+    <select id="getOrgInfoList" resultMap="OrgResultMap">
+        SELECT
+        id,
+        dept_name,
+        dept_type,
+        parent_id,
+        true as expand
+        FROM
+        manage_department md
+        WHERE
+        md.enabled = TRUE
+        <if test="ids != null">
+            AND md.id IN
+            <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
     </select>
 
 </mapper>

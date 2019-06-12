@@ -105,10 +105,16 @@ public class Constant {
      * 菜单
      */
     public static final String EDM = "EDM";
-    public static final String HOOLINK = "Hoolink";
-    public static final String MANAGE_CENTER = "manageCenter";
+    public static final String HOOLINK = "HOOLINK_MANAGE";
+    public static final String MANAGE_CENTER = "MANAGEMENT_CENTER";
     public static final String MANAGE_CENTER_NAME = "管理中心";
     public static final String ROLE_MANAGE_NAME = "角色管理";
+    public static final String DEPT_REPERTORY = "DEPT_REPERTORY";
+    public static final String CACHE_REPERTORY = "CACHE_REPERTORY";
+    public static final String COMPANY_REPERTORY = "COMPANY_REPERTORY";
+    public static final Integer REPERTORY_ONE = 1;
+    public static final Integer REPERTORY_TWO = 2;
+    public static final Integer REPERTORY_THREE = 3;
 
     /**
      * 登录
