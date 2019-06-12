@@ -30,7 +30,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/mobile/department/")
-@RestSchema(schemaId = "departmentController")
+@RestSchema(schemaId = "mobileDepartmentController")
 public class MobileDepartmentController {
 
     @Resource

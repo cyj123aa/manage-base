@@ -7,6 +7,7 @@
     <result column="dept_name" jdbcType="VARCHAR" property="title" />
     <result column="dept_type" jdbcType="TINYINT" property="deptType" />
     <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="expand" jdbcType="BIT" property="expand" />
     <collection property="children" select="getOrganizationListByParentId" column="id"></collection>
   </resultMap>
 
@@ -16,7 +17,8 @@
             id,
             dept_name,
             dept_type,
-            parent_id
+            parent_id,
+            true as expand
         FROM
             manage_department md
         WHERE
@@ -35,7 +37,8 @@
             id,
             dept_name,
             dept_type,
-            parent_id
+            parent_id,
+            true as expand
         FROM
             manage_department md
         WHERE
