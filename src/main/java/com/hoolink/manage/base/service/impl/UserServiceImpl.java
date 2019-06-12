@@ -449,8 +449,8 @@ public class UserServiceImpl implements UserService {
 				for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
 					List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 					DeptPairBO deptPair = new DeptPairBO();
-					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+					deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+					deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 
 					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
@@ -569,8 +569,8 @@ public class UserServiceImpl implements UserService {
         for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
             List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
             DeptPairBO deptPair = new DeptPairBO();
-            deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-            deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+            deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+            deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
             if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
                 deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
             }
@@ -740,32 +740,8 @@ public class UserServiceImpl implements UserService {
 
             for (int i = 0; i < allDeptIdList.size(); i++) {
                 List<Long> deptIdList = allDeptIdList.get(i);
-                //从末节点逐级找到子节点入库
-                Long lastDeptId = deptIdList.get(deptIdList.size() - 1);
-                List<Long> chidrenDeptId = new ArrayList<>();
-                traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
-                List<Long> toStoreDeptIdList = new ArrayList<>();
-                toStoreDeptIdList.addAll(deptIdList);
-                toStoreDeptIdList.addAll(chidrenDeptId);
-
-
-                List<DeptIdDeduceStatusPairBO> deptStatusPairList = new ArrayList<>();
-                deptIdList.stream().forEach(di -> {
-                    DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
-                    pair.setDeptId(di);
-                    pair.setDeduceStatus(true);
-                    deptStatusPairList.add(pair);
-                });
-
-                chidrenDeptId.stream().forEach(cdi -> {
-                    DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
-                    pair.setDeptId(cdi);
-                    pair.setDeduceStatus(false);
-                    deptStatusPairList.add(pair);
-                });
-
                 UserDeptPairBO deptPair = new UserDeptPairBO();
-                deptPair.setDeptStatusPairList(deptStatusPairList);
+                deptPair.setDeptIdList(deptIdList);
                 deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
                 deptPairList.add(deptPair);
             }
@@ -783,10 +759,9 @@ public class UserServiceImpl implements UserService {
         List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
         deptPairList.stream().forEach(dp -> {
             String diffDeptGroup = generateRandom();
-            for (DeptIdDeduceStatusPairBO deptIdDeduceStatusPair : dp.getDeptStatusPairList()) {
+            for (Long deptId : dp.getDeptIdList()) {
                 MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
-                middleUserDept.setDeptId(deptIdDeduceStatusPair.getDeptId());
-                middleUserDept.setDeduceStatus(deptIdDeduceStatusPair.getDeduceStatus());
+                middleUserDept.setDeptId(deptId);
                 middleUserDept.setUserId(userId);
                 middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
                 middleUserDept.setDiffDeptGroup(diffDeptGroup);
@@ -967,8 +942,8 @@ public class UserServiceImpl implements UserService {
 		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
-			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
