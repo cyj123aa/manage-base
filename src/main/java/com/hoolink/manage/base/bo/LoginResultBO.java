@@ -3,6 +3,7 @@ package com.hoolink.manage.base.bo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author: xuli
@@ -48,4 +49,9 @@ public class LoginResultBO implements Serializable {
      * 图像url
      */
     private String image;
+
+    /**
+     * edm库的权限，1 部门资源，2 缓存库，3 资源库
+     */
+    private List<Integer> edmRepertory;
 }
