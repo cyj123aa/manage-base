@@ -3,7 +3,6 @@ package com.hoolink.manage.base.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
@@ -719,11 +718,7 @@ public class UserServiceImpl implements UserService {
                     throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_FORMAT_ERROR);
                 }
 
-                //判断末节点是否至少为部门类型
-                Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(lastDeptId)).findFirst();
-                if (!manageDepartmentBOOpt.isPresent() || DeptTypeEnum.DEPARTMENT.getKey() > manageDepartmentBOOpt.get().getDeptType()) {
-                    throw new BusinessException(HoolinkExceptionMassageEnum.TYPE_AT_LEASE_DEPT);
-                } else if (userDeptPairParam.getEncryLevelDept() == null) {
+                if (userDeptPairParam.getEncryLevelDept() == null) {
                     throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
                 }
 
