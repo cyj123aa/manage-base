@@ -160,4 +160,17 @@
         </if>
     </select>
 
+    <select id="getAllOrgInfoList" resultMap="OrgResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            true as expand
+        FROM
+            manage_department md
+        WHERE
+            md.enabled = TRUE
+    </select>
+
 </mapper>
