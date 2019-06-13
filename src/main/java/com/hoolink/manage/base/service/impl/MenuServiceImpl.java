@@ -173,7 +173,7 @@ public class MenuServiceImpl implements MenuService {
                 }
                 List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
                 companyList.forEach(company -> {
-                    EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,true);
+                    EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,true,byType.getKey());
                     twoMenuBOS.add(twoMenu);
                 });
                 edmMenuTreeBO.setChildren(twoMenuBOS);
@@ -228,13 +228,14 @@ public class MenuServiceImpl implements MenuService {
      * @param deptPositionBO
      * @return
      */
-    private EdmMenuTreeBO getEdmMenuTreeBO(DeptPositionBO deptPositionBO,boolean flag) {
+    private EdmMenuTreeBO getEdmMenuTreeBO(DeptPositionBO deptPositionBO,boolean flag,Integer repertoryType) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
         menuTreeBO.setKey(deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
         menuTreeBO.setEnableUpdate(flag);
         menuTreeBO.setMenuType(true);
+        menuTreeBO.setRepertoryType(repertoryType);
         return menuTreeBO;
     }
 
@@ -243,12 +244,13 @@ public class MenuServiceImpl implements MenuService {
      * @param deptPositionBO
      * @return
      */
-    private EdmMenuTreeBO getEdmMenuTreeBO(ManageDepartmentBO deptPositionBO) {
+    private EdmMenuTreeBO getEdmMenuTreeBO(ManageDepartmentBO deptPositionBO,Integer repertoryType) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
         menuTreeBO.setKey(deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getName());
         menuTreeBO.setMenuType(true);
+        menuTreeBO.setRepertoryType(repertoryType);
         return menuTreeBO;
     }
 
@@ -273,9 +275,9 @@ public class MenuServiceImpl implements MenuService {
                 }
                 EdmMenuTreeBO edmMenuTreeBO;
                 if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
-                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true);
+                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true,DEPT_RESOURCE_CODE.getKey());
                 }else{
-                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false);
+                    edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false,DEPT_RESOURCE_CODE.getKey());
                 }
                 if(map.containsKey(parentId)){
                     map.get(parentId).add(edmMenuTreeBO);
@@ -339,9 +341,9 @@ public class MenuServiceImpl implements MenuService {
         if(manageDepartment!=null){
             String parentIdCode = manageDepartment.getParentIdCode();
             String[] split = parentIdCode.split(Constant.UNDERLINE);
-            if(split.length<=2){
+            if(split.length==2){
                 //一级组织架构
-                edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
+                edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class),paramBO.getRepertoryType()));
                 return edmMenuTreeBOS;
             }
             String[] split1 = new String[split.length-1];
@@ -350,9 +352,8 @@ public class MenuServiceImpl implements MenuService {
             List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
             List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
             if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
-                manageDepartmentBOS.forEach(manageDepartmentBO -> edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO)));
+                manageDepartmentBOS.forEach(manageDepartmentBO -> edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType())));
             }
-            //edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
         }
         return edmMenuTreeBOS;
     }
