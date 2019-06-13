@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.service.impl;
 
-import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
-import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,13 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.DeptTreeToolUtils;
@@ -32,7 +26,6 @@ import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 
 /**
@@ -170,8 +163,9 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentTreeBO> getOrgInfoList(DepartmentTreeParamBO treeParamBO) throws Exception {
-		// 根据userId和组织架构层级type获取对应的组织架构id
+	public PermissionManageDeptBO getOrgInfoList(DepartmentTreeParamBO treeParamBO) throws Exception {
+		PermissionManageDeptBO manageDeptBO = new PermissionManageDeptBO();
+		// 1.根据userId和组织架构层级type获取对应的组织架构id
 		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
 		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
 		paramBO.setDeptType(treeParamBO.getDeptType());
@@ -179,12 +173,17 @@ public class DepartmentServiceImpl implements DepartmentService{
 		if(CollectionUtils.isEmpty(deptIdList)){
 			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
 		}
-		// 根据组织架构id集合获取组织架信息
+		// 2.根据组织架构id集合获取组织架信息
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrgInfoList(deptIdList);
 		if(CollectionUtils.isEmpty(manageDepartmentList)){
 			return null;
 		}
-		return manageDepartmentList;
+		manageDeptBO.setManageDepartmentList(manageDepartmentList);
+
+		// 3.获取所有组织架构信息
+		List<ManageDepartmentTreeBO> manageDepartmentTreeBOS = manageDepartmentMapperExt.getAllOrgInfoList();
+		manageDeptBO.setAllManageDepartmentList(manageDepartmentTreeBOS);
+		return manageDeptBO;
 	}
 
 	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){

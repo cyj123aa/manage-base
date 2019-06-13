@@ -37,14 +37,6 @@ public class MiddleUserDepartment implements Serializable {
 
     /**
      * <pre>
-     * 选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
-     * 表字段 : middle_user_department.deduce_status
-     * </pre>
-     */
-    private Boolean deduceStatus;
-
-    /**
-     * <pre>
      * 同一用户不同部门区分标识
      * 表字段 : middle_user_department.diff_dept_group
      * </pre>
@@ -157,31 +149,6 @@ public class MiddleUserDepartment implements Serializable {
      */
     public void setEncryLevelDept(Integer encryLevelDept) {
         this.encryLevelDept = encryLevelDept;
-    }
-
-    /**
-     * <pre>
-     * 获取：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
-     * 表字段：middle_user_department.deduce_status
-     * </pre>
-     *
-     * @return middle_user_department.deduce_status：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
-     */
-    public Boolean getDeduceStatus() {
-        return deduceStatus;
-    }
-
-    /**
-     * <pre>
-     * 设置：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
-     * 表字段：middle_user_department.deduce_status
-     * </pre>
-     *
-     * @param deduceStatus
-     *            middle_user_department.deduce_status：选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
-     */
-    public void setDeduceStatus(Boolean deduceStatus) {
-        this.deduceStatus = deduceStatus;
     }
 
     /**

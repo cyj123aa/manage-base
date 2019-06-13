@@ -32,6 +32,7 @@ import com.hoolink.sdk.enums.StatusEnum;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
+import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.utils.MD5Util;
@@ -448,8 +449,8 @@ public class UserServiceImpl implements UserService {
 				for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
 					List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 					DeptPairBO deptPair = new DeptPairBO();
-					deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-					deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus() && !DeptTypeEnum.COMPANY.getKey().equals(dwm.getDeptType())).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+					deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+					deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 
 					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
@@ -568,8 +569,8 @@ public class UserServiceImpl implements UserService {
         for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
             List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
             DeptPairBO deptPair = new DeptPairBO();
-            deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-            deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus() != null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+            deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+            deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
             if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
                 deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
             }
@@ -717,11 +718,7 @@ public class UserServiceImpl implements UserService {
                     throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_FORMAT_ERROR);
                 }
 
-                //判断末节点是否至少为部门类型
-                Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(lastDeptId)).findFirst();
-                if (!manageDepartmentBOOpt.isPresent() || DeptTypeEnum.DEPARTMENT.getKey() > manageDepartmentBOOpt.get().getDeptType()) {
-                    throw new BusinessException(HoolinkExceptionMassageEnum.TYPE_AT_LEASE_DEPT);
-                } else if (userDeptPairParam.getEncryLevelDept() == null) {
+                if (userDeptPairParam.getEncryLevelDept() == null) {
                     throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
                 }
 
@@ -743,32 +740,8 @@ public class UserServiceImpl implements UserService {
 
             for (int i = 0; i < allDeptIdList.size(); i++) {
                 List<Long> deptIdList = allDeptIdList.get(i);
-                //从末节点逐级找到子节点入库
-                Long lastDeptId = deptIdList.get(deptIdList.size() - 1);
-                List<Long> chidrenDeptId = new ArrayList<>();
-                traverseGetAllChildrenDeptId(deptList, chidrenDeptId, lastDeptId);
-                List<Long> toStoreDeptIdList = new ArrayList<>();
-                toStoreDeptIdList.addAll(deptIdList);
-                toStoreDeptIdList.addAll(chidrenDeptId);
-
-
-                List<DeptIdDeduceStatusPairBO> deptStatusPairList = new ArrayList<>();
-                deptIdList.stream().forEach(di -> {
-                    DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
-                    pair.setDeptId(di);
-                    pair.setDeduceStatus(true);
-                    deptStatusPairList.add(pair);
-                });
-
-                chidrenDeptId.stream().forEach(cdi -> {
-                    DeptIdDeduceStatusPairBO pair = new DeptIdDeduceStatusPairBO();
-                    pair.setDeptId(cdi);
-                    pair.setDeduceStatus(false);
-                    deptStatusPairList.add(pair);
-                });
-
                 UserDeptPairBO deptPair = new UserDeptPairBO();
-                deptPair.setDeptStatusPairList(deptStatusPairList);
+                deptPair.setDeptIdList(deptIdList);
                 deptPair.setEncryLevelDept(userDeptPairParamList.get(i).getEncryLevelDept());
                 deptPairList.add(deptPair);
             }
@@ -786,10 +759,9 @@ public class UserServiceImpl implements UserService {
         List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
         deptPairList.stream().forEach(dp -> {
             String diffDeptGroup = generateRandom();
-            for (DeptIdDeduceStatusPairBO deptIdDeduceStatusPair : dp.getDeptStatusPairList()) {
+            for (Long deptId : dp.getDeptIdList()) {
                 MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
-                middleUserDept.setDeptId(deptIdDeduceStatusPair.getDeptId());
-                middleUserDept.setDeduceStatus(deptIdDeduceStatusPair.getDeduceStatus());
+                middleUserDept.setDeptId(deptId);
                 middleUserDept.setUserId(userId);
                 middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
                 middleUserDept.setDiffDeptGroup(diffDeptGroup);
@@ -970,8 +942,8 @@ public class UserServiceImpl implements UserService {
 		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
 			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
 			DeptPairBO deptPair = new DeptPairBO();
-			deptPair.setDeptIdList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-			deptPair.setDeptNameList(deptWithMoreList.stream().filter(dwm -> dwm.getDeduceStatus()!=null && dwm.getDeduceStatus()).map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
 				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
 				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
@@ -1072,7 +1044,7 @@ public class UserServiceImpl implements UserService {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                    //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
@@ -1082,6 +1054,7 @@ public class UserServiceImpl implements UserService {
             });
             if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
                 List<Long> deptList = new ArrayList<>(dept.keySet());
+                //本身List也会被查出来
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByParentIdCode(deptList);
                 if(CollectionUtils.isNotEmpty(deptPositionBOS)){
                     deptPositionBOS.forEach(deptPositionBO -> {
@@ -1099,7 +1072,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             userDeptInfoBO.setDeptMap(map);
-            userDeptInfoBO.setPositionList(positionList);
+            userDeptInfoBO.setPositionList(ArrayUtil.removeDuplict(positionList));
         }
         return userDeptInfoBO;
     }

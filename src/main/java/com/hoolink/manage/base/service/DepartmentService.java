@@ -1,15 +1,11 @@
 package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.sdk.bo.manager.OrganizationDeptBO;
-import com.hoolink.sdk.bo.manager.OrganizationDeptParamBO;
+import com.hoolink.sdk.bo.manager.*;
+
 import java.util.List;
 
-import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 
 /**
  * @author lijunling
@@ -87,5 +83,5 @@ public interface DepartmentService {
 	 * @return
 	 * @throws Exception
 	 */
-	List<ManageDepartmentTreeBO> getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
+	PermissionManageDeptBO getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
 }
