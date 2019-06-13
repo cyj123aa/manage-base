@@ -3,7 +3,6 @@ package com.hoolink.manage.base.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
