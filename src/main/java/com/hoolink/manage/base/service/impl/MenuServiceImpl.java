@@ -139,7 +139,7 @@ public class MenuServiceImpl implements MenuService {
                     for (DeptPositionBO deptPositionBO:deptPositionBOS) {
                         String parentIdCode = deptPositionBO.getParentIdCode();
                         String[] split = parentIdCode.split(Constant.UNDERLINE);
-                        if(split.length<=1){
+                        if(split.length<=2){
                             continue;
                         }
                         List<String> ids = Arrays.asList(split);
@@ -339,7 +339,8 @@ public class MenuServiceImpl implements MenuService {
         if(manageDepartment!=null){
             String parentIdCode = manageDepartment.getParentIdCode();
             String[] split = parentIdCode.split(Constant.UNDERLINE);
-            if(split.length==1){
+            if(split.length<=2){
+                //一级组织架构
                 edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
                 return edmMenuTreeBOS;
             }
@@ -347,12 +348,11 @@ public class MenuServiceImpl implements MenuService {
             System.arraycopy(split, 1, split1, 0, split1.length);
             List<String> ids = Arrays.asList(split1);
             List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
-            //List<ManageDepartmentBO> manageDepartmentBOS = departmentService.listByIdList(collect);
             List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
             if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
                 manageDepartmentBOS.forEach(manageDepartmentBO -> edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO)));
             }
-            edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
+            //edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class)));
         }
         return edmMenuTreeBOS;
     }

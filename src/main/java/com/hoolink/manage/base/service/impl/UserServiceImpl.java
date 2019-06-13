@@ -3,7 +3,6 @@ package com.hoolink.manage.base.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
@@ -1074,7 +1073,7 @@ public class UserServiceImpl implements UserService {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                    //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
@@ -1084,6 +1083,7 @@ public class UserServiceImpl implements UserService {
             });
             if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
                 List<Long> deptList = new ArrayList<>(dept.keySet());
+                //本身List也会被查出来
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByParentIdCode(deptList);
                 if(CollectionUtils.isNotEmpty(deptPositionBOS)){
                     deptPositionBOS.forEach(deptPositionBO -> {
