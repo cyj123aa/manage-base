@@ -12,7 +12,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import com.hoolink.manage.base.bo.DeptPositionBO;
+import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
+import com.hoolink.sdk.bo.edm.CheckedParamBO;
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.DeptTreeToolUtils;
@@ -90,7 +97,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<ManageDepartmentTreeBO> listAll(Boolean flag) {
+	public List<DepartmentAndUserTreeBO> listAll(Boolean flag, List<CheckedParamBO> checkedList) {
 		List<DeptPositionBO> positionBOList = middleUserDepartmentMapperExt.getDept(ContextUtil.getManageCurrentUser().getUserId());
 		if (CollectionUtils.isEmpty(positionBOList)){
 			return new ArrayList<>(0);
@@ -108,13 +115,31 @@ public class DepartmentServiceImpl implements DepartmentService{
 		//过滤两个list中相同的元素放到新集合中
 		List<ManageDepartment> parentList = departmentBOList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
 		List<ManageDepartment> childList = deptList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
-		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(CopyPropertiesUtil.copyList(parentList, ManageDepartmentTreeBO.class), CopyPropertiesUtil.copyList(childList, ManageDepartmentTreeBO.class));
+		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(convertToDepartmentAndUserTree(parentList), convertToDepartmentAndUserTree(childList));
 		//组织架构用户map
 		Map<Long, List<SimpleDeptUserBO>> userMap = null;
 		if (flag){
 			userMap = userService.mapUserByDeptIds(null);
 		}
-		List<ManageDepartmentTreeBO> treeBOList =  toolUtils.getTree(flag, userMap);
+		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(flag, userMap, checkedList);
+		return treeBOList;
+	}
+
+	private List<DepartmentAndUserTreeBO> convertToDepartmentAndUserTree(List<ManageDepartment> departmentList){
+		List<DepartmentAndUserTreeBO> treeBOList = new ArrayList<>();
+		for (ManageDepartment department : departmentList){
+			DepartmentAndUserTreeBO departmentAndUserTreeBO = new DepartmentAndUserTreeBO();
+			departmentAndUserTreeBO.setKey(department.getId());
+			departmentAndUserTreeBO.setType(Constant.DEPARTMENT);
+			departmentAndUserTreeBO.setTitle(department.getName());
+			departmentAndUserTreeBO.setParentId(department.getParentId());
+			departmentAndUserTreeBO.setValue(department.getId());
+			//默认展开组织架构
+			departmentAndUserTreeBO.setExpand(Boolean.TRUE);
+			//默认全部取消勾选
+			departmentAndUserTreeBO.setChecked(Boolean.FALSE);
+			treeBOList.add(departmentAndUserTreeBO);
+		}
 		return treeBOList;
 	}
 

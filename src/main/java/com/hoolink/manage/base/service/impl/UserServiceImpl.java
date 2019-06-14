@@ -179,14 +179,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CurrentUserBO getSessionUser(String token) {
+    public CurrentUserBO getSessionUser(String token,boolean ismobile) {
         // 获取当前 session 中的用户
         CurrentUserBO currentUser = sessionService.getCurrentUser(token);
         if (currentUser == null) {
             return null;
         }
         // 刷新 session 失效时间
-        if (!sessionService.refreshSession(currentUser.getUserId())) {
+        if (!sessionService.refreshSession(currentUser.getUserId(),ismobile)) {
             return null;
         }
         return currentUser;
@@ -1045,7 +1045,7 @@ public class UserServiceImpl implements UserService {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                    //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
@@ -1055,6 +1055,7 @@ public class UserServiceImpl implements UserService {
             });
             if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
                 List<Long> deptList = new ArrayList<>(dept.keySet());
+                //本身List也会被查出来
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByParentIdCode(deptList);
                 if(CollectionUtils.isNotEmpty(deptPositionBOS)){
                     deptPositionBOS.forEach(deptPositionBO -> {
@@ -1123,7 +1124,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> getUserNameByIds(List<Long> ids) {
+        if(CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        UserExample example=new UserExample();
+        example.createCriteria().andIdIn(ids);
+        List<User> list=userMapper.selectByExample(example);
+        return list;
+    }
+
+    @Override
+    public void updateDeviceCode(String deviceCode) throws Exception {
+        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
+        User user=new User();
+        user.setId(userBO.getUserId());
+        user.setDeviceCode(deviceCode);
+        userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
+    }
+
+    @Override
+    public List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList) {
+        List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
+        return userBOList;
     }
 }

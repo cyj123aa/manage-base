@@ -5,6 +5,10 @@ import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
 
+import com.hoolink.sdk.bo.edm.CheckedParamBO;
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 
 /**
@@ -49,9 +53,10 @@ public interface DepartmentService {
 	/**
 	 * 组织架构树形结构
 	 * @param flag 是否查询组织架构下的员工 true:查询 false:只查询组织架构
+	 * @param checkedList 所勾选的员工列表 如果 flag == false && checkedList != null 就勾选组织架构，flag == true && checkedList != null勾选组织架构下员工
 	 * @return
 	 */
-	List<ManageDepartmentTreeBO> listAll(Boolean flag);
+	List<DepartmentAndUserTreeBO> listAll(Boolean flag, List<CheckedParamBO> checkedList);
 
 	/**
 	 * 获取组织机构树（人员）

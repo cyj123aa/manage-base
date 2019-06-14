@@ -16,6 +16,7 @@ import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -49,13 +50,14 @@ public interface UserService {
      */
     void logout();
 
+
     /**
      * 根据token获取当前用户，该接口仅供网关鉴权使用
-     *
      * @param token
+     * @param isMobile
      * @return
      */
-    CurrentUserBO getSessionUser(String token);
+    CurrentUserBO getSessionUser(String token,boolean isMobile);
 
     /**
      * 重置密码
@@ -265,6 +267,13 @@ public interface UserService {
     Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList);
 
     /**
+     * 查询组织结构id集合下的所有用户 deptIdList查询所有
+     * @param deptIdList
+     * @return
+     */
+    List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList);
+
+    /**
      * 根据用户id获取所在公司或者部门信息
      * @param paramBO
      * @return
@@ -279,4 +288,18 @@ public interface UserService {
      * @throws Exception
      */
     List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 根据用户id集合获取用户名称
+     * @param ids
+     * @return
+     */
+    List<User> getUserNameByIds(List<Long> ids);
+
+    /**
+     * 更新设备码
+     * @param deviceCode
+     * @throws Exception
+     */
+    void updateDeviceCode(String deviceCode) throws Exception;
 }

@@ -1,10 +1,15 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.edm.TreeParamBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.manager.*;
+import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -35,6 +40,14 @@ public class DepartmentController {
     @LogAndParam(value = "获取组织架构信息失败")
     public BackBO<List<ManageDepartmentTreeBO>> getOrganizationList(@RequestBody @Valid ManageDepartmetTreeParamBO paramBO) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrganizationList(paramBO));
+    }
+
+    @PostMapping(value = "getTreeByParam")
+    @ApiOperation(value = "查询组织架构")
+    @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
+    public BackBO<List<DepartmentAndUserTreeBO>> listByRole(@RequestBody TreeParamBO paramBO) throws Exception {
+        List<DepartmentAndUserTreeBO> departmentAndUserTreeBOList = departmentService.listAll(paramBO.getShowUser(), paramBO.getCheckedList());
+        return BackBOUtil.defaultBackBO(departmentAndUserTreeBOList);
     }
 
     @PostMapping(value = "getOrganization")

@@ -2,12 +2,13 @@ package com.hoolink.manage.base.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
+import com.hoolink.manage.base.constant.Constant;
+import com.hoolink.sdk.bo.edm.CheckedParamBO;
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
 import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
-import com.hoolink.manage.base.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,46 +18,94 @@ import java.util.Map;
  */
 public class DeptTreeToolUtils {
 
-    @Resource
-    private UserService userService;
-
     /** 根节点对象存放到这里 */
-    private List<ManageDepartmentTreeBO> rootList;
+    private List<DepartmentAndUserTreeBO> rootList;
 
     /** 其他节点存放到这里，可以包含根节点 */
-    private List<ManageDepartmentTreeBO> bodyList;
+    private List<DepartmentAndUserTreeBO> bodyList;
 
-    public DeptTreeToolUtils(List<ManageDepartmentTreeBO> rootList, List<ManageDepartmentTreeBO> bodyList) {
+    public DeptTreeToolUtils(List<DepartmentAndUserTreeBO> rootList, List<DepartmentAndUserTreeBO> bodyList) {
         this.rootList = rootList;
         this.bodyList = bodyList;
     }
 
-    public List<ManageDepartmentTreeBO> getTree(Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap) {
+    public List<DepartmentAndUserTreeBO> getTree(Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList) {
         //调用的方法入口
         if (bodyList != null && !bodyList.isEmpty()) {
             //声明一个map，用来过滤已操作过的数据
             Map<Long, Long> map = Maps.newHashMapWithExpectedSize(bodyList.size());
-            rootList.forEach(beanTree -> getChild(beanTree, map, flag, userMap));
+            Boolean hasAddUser =  flag && (userMap != null && !userMap.isEmpty());
+            //顶层节点用户
+            List<DepartmentAndUserTreeBO> rootUserList = new ArrayList<>();
+            rootList.forEach(beanTree -> {
+                getChild(beanTree, map, hasAddUser, userMap, checkedList);
+                if (hasAddUser){
+                    List<SimpleDeptUserBO> userBOList = userMap.get(beanTree.getKey());
+                    if (CollectionUtils.isNotEmpty(userBOList)){
+                        buildUserList(rootUserList, beanTree, userBOList, checkedList);
+                    }
+                }
+            });
+            rootList.addAll(rootUserList);
             return rootList;
         }
         return null;
     }
 
-    public void getChild(ManageDepartmentTreeBO treeDto, Map<Long, Long> map, Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap) {
-        List<ManageDepartmentTreeBO> childList = Lists.newArrayList();
+    private void buildUserList(List<DepartmentAndUserTreeBO> rootUserList, DepartmentAndUserTreeBO beanTree, List<SimpleDeptUserBO> userBOList, List<CheckedParamBO> checkedUserList) {
+        for (SimpleDeptUserBO userBO : userBOList) {
+            DepartmentAndUserTreeBO treeBO = new DepartmentAndUserTreeBO();
+            treeBO.setKey(userBO.getId());
+            treeBO.setTitle(userBO.getUserName());
+            treeBO.setValue(userBO.getId());
+            treeBO.setType(Constant.USER);
+            treeBO.setDepartId(beanTree.getKey());
+            treeBO.setChecked(Boolean.FALSE);
+            treeBO.setExpand(Boolean.FALSE);
+            if (CollectionUtils.isNotEmpty(checkedUserList)){
+                for (CheckedParamBO userParamBO : checkedUserList){
+                    if (userParamBO.getId().equals(userBO.getId()) && userParamBO.getDepartId().equals(beanTree.getKey())){
+                        treeBO.setChecked(Boolean.TRUE);
+                    }
+                }
+            }
+            rootUserList.add(treeBO);
+        }
+    }
+
+    public void getChild(DepartmentAndUserTreeBO treeDto, Map<Long, Long> map, Boolean hasAddUser, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList) {
+        List<DepartmentAndUserTreeBO> childList = Lists.newArrayList();
         bodyList.stream()
                 .filter(c -> !map.containsKey(c.getKey()))
                 .filter(c -> c.getParentId().equals(treeDto.getKey()))
                 .forEach(c -> {
                     map.put(c.getKey(), c.getParentId());
-                    getChild(c, map, flag, userMap);
-                    childList.add(c);
-                    Boolean hasAddUser = CollectionUtils.isEmpty(c.getChildren()) && flag && (userMap != null && !userMap.isEmpty());
+                    getChild(c, map, hasAddUser, userMap, checkedList);
+                    //子集
                     if (hasAddUser) {
-                        c.setUserList(userMap.get(c.getKey()));
+                        if (CollectionUtils.isNotEmpty(userMap.get(c.getKey()))) {
+                            List<DepartmentAndUserTreeBO> children = new ArrayList<>();
+                            //封装员工数据
+                            buildUserList(children, c, userMap.get(c.getKey()), checkedList);
+                            if (CollectionUtils.isEmpty(c.getChildren())) {
+                                c.setChildren(children);
+                            } else {
+                                //同级
+                                childList.addAll(children);
+                            }
+                        }
+                    }else {
+                        if (CollectionUtils.isNotEmpty(checkedList)){
+                            //勾选组织架构
+                            for (CheckedParamBO paramBO : checkedList){
+                                if (c.getKey().equals(paramBO.getId())){
+                                    c.setChecked(Boolean.TRUE);
+                                }
+                            }
+                        }
                     }
+                    childList.add(c);
                 });
         treeDto.setChildren(childList);
-
     }
 }

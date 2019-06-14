@@ -1,13 +1,12 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.sdk.bo.manager.ManageUserInfoBO;
+import com.hoolink.manage.base.dao.model.User;
+import com.hoolink.sdk.bo.manager.*;
+
 import java.util.List;
 
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
-import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import java.util.List;
+import java.util.Map;
 
 import com.hoolink.sdk.param.BaseParam;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -20,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 
@@ -86,5 +86,19 @@ public class UserController {
     @LogAndParam(value = "根据id获取用户失败，请稍后重试")
     public BackBO<ManageUserInfoBO> getUserInfoById(@RequestBody Long id)throws Exception{
         return BackBOUtil.defaultBackBO(userService.getUserInfoById(id));
+    }
+
+    @PostMapping(value = "getUserByDeptIds")
+    @ApiOperation(value = "根据组织架构获取用户")
+    @LogAndParam(value = "根据组织架构获取用户失败，请稍后重试")
+    public BackBO<List<SimpleDeptUserBO>> getUserByDeptIds(@RequestBody List<Long> DeptIds){
+        return BackBOUtil.defaultBackBO(userService.listUserByDeptIds(DeptIds));
+    }
+
+    @PostMapping(value = "getNameByIds")
+    @ApiOperation(value = "根据用户id集合返回id与名称的map")
+    @LogAndParam(value = "根据id获取用户名称失败，请稍后重试")
+    public BackBO<List<User>> getUserNameByIds(@RequestBody  List<Long> ids){
+        return BackBOUtil.defaultBackBO(userService.getUserNameByIds(ids));
     }
 }

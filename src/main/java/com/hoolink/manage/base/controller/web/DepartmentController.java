@@ -3,6 +3,7 @@ package com.hoolink.manage.base.controller.web;
 import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.vo.req.DepartmentTreeParamVO;
+import com.hoolink.manage.base.vo.res.DepartmentAndUserTreeVO;
 import com.hoolink.manage.base.vo.res.ManageDepartmentTreeVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
@@ -50,8 +51,8 @@ public class DepartmentController {
     @PostMapping(value = "tree")
     @ApiOperation(value = "查询组织架构")
     @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
-    public BackBO<List<ManageDepartmentTreeVO>> listByRole(@RequestBody BaseParam<Boolean> baseParam) throws Exception {
-        List<ManageDepartmentTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.listAll(baseParam.getData()), ManageDepartmentTreeVO.class);
+    public BackBO<List<DepartmentAndUserTreeVO>> listByRole(@RequestBody BaseParam<Boolean> baseParam) throws Exception {
+        List<DepartmentAndUserTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.listAll(baseParam.getData(), null), DepartmentAndUserTreeVO.class);
         return BackBOUtil.defaultBackBO(manageDepartmentTreeVOS);
     }
 }
