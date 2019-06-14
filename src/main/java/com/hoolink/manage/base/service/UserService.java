@@ -49,13 +49,14 @@ public interface UserService {
      */
     void logout();
 
+
     /**
      * 根据token获取当前用户，该接口仅供网关鉴权使用
-     *
      * @param token
+     * @param isMobile
      * @return
      */
-    CurrentUserBO getSessionUser(String token);
+    CurrentUserBO getSessionUser(String token,boolean isMobile);
 
     /**
      * 重置密码

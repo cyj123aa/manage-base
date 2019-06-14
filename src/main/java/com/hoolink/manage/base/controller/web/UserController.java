@@ -195,8 +195,8 @@ public class UserController {
     @PostMapping(value = "getSessionUser")
     @ApiOperation(value = "查询Session用户", notes = "该接口主要提供网关鉴权使用，其他场景不要使用")
     @LogAndParam(value = "查询Session用户失败")
-    public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token) {
-        return userService.getSessionUser(token);
+    public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token,boolean isMobile) {
+        return userService.getSessionUser(token,isMobile);
     }
     
     @PostMapping(value = "list")

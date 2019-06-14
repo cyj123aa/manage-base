@@ -165,13 +165,7 @@ public class MobileUserController {
         return BackVOUtil.operateAccess();
     }
 
-    @PostMapping(value = "getSessionUser")
-    @ApiOperation(value = "查询Session用户", notes = "该接口主要提供网关鉴权使用，其他场景不要使用")
-    @LogAndParam(value = "查询Session用户失败")
-    public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token) {
-        return userService.getSessionUser(token);
-    }
-    
+
     @PostMapping(value = "list")
     @ApiOperation(value = "获取用户列表带分页")
     @LogAndParam(value = "获取用户列表失败", check = CheckEnum.DATA_NOT_NULL)

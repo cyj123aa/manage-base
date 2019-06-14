@@ -27,6 +27,7 @@ public class SessionServiceImpl implements SessionService {
     private static final String TOKEN_SEPARATOR = "_";
     private static final int TOKEN_SPLIT_COUNT = 2;
     private static final int SESSION_TIMEOUT_SECONDS = 60;
+    private static final int SESSION_TIMEOUT_HOURS = 24;
 
     @Override
     public String cacheCurrentUser(CurrentUserBO currentUserBO) {
@@ -61,7 +62,10 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Boolean refreshSession(Long userId) {
+    public Boolean refreshSession(Long userId,boolean isMobile) {
+        if(isMobile){
+            return sessionOperation.getOperations().expire(getKey(userId), SESSION_TIMEOUT_HOURS, TimeUnit.HOURS);
+        }
         return sessionOperation.getOperations().expire(getKey(userId), SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
     }
 

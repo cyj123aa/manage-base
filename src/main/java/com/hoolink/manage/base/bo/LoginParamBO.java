@@ -18,4 +18,5 @@ public class LoginParamBO {
      * 密码
      */
     private String passwd;
+
 }

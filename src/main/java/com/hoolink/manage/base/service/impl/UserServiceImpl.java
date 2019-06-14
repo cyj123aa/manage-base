@@ -179,14 +179,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CurrentUserBO getSessionUser(String token) {
+    public CurrentUserBO getSessionUser(String token,boolean ismobile) {
         // 获取当前 session 中的用户
         CurrentUserBO currentUser = sessionService.getCurrentUser(token);
         if (currentUser == null) {
             return null;
         }
         // 刷新 session 失效时间
-        if (!sessionService.refreshSession(currentUser.getUserId())) {
+        if (!sessionService.refreshSession(currentUser.getUserId(),ismobile)) {
             return null;
         }
         return currentUser;
