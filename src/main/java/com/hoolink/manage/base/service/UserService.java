@@ -294,4 +294,11 @@ public interface UserService {
      * @return
      */
     Map<Long,String> getUserNameByIds(List<Long> ids);
+
+    /**
+     * 更新设备码
+     * @param deviceCode
+     * @throws Exception
+     */
+    void updateDeviceCode(String deviceCode) throws Exception;
 }

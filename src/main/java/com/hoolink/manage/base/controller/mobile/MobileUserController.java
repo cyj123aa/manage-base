@@ -308,4 +308,12 @@ public class MobileUserController {
     	UserExcelDataVO userExcelDataVO=CopyPropertiesUtil.copyBean(userExcelDataBO,UserExcelDataVO.class);
         return BackVOUtil.operateAccess(userExcelDataVO);
     }
+
+    @PostMapping(value = "updateDeviceCode")
+    @ApiOperation(value = "更新设备码")
+    @LogAndParam(value = "更新设备码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<Void> updateDeviceCode(@RequestBody BaseParam<String> deviceCode)throws Exception  {
+        userService.updateDeviceCode(deviceCode.getData());
+        return BackVOUtil.operateAccess();
+    }
 }

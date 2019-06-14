@@ -1134,6 +1134,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateDeviceCode(String deviceCode) throws Exception {
+        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
+        User user=new User();
+        user.setId(userBO.getUserId());
+        user.setDeviceCode(deviceCode);
+        userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
     }
