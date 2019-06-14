@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
+                .andPasswdEqualTo(loginParam.getPasswd());
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误
@@ -1125,5 +1125,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
+    }
+
+    @Override
+    public List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList) {
+        List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
+        return userBOList;
     }
 }
