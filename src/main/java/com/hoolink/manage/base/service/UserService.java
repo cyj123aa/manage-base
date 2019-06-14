@@ -265,6 +265,13 @@ public interface UserService {
     Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList);
 
     /**
+     * 查询组织结构id集合下的所有用户 deptIdList查询所有
+     * @param deptIdList
+     * @return
+     */
+    List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList);
+
+    /**
      * 根据用户id获取所在公司或者部门信息
      * @param paramBO
      * @return

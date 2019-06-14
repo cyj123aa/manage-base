@@ -1126,4 +1126,10 @@ public class UserServiceImpl implements UserService {
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
     }
+
+    @Override
+    public List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList) {
+        List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
+        return userBOList;
+    }
 }

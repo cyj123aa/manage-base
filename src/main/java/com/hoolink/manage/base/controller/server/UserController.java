@@ -88,7 +88,7 @@ public class UserController {
     @PostMapping(value = "getUserByDeptIds")
     @ApiOperation(value = "根据组织架构获取用户")
     @LogAndParam(value = "根据组织架构获取用户失败，请稍后重试")
-    public BackBO<Map<Long, List<SimpleDeptUserBO>>> getUserByDeptIds(@RequestBody List<Long> DeptIds){
-        return BackBOUtil.defaultBackBO(userService.mapUserByDeptIds(DeptIds));
+    public BackBO<List<SimpleDeptUserBO>> getUserByDeptIds(@RequestBody List<Long> DeptIds){
+        return BackBOUtil.defaultBackBO(userService.listUserByDeptIds(DeptIds));
     }
 }
