@@ -16,6 +16,7 @@ import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
@@ -293,7 +294,7 @@ public interface UserService {
      * @param ids
      * @return
      */
-    Map<Long,String> getUserNameByIds(List<Long> ids);
+    List<User> getUserNameByIds(List<Long> ids);
 
     /**
      * 更新设备码

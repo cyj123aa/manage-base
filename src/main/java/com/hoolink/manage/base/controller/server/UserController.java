@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
@@ -97,7 +98,7 @@ public class UserController {
     @PostMapping(value = "getNameByIds")
     @ApiOperation(value = "根据用户id集合返回id与名称的map")
     @LogAndParam(value = "根据id获取用户名称失败，请稍后重试")
-    public BackBO<Map<Long,String>> getUserNameByIds(@RequestBody @NotNull(message="idList不能为空") List<Long> ids){
+    public BackBO<List<User>> getUserNameByIds(@RequestBody  List<Long> ids){
         return BackBOUtil.defaultBackBO(userService.getUserNameByIds(ids));
     }
 }
