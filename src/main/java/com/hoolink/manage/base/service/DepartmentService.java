@@ -84,4 +84,12 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	PermissionManageDeptBO getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
+
+	/**
+	 * 获取部门名称
+	 * @param deptId
+	 * @return
+	 * @throws Exception
+	 */
+	String getDeptInfo(Long deptId) throws Exception;
 }

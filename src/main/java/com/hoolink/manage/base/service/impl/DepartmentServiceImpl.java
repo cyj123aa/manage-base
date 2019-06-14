@@ -186,6 +186,22 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return manageDeptBO;
 	}
 
+	@Override
+	public String getDeptInfo(Long deptId) throws Exception {
+	    if(deptId == null) {
+	        return null;
+      }
+      ManageDepartment department = manageDepartmentMapper.selectByPrimaryKey(deptId);
+      if(department == null || department.getDeptType().intValue() == EdmDeptEnum.COMPANY.getKey().intValue() ){
+          return null;
+      }
+      // 组
+      if(department.getDeptType().intValue() == EdmDeptEnum.POSITION.getKey().intValue()){
+          department = manageDepartmentMapper.selectByPrimaryKey(department.getParentId());
+      }
+		return department.getName();
+	}
+
 	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
       ManageDepartmentExample departmentExample = new ManageDepartmentExample();
       ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
