@@ -21,4 +21,7 @@ public class Constant {
     public static final Byte COMPANY_LEVEL = 1;
     public static final Byte DEPT_LEVEL = 2;
     public static final Byte POSITION_LEVEL = 3;
+
+    public static final Integer USER = 0;
+    public static final Integer DEPARTMENT = 1;
 }
