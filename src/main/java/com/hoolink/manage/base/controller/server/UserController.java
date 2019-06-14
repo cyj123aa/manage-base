@@ -21,6 +21,8 @@ import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * 
  * @author lijunling
@@ -90,5 +92,12 @@ public class UserController {
     @LogAndParam(value = "根据组织架构获取用户失败，请稍后重试")
     public BackBO<List<SimpleDeptUserBO>> getUserByDeptIds(@RequestBody List<Long> DeptIds){
         return BackBOUtil.defaultBackBO(userService.listUserByDeptIds(DeptIds));
+    }
+
+    @PostMapping(value = "getNameByIds")
+    @ApiOperation(value = "根据用户id集合返回id与名称的map")
+    @LogAndParam(value = "根据id获取用户名称失败，请稍后重试")
+    public BackBO<Map<Long,String>> getUserNameByIds(@RequestBody @NotNull(message="idList不能为空") List<Long> ids){
+        return BackBOUtil.defaultBackBO(userService.getUserNameByIds(ids));
     }
 }

@@ -287,4 +287,11 @@ public interface UserService {
      * @throws Exception
      */
     List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 根据用户id集合获取用户名称
+     * @param ids
+     * @return
+     */
+    Map<Long,String> getUserNameByIds(List<Long> ids);
 }

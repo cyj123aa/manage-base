@@ -1123,6 +1123,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Map<Long, String> getUserNameByIds(List<Long> ids) {
+        if(CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        UserExample example=new UserExample();
+        example.createCriteria().andIdIn(ids);
+        List<User> list=userMapper.selectByExample(example);
+        return list.stream().collect(Collectors.toMap(User::getId,User::getName));
+    }
+
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
     }
