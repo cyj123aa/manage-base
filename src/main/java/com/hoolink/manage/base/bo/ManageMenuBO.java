@@ -64,4 +64,9 @@ public class ManageMenuBO {
      * 数据有效性
      */
     private Boolean enabled;
+
+    /**
+     * 权限级别 1-只读 2-全部(读、写)
+     */
+    private Integer permissionFlag;
 }

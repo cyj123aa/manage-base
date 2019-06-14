@@ -1,13 +1,12 @@
 package com.hoolink.manage.base.controller.web;
 
-import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
+import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.vo.req.DepartmentTreeParamVO;
 import com.hoolink.manage.base.vo.res.DepartmentAndUserTreeVO;
 import com.hoolink.manage.base.vo.res.ManageDepartmentTreeVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackBOUtil;

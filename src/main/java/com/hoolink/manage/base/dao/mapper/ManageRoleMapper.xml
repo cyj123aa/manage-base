@@ -16,6 +16,7 @@
     <result column="created" jdbcType="BIGINT" property="created" />
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="role_type" jdbcType="BIT" property="roleType" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -86,7 +87,7 @@
     @mbggenerated
     -->
     id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created, 
-    updated, enabled
+    updated, enabled, role_type
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageRoleExample" resultMap="BaseResultMap">
     <!--
@@ -137,11 +138,11 @@
     insert into manage_role (role_name, role_desc, parent_id, 
       role_level, role_status, creator, 
       updator, created, updated, 
-      enabled)
+      enabled, role_type)
     values (#{roleName,jdbcType=VARCHAR}, #{roleDesc,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT}, 
       #{roleLevel,jdbcType=TINYINT}, #{roleStatus,jdbcType=BIT}, #{creator,jdbcType=BIGINT}, 
       #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, 
-      #{enabled,jdbcType=BIT})
+      #{enabled,jdbcType=BIT}, #{roleType,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageRole" useGeneratedKeys="true">
     <!--
@@ -179,6 +180,9 @@
       <if test="enabled != null">
         enabled,
       </if>
+      <if test="roleType != null">
+        role_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="roleName != null">
@@ -210,6 +214,9 @@
       </if>
       <if test="enabled != null">
         #{enabled,jdbcType=BIT},
+      </if>
+      <if test="roleType != null">
+        #{roleType,jdbcType=BIT},
       </if>
     </trim>
   </insert>
@@ -261,6 +268,9 @@
       <if test="record.enabled != null">
         enabled = #{record.enabled,jdbcType=BIT},
       </if>
+      <if test="record.roleType != null">
+        role_type = #{record.roleType,jdbcType=BIT},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -281,7 +291,8 @@
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
       updated = #{record.updated,jdbcType=BIGINT},
-      enabled = #{record.enabled,jdbcType=BIT}
+      enabled = #{record.enabled,jdbcType=BIT},
+      role_type = #{record.roleType,jdbcType=BIT}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -322,6 +333,9 @@
       <if test="enabled != null">
         enabled = #{enabled,jdbcType=BIT},
       </if>
+      <if test="roleType != null">
+        role_type = #{roleType,jdbcType=BIT},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -339,7 +353,8 @@
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},
       updated = #{updated,jdbcType=BIGINT},
-      enabled = #{enabled,jdbcType=BIT}
+      enabled = #{enabled,jdbcType=BIT},
+      role_type = #{roleType,jdbcType=BIT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -1,13 +1,15 @@
 package com.hoolink.manage.base.service;
 
+import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.sdk.bo.manager.*;
+
 import java.util.List;
 
-import com.hoolink.manage.base.bo.DepartmentTreeParamBO;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
 import com.hoolink.sdk.bo.edm.CheckedParamBO;
 import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
+import com.hoolink.manage.base.bo.DeptPositionBO;
 
 /**
  * @author lijunling
@@ -21,13 +23,32 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listByIdList(List<Long> idList);
-	
+
 	/**
-	 * 根据公司获取所有部门
-	 * @param company
+	 * 根据父节点集合获取部门信息
+	 * @param idList
 	 * @return
 	 */
-	List<ManageDepartmentBO> listByCompany(String company);
+	List<DeptPositionBO> listByParentIdList(List<Long> idList);
+
+	/**
+	 *  获取组织架构树
+	 * @return
+	 */
+	List<ManageDepartmentBO> listAll();
+	/**
+	 * 根据组织类型查询
+	 * @param deptType
+	 * @return
+	 */
+	List<ManageDepartmentBO> listByDeptType(Byte deptType);
+
+	/**
+	 * 父级查询组织类型
+	 * @param parentList
+	 * @return
+	 */
+	List<ManageDepartment> listByParentList(List<Long> parentList);
 
 	/**
 	 * 组织架构树形结构
@@ -53,4 +74,19 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	List<ManageDepartmentTreeBO> getOrgList (DepartmentTreeParamBO treeParamBO) throws Exception;
+	/**
+	 * 获取组织
+	 * @param paramBO
+	 * @return
+	 * @throws Exception
+	 */
+	OrganizationDeptBO getOrganization (OrganizationDeptParamBO paramBO) throws Exception;
+
+	/**
+	 * 获取组织信息
+	 * @param treeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	PermissionManageDeptBO getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
 }

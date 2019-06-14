@@ -1,8 +1,10 @@
 package com.hoolink.manage.base.vo.req;
 
+import com.hoolink.manage.base.bo.MiddleRoleMenuBO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @description: 角色相关信息
@@ -36,5 +38,10 @@ public class MiddleRoleMenuVO implements Serializable {
      * 权限级别 1-只读 2-全部(读、写)
      */
     private Integer permissionFlag;
+
+    /**
+     * 下一级菜单列表
+     */
+    private List<MiddleRoleMenuVO> childList;
 
 }
