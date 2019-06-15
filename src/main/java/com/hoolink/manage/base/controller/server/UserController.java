@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,7 +99,8 @@ public class UserController {
     @PostMapping(value = "getNameByIds")
     @ApiOperation(value = "根据用户id集合返回id与名称的map")
     @LogAndParam(value = "根据id获取用户名称失败，请稍后重试")
-    public BackBO<List<User>> getUserNameByIds(@RequestBody  List<Long> ids){
-        return BackBOUtil.defaultBackBO(userService.getUserNameByIds(ids));
+    public BackBO<List<ManagerUserBO>> getUserNameByIds(@RequestBody  List<Long> ids){
+        List<ManagerUserBO> result= CopyPropertiesUtil.copyList(userService.getUserNameByIds(ids),ManagerUserBO.class);
+        return BackBOUtil.defaultBackBO(result);
     }
 }
