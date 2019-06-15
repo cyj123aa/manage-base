@@ -310,12 +310,13 @@ public class MenuServiceImpl implements MenuService {
             List<EdmMenuTreeBO> menuBOS = map.get(menuId);
             if (org.springframework.util.CollectionUtils.isEmpty(menuBOS)) {
                 childMenu.setExistChild(false);
-                childMenu.setMenuType(true);
+                childMenu.setEnableUpdate(true);
                 continue;
             }
             fillNextMenu(map,menuBOS);
             childMenu.setChildren(menuBOS);
             childMenu.setExistChild(true);
+            childMenu.setEnableUpdate(false);
         }
     }
 
