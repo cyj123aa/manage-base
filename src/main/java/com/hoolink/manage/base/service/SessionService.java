@@ -40,7 +40,7 @@ public interface SessionService {
      * @param userId
      * @return
      */
-    Boolean refreshSession(Long userId);
+    Boolean refreshSession(Long userId,boolean ismobile);
 
     /**
      * 删除用户及其token

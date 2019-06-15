@@ -29,4 +29,5 @@ public class LoginParamVO {
             groups = {ManagerBaseGroup.UserLogin.class}
     )
     private String passwd;
+
 }

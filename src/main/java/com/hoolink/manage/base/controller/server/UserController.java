@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,8 @@ import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 
@@ -90,5 +94,13 @@ public class UserController {
     @LogAndParam(value = "根据组织架构获取用户失败，请稍后重试")
     public BackBO<List<SimpleDeptUserBO>> getUserByDeptIds(@RequestBody List<Long> DeptIds){
         return BackBOUtil.defaultBackBO(userService.listUserByDeptIds(DeptIds));
+    }
+
+    @PostMapping(value = "getNameByIds")
+    @ApiOperation(value = "根据用户id集合返回id与名称的map")
+    @LogAndParam(value = "根据id获取用户名称失败，请稍后重试")
+    public BackBO<List<ManagerUserBO>> getUserNameByIds(@RequestBody  List<Long> ids){
+        List<ManagerUserBO> result= CopyPropertiesUtil.copyList(userService.getUserNameByIds(ids),ManagerUserBO.class);
+        return BackBOUtil.defaultBackBO(result);
     }
 }

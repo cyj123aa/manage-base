@@ -70,4 +70,11 @@ public class DepartmentController {
     public BackBO<PermissionManageDeptBO> getOrgTree(@RequestBody DepartmentTreeParamBO param) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrgInfoList(param));
     }
+
+    @PostMapping(value = "getDeptInfo")
+    @ApiOperation(value = "获取部门信息")
+    @LogAndParam(value = "获取部门信息失败")
+    public BackBO getDeptInfo(@RequestBody Long deptId) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getDeptInfo(deptId));
+    }
 }

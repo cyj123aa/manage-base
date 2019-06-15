@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(loginParam.getPasswd());
+                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误
@@ -179,14 +179,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CurrentUserBO getSessionUser(String token) {
+    public CurrentUserBO getSessionUser(String token,boolean ismobile) {
         // 获取当前 session 中的用户
         CurrentUserBO currentUser = sessionService.getCurrentUser(token);
         if (currentUser == null) {
             return null;
         }
         // 刷新 session 失效时间
-        if (!sessionService.refreshSession(currentUser.getUserId())) {
+        if (!sessionService.refreshSession(currentUser.getUserId(),ismobile)) {
             return null;
         }
         return currentUser;
@@ -833,6 +833,7 @@ public class UserServiceImpl implements UserService {
         List<UserDeptBO> userCompany = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
         if (CollectionUtils.isNotEmpty(userCompany)) {
             manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
+            manageUserInfoBO.setCompanyId(userCompany.get(0).getDeptId());
         }
         List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
         manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
@@ -1120,6 +1121,26 @@ public class UserServiceImpl implements UserService {
             }
         }
         return userDeptAssociationBOS;
+    }
+
+    @Override
+    public List<User> getUserNameByIds(List<Long> ids) {
+        if(CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        UserExample example=new UserExample();
+        example.createCriteria().andIdIn(ids);
+        List<User> list=userMapper.selectByExample(example);
+        return list;
+    }
+
+    @Override
+    public void updateDeviceCode(String deviceCode) throws Exception {
+        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
+        User user=new User();
+        user.setId(userBO.getUserId());
+        user.setDeviceCode(deviceCode);
+        userMapper.updateByPrimaryKeySelective(user);
     }
 
     @Override
