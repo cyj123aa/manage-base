@@ -1184,6 +1184,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<MobileFileBO> getDeptByParentId(Long id) throws Exception {
+        if(id==null){
+            return null;
+        }
+        ManageDepartmentExample example=new ManageDepartmentExample();
+        example.createCriteria().andParentIdEqualTo(id);
+        example.setOrderByClause(" dept_name asc ");
+        List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        List<MobileFileBO> mobileFile=new ArrayList<>();
+        list.stream().forEach(m ->{
+            MobileFileBO mobileFileBO=new MobileFileBO();
+            mobileFileBO.setId(m.getId());
+            mobileFileBO.setName(m.getName());
+            mobileFileBO.setIfDepartment(true);
+            //如果是小组类型就设置为是最下一级组织架构层级
+            if(Constant.POSITION_LEVEL.equals(m.getDeptType())){
+                mobileFileBO.setIfLastDepartment(true);
+            }else{
+                mobileFileBO.setIfLastDepartment(false);
+            }
+            mobileFile.add(mobileFileBO);
+        });
+        return mobileFile;
+    }
+
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
     }

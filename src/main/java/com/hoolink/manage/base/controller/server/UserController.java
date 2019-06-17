@@ -111,4 +111,11 @@ public class UserController {
     public BackBO<List<MobileFileBO>> getCompanyById(@RequestBody  Long id) throws Exception{
         return BackBOUtil.defaultBackBO(userService.getCompanyById(id));
     }
+
+    @PostMapping(value = "getDeptByParentId")
+    @ApiOperation(value = "根据父级id获取下级架构")
+    @LogAndParam(value = "根据父级id获取下级架构失败，请稍后重试")
+    public BackBO<List<MobileFileBO>> getDeptByParentId(@RequestBody  Long id) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getDeptByParentId(id));
+    }
 }

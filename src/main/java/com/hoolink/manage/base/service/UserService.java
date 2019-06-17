@@ -314,7 +314,13 @@ public interface UserService {
      */
     List<MobileFileBO> getCompanyById(Long id) throws Exception;
 
-
+    /**
+     * 根据id获取下层架构
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    List<MobileFileBO> getDeptByParentId(Long id) throws Exception;
 
     /**
      * 个人中心-上传保存头像
