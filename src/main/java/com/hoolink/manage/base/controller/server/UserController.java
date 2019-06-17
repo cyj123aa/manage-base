@@ -108,7 +108,7 @@ public class UserController {
     @PostMapping(value = "getCompanyById")
     @ApiOperation(value = "根据用户id获取公司")
     @LogAndParam(value = "根据用户id获取公司失败，请稍后重试")
-    public BackBO<MobileFileBO> getUserNameByIds(@RequestBody  Long id) throws Exception{
-        return BackBOUtil.defaultBackBO(userService.getUserNameByIds(id));
+    public BackBO<MobileFileBO> getCompanyById(@RequestBody  Long id) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getCompanyById(id));
     }
 }

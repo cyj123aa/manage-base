@@ -1154,7 +1154,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MobileFileBO getUserNameByIds(Long id) throws Exception {
+    public MobileFileBO getCompanyById(Long id) throws Exception {
         if(id==null){
             return null;
         }
