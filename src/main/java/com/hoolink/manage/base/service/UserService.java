@@ -31,6 +31,8 @@ import com.hoolink.sdk.bo.manager.*;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * @Author: xuli
  * @Date: 2019/4/15 19:24
@@ -302,4 +304,11 @@ public interface UserService {
      * @throws Exception
      */
     void updateDeviceCode(String deviceCode) throws Exception;
+    
+    /**
+     * 个人中心-上传保存头像
+     * @param multipartFile
+     * @return
+     */
+    boolean uploadImage(MultipartFile multipartFile);
 }
