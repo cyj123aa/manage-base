@@ -46,6 +46,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
@@ -1192,4 +1193,11 @@ public class UserServiceImpl implements UserService {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
         return userBOList;
     }
+
+	@Override
+	public boolean uploadImage(MultipartFile multipartFile) {
+		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
+		return updateImage(obsBo.getData().getId());
+	}
+
 }
