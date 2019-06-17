@@ -129,8 +129,8 @@ public class MenuServiceImpl implements MenuService {
                     deptAllList.addAll(deptPositionBOS);
                 }
             }
-            //临时文件所属组织架构 部门库存在
-            List<Long> positions = paramBO.getPositionList();
+            //临时文件所属组织架构 资源库库存在
+            /*List<Long> positions = paramBO.getPositionList();
             if (CollectionUtils.isNotEmpty(positions)) {
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByIdList(positions);
                 List<Long> parentList = new ArrayList<>();
@@ -152,7 +152,7 @@ public class MenuServiceImpl implements MenuService {
                     List<DeptPositionBO> deptPositionBOList = manageDepartmentMapperExt.listByIdList(parentList);
                     deptAllList.addAll(deptPositionBOList);
                 }
-            }
+            }*/
             deptAllList = removeDuplict(deptAllList);
         }
         switch (byType) {
