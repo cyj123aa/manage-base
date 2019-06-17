@@ -105,8 +105,8 @@ public class Constant {
      * 菜单
      */
     public static final String EDM = "EDM";
-    public static final String HOOLINK = "Hoolink";
-    public static final String MANAGE_CENTER = "manageCenter";
+    public static final String HOOLINK = "HOOLINK_MANAGE";
+    public static final String MANAGE_CENTER = "MANAGEMENT_CENTER";
     public static final String MANAGE_CENTER_NAME = "管理中心";
     public static final String ROLE_MANAGE_NAME = "角色管理";
 
