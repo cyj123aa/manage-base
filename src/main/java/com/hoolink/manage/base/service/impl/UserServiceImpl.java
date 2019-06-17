@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
         //查询角色
-        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getId());
+        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
 
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
