@@ -7,14 +7,13 @@ import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
+import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.dict.AbstractDict;
 import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.SpringUtils;
@@ -24,6 +23,7 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -97,6 +97,12 @@ public class UserServiceImpl implements UserService {
     @Resource
     private ManageDepartmentMapperExt manageDepartmentMapperExt;
 
+    @Resource
+    private MiddleUserDepartmentMapper middleUserDepartmentMapper;
+
+    @Resource
+    private ManageRoleMapper manageRoleMapper;
+
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -126,11 +132,15 @@ public class UserServiceImpl implements UserService {
         toUpdateUser.setLastTime(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
+        //查询角色
+        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
+
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
         loginResult.setName(user.getName());
+        loginResult.setRoleName(manageRole.getRoleName());
         //设置头像
         if (user.getImgId() != null) {
             try {
@@ -1142,6 +1152,31 @@ public class UserServiceImpl implements UserService {
         user.setId(userBO.getUserId());
         user.setDeviceCode(deviceCode);
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    @Override
+    public MobileFileBO getCompanyById(Long id) throws Exception {
+        if(id==null){
+            return null;
+        }
+        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
+        example.createCriteria().andUserIdEqualTo(id);
+        //根据用户id获取所有的所属组织架构id
+        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
+        List<Long> departmentIds=list.stream().map(d -> d.getDeptId()).collect(Collectors.toList());
+        ManageDepartmentExample departmentExample=new ManageDepartmentExample();
+        departmentExample.createCriteria().andIdIn(departmentIds);
+        //根据他所属的所有组织架构id查询出公司层次的组织架构
+        List<ManageDepartment> manageDepartments=manageDepartmentMapper.selectByExample(departmentExample);
+        ManageDepartment manageDepartment= manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).findFirst().orElse(null);
+        if(manageDepartment!=null){
+            MobileFileBO mobileFileBO=new MobileFileBO();
+            mobileFileBO.setId(manageDepartment.getId());
+            mobileFileBO.setName(manageDepartment.getName());
+            mobileFileBO.setIfDepartment(true);
+            return mobileFileBO;
+        }
+        return null;
     }
 
     @Override
