@@ -844,7 +844,7 @@ public class UserServiceImpl implements UserService {
         List<UserDeptBO> userCompany = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
         if (CollectionUtils.isNotEmpty(userCompany)) {
             manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
-            //manageUserInfoBO.setCompanyId(userCompany.get(0).getDeptId());
+            manageUserInfoBO.setCompanyId(userCompany.get(0).getDeptId());
         }
         List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
         manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
