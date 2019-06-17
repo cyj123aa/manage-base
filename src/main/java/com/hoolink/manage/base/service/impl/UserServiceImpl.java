@@ -1154,7 +1154,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MobileFileBO getCompanyById(Long id) throws Exception {
+    public List<MobileFileBO> getCompanyById(Long id) throws Exception {
         if(id==null){
             return null;
         }
@@ -1167,13 +1167,17 @@ public class UserServiceImpl implements UserService {
         departmentExample.createCriteria().andIdIn(departmentIds);
         //根据他所属的所有组织架构id查询出公司层次的组织架构
         List<ManageDepartment> manageDepartments=manageDepartmentMapper.selectByExample(departmentExample);
-        ManageDepartment manageDepartment= manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).findFirst().orElse(null);
-        if(manageDepartment!=null){
-            MobileFileBO mobileFileBO=new MobileFileBO();
-            mobileFileBO.setId(manageDepartment.getId());
-            mobileFileBO.setName(manageDepartment.getName());
-            mobileFileBO.setIfDepartment(true);
-            return mobileFileBO;
+        List<ManageDepartment> manageDepartment= manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(manageDepartment)){
+            List<MobileFileBO> mobileFiles=new ArrayList<>();
+            for(ManageDepartment department:manageDepartment) {
+                MobileFileBO mobileFileBO = new MobileFileBO();
+                mobileFileBO.setId(department.getId());
+                mobileFileBO.setName(department.getName());
+                mobileFileBO.setIfDepartment(true);
+                mobileFiles.add(mobileFileBO);
+            }
+            return mobileFiles;
         }
         return null;
     }

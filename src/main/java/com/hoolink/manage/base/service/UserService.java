@@ -310,5 +310,5 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    MobileFileBO getCompanyById(Long id) throws Exception;
+    List<MobileFileBO> getCompanyById(Long id) throws Exception;
 }
