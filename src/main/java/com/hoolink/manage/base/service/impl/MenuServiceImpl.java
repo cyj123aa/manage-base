@@ -244,12 +244,13 @@ public class MenuServiceImpl implements MenuService {
      * @param deptPositionBO
      * @return
      */
-    private EdmMenuTreeBO getEdmMenuTreeBO(ManageDepartmentBO deptPositionBO,Integer repertoryType) {
+    private EdmMenuTreeBO getEdmMenuTreeBO(ManageDepartmentBO deptPositionBO,Integer repertoryType,Boolean flag) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
         menuTreeBO.setKey(deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getName());
         menuTreeBO.setMenuType(true);
+        menuTreeBO.setEnableUpdate(flag);
         menuTreeBO.setRepertoryType(repertoryType);
         return menuTreeBO;
     }
@@ -339,12 +340,21 @@ public class MenuServiceImpl implements MenuService {
             return edmMenuTreeBOS;
         }
         ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getBelongId());
+        //查询下级
+        ManageDepartmentExample example = new ManageDepartmentExample();
+        example.createCriteria().andEnabledEqualTo(true).andParentIdEqualTo(paramBO.getBelongId());
+        List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(example);
+        Boolean flag=true;
+        if(CollectionUtils.isNotEmpty(manageDepartments)){
+            flag=false;
+        }
+        final Boolean enableUpdate=flag;
         if(manageDepartment!=null){
             String parentIdCode = manageDepartment.getParentIdCode();
             String[] split = parentIdCode.split(Constant.UNDERLINE);
             if(split.length==2){
                 //一级组织架构
-                edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class),paramBO.getRepertoryType()));
+                edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class),paramBO.getRepertoryType(),enableUpdate));
                 return edmMenuTreeBOS;
             }
             String[] split1 = new String[split.length-1];
@@ -353,7 +363,13 @@ public class MenuServiceImpl implements MenuService {
             List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
             List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
             if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
-                manageDepartmentBOS.forEach(manageDepartmentBO -> edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType())));
+                manageDepartmentBOS.forEach(manageDepartmentBO -> {
+                    if(manageDepartmentBO.getId().equals(paramBO.getBelongId())){
+                        edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),enableUpdate));
+                    }else{
+                        edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),false));
+                    }
+                });
             }
         }
         return edmMenuTreeBOS;
