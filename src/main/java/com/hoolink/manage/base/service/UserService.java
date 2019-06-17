@@ -22,6 +22,8 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.edm.MobileFileBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -321,5 +323,14 @@ public interface UserService {
      * @return
      */
     boolean uploadImage(MultipartFile multipartFile);
+    
+    
+    /**
+     * 获取用户操作日志(分页)
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception;
 
 }
