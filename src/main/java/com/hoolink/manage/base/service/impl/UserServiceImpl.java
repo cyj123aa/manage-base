@@ -6,6 +6,7 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
+import com.hoolink.manage.base.consumer.edm.EdmClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
@@ -24,6 +25,8 @@ import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.edm.MobileFileBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -102,6 +105,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private ManageRoleMapper manageRoleMapper;
+    
+    @Autowired
+    private EdmClient edmClient;
 
 
     /*** 验证码超时时间，10分钟 */
@@ -1227,6 +1233,11 @@ public class UserServiceImpl implements UserService {
 	public boolean uploadImage(MultipartFile multipartFile) {
 		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
 		return updateImage(obsBo.getData().getId());
+	}
+
+	@Override
+	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
+		return edmClient.listOperateLog(paramBO).getData();
 	}
 
 }
