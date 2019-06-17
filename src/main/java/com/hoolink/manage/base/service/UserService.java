@@ -21,6 +21,7 @@ import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -302,4 +303,12 @@ public interface UserService {
      * @throws Exception
      */
     void updateDeviceCode(String deviceCode) throws Exception;
+
+    /**
+     * 根据用户id查询公司
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    MobileFileBO getUserNameByIds(Long id) throws Exception;
 }
