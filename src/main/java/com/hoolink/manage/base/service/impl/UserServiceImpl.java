@@ -1044,11 +1044,11 @@ public class UserServiceImpl implements UserService {
             list.forEach(deptSecurityBO -> {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                        && deptSecurityBO.getLowestLevel()){
                     //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                        && deptSecurityBO.getLowestLevel()){
                     //小组密保等级
                     map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                 }
