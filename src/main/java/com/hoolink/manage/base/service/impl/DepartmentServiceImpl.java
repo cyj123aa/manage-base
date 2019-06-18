@@ -3,6 +3,7 @@ package com.hoolink.manage.base.service.impl;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,9 @@ import com.hoolink.manage.base.util.DeptTreeToolUtils;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
 import com.hoolink.manage.base.dao.model.ManageDepartment;
@@ -226,6 +229,54 @@ public class DepartmentServiceImpl implements DepartmentService{
       }
 		return department.getName();
 	}
+
+    @Override
+    public List<ReadFileOrgInfoBO> getFileOrgList(List<Long> deptId) throws Exception {
+        List<ReadFileOrgInfoBO> orgInfoBOList = new ArrayList<>();
+        if (deptId == null) {
+            return null;
+        }
+        List<ManageDepartment> deptList = getDeptList(deptId);
+        if (deptList == null) {
+            return null;
+        }
+        Map<Long, String> idAndParentIdCodeMap = deptList.stream().collect(Collectors.toMap(ManageDepartment::getId, ManageDepartment::getParentIdCode));
+        for (Map.Entry<Long, String> entry : idAndParentIdCodeMap.entrySet()) {
+            Long key = entry.getKey();
+            String value = entry.getValue();
+            ReadFileOrgInfoBO readFileOrgInfoBO = new ReadFileOrgInfoBO();
+            List<Long>  id = Arrays.asList((Long[]) ConvertUtils.convert(value.split(Constant.UNDERLINE), Long.class));
+            List<ManageDepartment> deptParentIdList = getDeptList(id);
+            List<String> companyName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 1).map(ManageDepartment::getName).collect(Collectors.toList());
+            List<String> deptName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 2).map(ManageDepartment::getName).collect(Collectors.toList());
+            List<String> groupName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 3).map(ManageDepartment::getName).collect(Collectors.toList());
+            List<String> orgName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 4).map(ManageDepartment::getName).collect(Collectors.toList());
+            String orgLevel = null;
+            if(CollectionUtils.isNotEmpty(companyName)){
+                orgLevel = companyName.get(0)+ Constant.BACKSLASH;
+            }
+            if(CollectionUtils.isNotEmpty(orgName)){
+                orgLevel = orgLevel + orgName.get(0) + Constant.BACKSLASH;
+            }
+            if(CollectionUtils.isNotEmpty(deptName)){
+                orgLevel = orgLevel + deptName.get(0) + Constant.BACKSLASH;
+            }
+            if(CollectionUtils.isNotEmpty(groupName)){
+                orgLevel = orgLevel + groupName.get(0)+ Constant.BACKSLASH;
+            }
+            readFileOrgInfoBO.setOrgLevel(orgLevel);
+            readFileOrgInfoBO.setDepartmentId(key);
+            orgInfoBOList.add(readFileOrgInfoBO);
+        }
+      return orgInfoBOList;
+    }
+
+  private  List<ManageDepartment> getDeptList(List<Long> deptId){
+      ManageDepartmentExample departmentExample = new ManageDepartmentExample();
+      ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
+      criteria.andIdIn(deptId).andEnabledEqualTo(true);
+     return manageDepartmentMapper.selectByExample(departmentExample);
+  }
 
 	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO){
       ManageDepartmentExample departmentExample = new ManageDepartmentExample();

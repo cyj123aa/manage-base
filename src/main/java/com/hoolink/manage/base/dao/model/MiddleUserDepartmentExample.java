@@ -472,6 +472,66 @@ public class MiddleUserDepartmentExample {
             addCriterion("diff_dept_group not between", value1, value2, "diffDeptGroup");
             return (Criteria) this;
         }
+
+        public Criteria andLowestLevelIsNull() {
+            addCriterion("lowest_level is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelIsNotNull() {
+            addCriterion("lowest_level is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelEqualTo(Boolean value) {
+            addCriterion("lowest_level =", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotEqualTo(Boolean value) {
+            addCriterion("lowest_level <>", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelGreaterThan(Boolean value) {
+            addCriterion("lowest_level >", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("lowest_level >=", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelLessThan(Boolean value) {
+            addCriterion("lowest_level <", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelLessThanOrEqualTo(Boolean value) {
+            addCriterion("lowest_level <=", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelIn(List<Boolean> values) {
+            addCriterion("lowest_level in", values, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotIn(List<Boolean> values) {
+            addCriterion("lowest_level not in", values, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelBetween(Boolean value1, Boolean value2) {
+            addCriterion("lowest_level between", value1, value2, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("lowest_level not between", value1, value2, "lowestLevel");
+            return (Criteria) this;
+        }
     }
 
     /**

@@ -97,4 +97,13 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	String getDeptInfo(Long deptId) throws Exception;
+
+	/**
+	 * 获取文件的上层架构
+	 * @param
+	 * @param treeParamBO f
+	 * @return
+	 * @throws Exception
+	 */
+	List<ReadFileOrgInfoBO> getFileOrgList (List<Long> treeParamBO) throws Exception;
 }

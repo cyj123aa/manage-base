@@ -119,7 +119,7 @@ public class MenuServiceImpl implements MenuService {
             //用户处在 公司级别 体系中心级别 部门级别
             List<Long> highLevel = new ArrayList<>();
             for (DeptPositionBO deptPositionBO : deptAllList) {
-                if (!EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getEncryLevelDept() != null && deptPositionBO.getEncryLevelDept() != 0) {
+                if (!EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getLowestLevel()) {
                     highLevel.add(deptPositionBO.getId());
                 }
             }
@@ -129,30 +129,13 @@ public class MenuServiceImpl implements MenuService {
                     deptAllList.addAll(deptPositionBOS);
                 }
             }
-            //临时文件所属组织架构 资源库库存在
-            /*List<Long> positions = paramBO.getPositionList();
+            //可见组织架构
+            List<Long> positions = paramBO.getPositionList();
             if (CollectionUtils.isNotEmpty(positions)) {
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByIdList(positions);
-                List<Long> parentList = new ArrayList<>();
-                if(CollectionUtils.isNotEmpty(deptPositionBOS)){
-                    deptAllList.addAll(deptPositionBOS);
-                    for (DeptPositionBO deptPositionBO:deptPositionBOS) {
-                        String parentIdCode = deptPositionBO.getParentIdCode();
-                        String[] split = parentIdCode.split(Constant.UNDERLINE);
-                        if(split.length<=2){
-                            continue;
-                        }
-                        List<String> ids = Arrays.asList(split);
-                        List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
-                        parentList.addAll(collect);
-                    }
-                }
-                if(CollectionUtils.isNotEmpty(parentList)){
-                    parentList=ArrayUtil.removeDuplict(parentList);
-                    List<DeptPositionBO> deptPositionBOList = manageDepartmentMapperExt.listByIdList(parentList);
-                    deptAllList.addAll(deptPositionBOList);
-                }
-            }*/
+                //同部门下选择可见组织结构 可见文件上层组织架构 用户必然拥有
+                deptAllList.addAll(deptPositionBOS);
+            }
             deptAllList = removeDuplict(deptAllList);
         }
         switch (byType) {
