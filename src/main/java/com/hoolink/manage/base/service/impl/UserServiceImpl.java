@@ -27,6 +27,7 @@ import com.hoolink.sdk.bo.base.UserBO;
 import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
+import com.hoolink.sdk.bo.edm.RepertoryBO;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -172,18 +173,36 @@ public class UserServiceImpl implements UserService {
         } else {
             loginResult.setAccessHoolink(false);
         }
+        addRepertory(roleMenuPermissionList,loginResult);
+        return loginResult;
+    }
+
+    private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult){
         List<Integer> edmRepertory=new ArrayList<>();
+        List<RepertoryBO> repertory=new ArrayList<>();
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
             edmRepertory.add(Constant.REPERTORY_ONE);
+            RepertoryBO repertoryBO=new RepertoryBO();
+            repertoryBO.setType(Constant.REPERTORY_ONE);
+            repertoryBO.setName(Constant.REPERTORY_ONE_NAME);
+            repertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
             edmRepertory.add(Constant.REPERTORY_TWO);
+            RepertoryBO repertoryBO=new RepertoryBO();
+            repertoryBO.setType(Constant.REPERTORY_TWO);
+            repertoryBO.setName(Constant.REPERTORY_TWO_NAME);
+            repertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
             edmRepertory.add(Constant.REPERTORY_THREE);
+            RepertoryBO repertoryBO=new RepertoryBO();
+            repertoryBO.setType(Constant.REPERTORY_THREE);
+            repertoryBO.setName(Constant.REPERTORY_THREE_NAME);
+            repertory.add(repertoryBO);
         }
         loginResult.setEdmRepertory(edmRepertory);
-        return loginResult;
+        loginResult.setRepertoryList(repertory);
     }
 
     @Override
@@ -1062,7 +1081,6 @@ public class UserServiceImpl implements UserService {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
-                    //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
