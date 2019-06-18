@@ -179,7 +179,9 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 	@Override
 	public List<ManageDepartmentTreeBO> getOrgListTree(DepartmentTreeParamBO treeParamBO) throws Exception {
+		// 获取权限范围内的组织架构信息
 		PermissionManageDeptBO manageDeptBO = getPermissionManageDeptBO();
+		//组装组织架构树
 		List<ManageDepartmentTreeBO> topList = manageDeptBO.getManageDepartmentList();
 		List<ManageDepartmentTreeBO> allManageDeptList = manageDeptBO.getAllManageDepartmentList();
 		List<ManageDepartmentTreeBO> childList = allManageDeptList.stream().filter(manageDepartmentTreeBO -> Objects.nonNull(manageDepartmentTreeBO.getParentId())).collect(Collectors.toList());
@@ -207,6 +209,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 					map.put(c.getKey(), c.getParentId());
 					// 递归
 					getChild(c, map, bodyList);
+					c.setExpand(true);
 					childList.add(c);
 				});
 		treeBO.setChildren(childList);
@@ -312,7 +315,10 @@ public class DepartmentServiceImpl implements DepartmentService{
 			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
 		}
 		// 2.过滤密保等级不为空的部门数据
-		List<Long> deptIdList = deptInfoList.stream().filter(data -> !Objects.isNull(data.getEncryLevelDept())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+		List<Long> deptIdList = deptInfoList.stream().filter(data -> !Objects.isNull(data.getEncryLevelDept()) && data.getLowestLevel()).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+		if(CollectionUtils.isEmpty(deptIdList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
 		// 3.根据组织架构id集合获取组织架信息
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getDeptByParentIdCode(deptIdList);
 		manageDeptBO.setAllManageDepartmentList(manageDepartmentList);
