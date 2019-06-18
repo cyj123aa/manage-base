@@ -1,6 +1,9 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.github.pagehelper.PageInfo;
 import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.edm.DocumentRetrievalBO;
+import com.hoolink.sdk.bo.edm.OrganizationalStructureFileBO;
 import com.hoolink.sdk.bo.edm.TreeParamBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
@@ -90,5 +93,12 @@ public class DepartmentController {
     @LogAndParam(value = "获取组织架构信息失败")
     public BackBO<List<ReadFileOrgInfoBO>> getFileOrgList(@RequestBody @Valid List<Long> param) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getFileOrgList(param));
+    }
+
+    @PostMapping(value = "getNextOrganizationalStructureById")
+    @ApiOperation(value = "获取下级组织架构信息")
+    @LogAndParam(value = "获取下级组织架构信息失败")
+    public BackBO<PageInfo<OrganizationalStructureFileBO>> getNextOrganizationalStructureById(@RequestBody DocumentRetrievalBO param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getNextOrganizationalStructureById(param));
     }
 }
