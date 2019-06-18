@@ -111,7 +111,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 			return new ArrayList<>(0);
 		}
 		//拿到父节点
-		List<ManageDepartment> allParentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId())).collect(Collectors.toList());
+		List<ManageDepartment> allParentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId()) || d.getParentId() == 0).collect(Collectors.toList());
 		//过滤两个list中相同的元素放到新集合中
 		List<ManageDepartment> parentList = departmentBOList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
 		List<ManageDepartment> childList = deptList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());

@@ -58,7 +58,7 @@
         u.position,
         u.encry_level_company,
         u.view_encry_level_permitted,
-        u.device_code
+        u.device_code,
         m.dept_id AS dept_id
     FROM
         middle_user_department m
