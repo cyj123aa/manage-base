@@ -113,8 +113,11 @@ public class Constant {
     public static final String CACHE_REPERTORY = "CACHE_REPERTORY";
     public static final String COMPANY_REPERTORY = "COMPANY_REPERTORY";
     public static final Integer REPERTORY_ONE = 1;
+    public static final String REPERTORY_ONE_NAME = "部门资源";
     public static final Integer REPERTORY_TWO = 2;
+    public static final String REPERTORY_TWO_NAME = "缓存库";
     public static final Integer REPERTORY_THREE = 3;
+    public static final String REPERTORY_THREE_NAME = "资源库";
 
     /**
      * 登录

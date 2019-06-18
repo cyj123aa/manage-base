@@ -9,12 +9,17 @@ import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 个人中心
@@ -24,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/mobile/personalCenter/")
-@RestSchema(schemaId = "personalCenterController")
+@RestSchema(schemaId = "mobile.personalCenterController")
 public class MobilePersonalCenterController {
     @Autowired
     private UserService userService;
@@ -42,6 +47,14 @@ public class MobilePersonalCenterController {
     @LogAndParam(value = "保存头像失败")
     public BackVO<PersonalInfoVO> updateImageId(@RequestBody BaseParam<Long> imageIdParam) throws Exception{
     	userService.updateImage(imageIdParam.getData());
+    	return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "uploadImage", consumes = MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(value = "个人中心保存头像")
+    @LogAndParam(value = "个人中心保存头像失败")
+    public BackVO<Void> uploadImage(@RequestPart("file") MultipartFile multipartFile) throws Exception{
+    	userService.uploadImage(multipartFile);
     	return BackVOUtil.operateAccess();
     }
 }

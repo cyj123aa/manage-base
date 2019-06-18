@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
 import com.hoolink.manage.base.dao.model.User;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
@@ -102,5 +103,19 @@ public class UserController {
     public BackBO<List<ManagerUserBO>> getUserNameByIds(@RequestBody  List<Long> ids){
         List<ManagerUserBO> result= CopyPropertiesUtil.copyList(userService.getUserNameByIds(ids),ManagerUserBO.class);
         return BackBOUtil.defaultBackBO(result);
+    }
+
+    @PostMapping(value = "getCompanyById")
+    @ApiOperation(value = "根据用户id获取公司")
+    @LogAndParam(value = "根据用户id获取公司失败，请稍后重试")
+    public BackBO<List<MobileFileBO>> getCompanyById(@RequestBody  Long id) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getCompanyById(id));
+    }
+
+    @PostMapping(value = "getDeptByParentId")
+    @ApiOperation(value = "根据父级id获取下级架构")
+    @LogAndParam(value = "根据父级id获取下级架构失败，请稍后重试")
+    public BackBO<List<MobileFileBO>> getDeptByParentId(@RequestBody  Long id) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getDeptByParentId(id));
     }
 }
