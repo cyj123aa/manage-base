@@ -6,15 +6,15 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
+import com.hoolink.manage.base.consumer.edm.EdmClient;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
+import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.dict.AbstractDict;
 import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.SpringUtils;
@@ -24,6 +24,9 @@ import com.hoolink.sdk.bo.ability.ObsBO;
 import com.hoolink.sdk.bo.ability.SmsBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -46,6 +49,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
@@ -96,6 +100,15 @@ public class UserServiceImpl implements UserService {
     @Resource
     private ManageDepartmentMapperExt manageDepartmentMapperExt;
 
+    @Resource
+    private MiddleUserDepartmentMapper middleUserDepartmentMapper;
+
+    @Resource
+    private ManageRoleMapper manageRoleMapper;
+    
+    @Autowired
+    private EdmClient edmClient;
+
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -125,11 +138,15 @@ public class UserServiceImpl implements UserService {
         toUpdateUser.setLastTime(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
+        //查询角色
+        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
+
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
         loginResult.setFirstLogin(user.getFirstLogin());
         loginResult.setPhone(user.getPhone());
         loginResult.setName(user.getName());
+        loginResult.setRoleName(manageRole.getRoleName());
         //设置头像
         if (user.getImgId() != null) {
             try {
@@ -1144,6 +1161,64 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<MobileFileBO> getCompanyById(Long id) throws Exception {
+        if(id==null){
+            return null;
+        }
+        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
+        example.createCriteria().andUserIdEqualTo(id);
+        //根据用户id获取所有的所属组织架构id
+        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
+        List<Long> departmentIds=list.stream().map(d -> d.getDeptId()).collect(Collectors.toList());
+        ManageDepartmentExample departmentExample=new ManageDepartmentExample();
+        departmentExample.createCriteria().andIdIn(departmentIds);
+        //根据他所属的所有组织架构id查询出公司层次的组织架构
+        List<ManageDepartment> manageDepartments=manageDepartmentMapper.selectByExample(departmentExample);
+        List<ManageDepartment> manageDepartment= manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(manageDepartment)){
+            List<MobileFileBO> mobileFiles=new ArrayList<>();
+            for(ManageDepartment department:manageDepartment) {
+                MobileFileBO mobileFileBO = new MobileFileBO();
+                mobileFileBO.setId(department.getId());
+                mobileFileBO.setName(department.getName());
+                mobileFileBO.setIfDepartment(true);
+                mobileFiles.add(mobileFileBO);
+            }
+            return mobileFiles;
+        }
+        return null;
+    }
+
+    @Override
+    public List<MobileFileBO> getDeptByParentId(Long id) throws Exception {
+        if(id==null){
+            return null;
+        }
+        ManageDepartmentExample example=new ManageDepartmentExample();
+        example.createCriteria().andParentIdEqualTo(id);
+        example.setOrderByClause(" dept_name asc ");
+        List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        List<MobileFileBO> mobileFile=new ArrayList<>();
+        list.stream().forEach(m ->{
+            MobileFileBO mobileFileBO=new MobileFileBO();
+            mobileFileBO.setId(m.getId());
+            mobileFileBO.setName(m.getName());
+            mobileFileBO.setIfDepartment(true);
+            //如果是小组类型就设置为是最下一级组织架构层级
+            if(Constant.POSITION_LEVEL.equals(m.getDeptType())){
+                mobileFileBO.setIfLastDepartment(true);
+            }else{
+                mobileFileBO.setIfLastDepartment(false);
+            }
+            mobileFile.add(mobileFileBO);
+        });
+        return mobileFile;
+    }
+
+    @Override
     public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
         return userMapperExt.getDeptByUser(id);
     }
@@ -1153,4 +1228,16 @@ public class UserServiceImpl implements UserService {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
         return userBOList;
     }
+
+	@Override
+	public boolean uploadImage(MultipartFile multipartFile) {
+		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
+		return updateImage(obsBo.getData().getId());
+	}
+
+	@Override
+	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
+		return edmClient.listOperateLog(paramBO).getData();
+	}
+
 }

@@ -21,6 +21,9 @@ import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -30,6 +33,8 @@ import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: xuli
@@ -302,4 +307,37 @@ public interface UserService {
      * @throws Exception
      */
     void updateDeviceCode(String deviceCode) throws Exception;
+
+    /**
+     * 根据用户id查询公司
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    List<MobileFileBO> getCompanyById(Long id) throws Exception;
+
+    /**
+     * 根据id获取下层架构
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    List<MobileFileBO> getDeptByParentId(Long id) throws Exception;
+
+    /**
+     * 个人中心-上传保存头像
+     * @param multipartFile
+     * @return
+     */
+    boolean uploadImage(MultipartFile multipartFile);
+    
+    
+    /**
+     * 获取用户操作日志(分页)
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception;
+
 }
