@@ -10,6 +10,7 @@ import com.hoolink.manage.base.vo.req.*;
 import com.hoolink.manage.base.vo.res.*;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackVOUtil;
@@ -315,5 +316,13 @@ public class MobileUserController {
     public BackVO<Void> updateDeviceCode(@RequestBody BaseParam<String> deviceCode)throws Exception  {
         userService.updateDeviceCode(deviceCode.getData());
         return BackVOUtil.operateAccess();
+    }
+    
+    @PostMapping(value = "listOperateLog")
+    @ApiOperation(value = "获取用户操作日志带分页")
+    @LogAndParam(value = "获取用户操作日志失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<PageInfo<OperateFileLogVO>> listOperateLog(@RequestBody OperateFileLogParamVO paramVO) throws Exception{
+    	OperateFileLogParamBO paramBO = CopyPropertiesUtil.copyBean(paramVO, OperateFileLogParamBO.class);
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyPageInfo(userService.listOperateLog(paramBO), OperateFileLogVO.class));
     }
 }
