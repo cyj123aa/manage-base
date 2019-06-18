@@ -1,5 +1,7 @@
 package com.hoolink.manage.base.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
@@ -172,6 +174,42 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
+	public List<ManageDepartmentTreeBO> getOrgListTree(DepartmentTreeParamBO treeParamBO) throws Exception {
+		PermissionManageDeptBO manageDeptBO = getPermissionManageDeptBO();
+		List<ManageDepartmentTreeBO> topList = manageDeptBO.getManageDepartmentList();
+		List<ManageDepartmentTreeBO> allManageDeptList = manageDeptBO.getAllManageDepartmentList();
+		List<ManageDepartmentTreeBO> childList = allManageDeptList.stream().filter(manageDepartmentTreeBO -> Objects.nonNull(manageDepartmentTreeBO.getParentId())).collect(Collectors.toList());
+		List<ManageDepartmentTreeBO> manageDepartmentTreeBOS = getResourceTree(topList, childList);
+		return manageDepartmentTreeBOS;
+	}
+
+	private List<ManageDepartmentTreeBO> getResourceTree(List<ManageDepartmentTreeBO> rootList, List<ManageDepartmentTreeBO> bodyList){
+		if (bodyList != null && !bodyList.isEmpty()) {
+			//声明一个map，用来过滤已操作过的数据
+			Map<Long, Long> map = Maps.newHashMapWithExpectedSize(bodyList.size());
+			rootList.forEach(beanTree -> getChild(beanTree, map, bodyList));
+			return rootList;
+		}
+		return null;
+	}
+
+	public void getChild(ManageDepartmentTreeBO treeBO, Map<Long, Long> map, List<ManageDepartmentTreeBO> bodyList) {
+		List<ManageDepartmentTreeBO> childList = Lists.newArrayList();
+		bodyList.stream()
+				.filter(c -> !map.containsKey(c.getKey()))
+				.filter(c -> c.getParentId().equals(treeBO.getKey()))
+				.forEach(c -> {
+					// 把已经处理过的数据组装起来，用来过滤已经操作过的数据
+					map.put(c.getKey(), c.getParentId());
+					// 递归
+					getChild(c, map, bodyList);
+					childList.add(c);
+				});
+		treeBO.setChildren(childList);
+
+	}
+
+	@Override
 	public OrganizationDeptBO getOrganization(OrganizationDeptParamBO paramBO) throws Exception {
       OrganizationDeptBO organizationDeptBO = new OrganizationDeptBO();
       ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getDeptId());
@@ -211,6 +249,31 @@ public class DepartmentServiceImpl implements DepartmentService{
 		// 3.获取所有组织架构信息
 		List<ManageDepartmentTreeBO> manageDepartmentTreeBOS = manageDepartmentMapperExt.getAllOrgInfoList();
 		manageDeptBO.setAllManageDepartmentList(manageDepartmentTreeBOS);
+		return manageDeptBO;
+	}
+
+	@Override
+	public PermissionManageDeptBO getOrgInfoListToDept(DepartmentTreeParamBO treeParamBO) throws Exception {
+		PermissionManageDeptBO manageDeptBO = getPermissionManageDeptBO();
+		return manageDeptBO;
+	}
+
+	private PermissionManageDeptBO getPermissionManageDeptBO() throws Exception {
+		PermissionManageDeptBO manageDeptBO = new PermissionManageDeptBO();
+		// 1.根据userIde获取对应的组织架构信息
+		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
+		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
+		List<UserDeptAssociationBO> deptInfoList = userService.getOrganizationInfoToDept(paramBO);
+		if(CollectionUtils.isEmpty(deptInfoList)){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
+		}
+		// 2.过滤密保等级不为空的部门数据
+		List<Long> deptIdList = deptInfoList.stream().filter(data -> !Objects.isNull(data.getEncryLevelDept())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
+		// 3.根据组织架构id集合获取组织架信息
+		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getDeptByParentIdCode(deptIdList);
+		manageDeptBO.setAllManageDepartmentList(manageDepartmentList);
+		List<ManageDepartmentTreeBO> departmentList = manageDepartmentList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).collect(Collectors.toList());
+		manageDeptBO.setManageDepartmentList(departmentList);
 		return manageDeptBO;
 	}
 

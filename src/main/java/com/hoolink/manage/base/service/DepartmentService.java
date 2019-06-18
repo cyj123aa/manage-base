@@ -74,6 +74,14 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	List<ManageDepartmentTreeBO> getOrgList (DepartmentTreeParamBO treeParamBO) throws Exception;
+
+	/**
+	 * 获取组织架构想信息树
+	 * @param treeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	List<ManageDepartmentTreeBO> getOrgListTree (DepartmentTreeParamBO treeParamBO) throws Exception;
 	/**
 	 * 获取组织
 	 * @param paramBO
@@ -89,6 +97,14 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	PermissionManageDeptBO getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
+
+	/**
+	 * 获取部门组织架构信息
+	 * @param treeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	PermissionManageDeptBO getOrgInfoListToDept (DepartmentTreeParamBO treeParamBO) throws Exception;
 
 	/**
 	 * 获取部门名称

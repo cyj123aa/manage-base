@@ -67,8 +67,15 @@ public class DepartmentController {
     @PostMapping(value = "getOrgInfoList")
     @ApiOperation(value = "组织架构信息")
     @LogAndParam(value = "获取组织架构信息失败")
-    public BackBO<PermissionManageDeptBO> getOrgTree(@RequestBody DepartmentTreeParamBO param) throws Exception{
+    public BackBO<PermissionManageDeptBO> getOrgInfoList(@RequestBody DepartmentTreeParamBO param) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrgInfoList(param));
+    }
+
+    @PostMapping(value = "getOrgInfoListToDept")
+    @ApiOperation(value = "组织架构信息")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<PermissionManageDeptBO> getOrgInfoListToDept(@RequestBody DepartmentTreeParamBO param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getOrgInfoListToDept(param));
     }
 
     @PostMapping(value = "getDeptInfo")

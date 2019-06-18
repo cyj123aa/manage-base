@@ -31,6 +31,7 @@
     <id column="dept_id" jdbcType="BIGINT" property="deptId"/>
     <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
     <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+    <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
   </resultMap>
 
   <select id="getDept" resultMap="UserCompanyMap">
@@ -81,7 +82,8 @@ ORDER BY
     SELECT
       md.id AS dept_id,
       md.dept_name,
-      md.dept_type
+      md.dept_type,
+      mud.encry_level_dept
     FROM
       middle_user_department mud
       LEFT JOIN manage_department md ON mud.dept_id=md.id

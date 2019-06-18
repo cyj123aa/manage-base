@@ -1149,6 +1149,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDeptAssociationBO> getOrganizationInfoToDept(OrganizationInfoParamBO paramBO) throws Exception {
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        //过滤出部门以下的层级
+        userDeptInfoBOList = userDeptInfoBOList.stream().filter(data -> !Constant.COMPANY_LEVEL.equals(data.getDeptType())
+                || !Constant.SYSTEM_CENTER_LEVEL.equals(data.getDeptType())).collect(Collectors.toList());
+        return userDeptInfoBOList;
+    }
+
+    @Override
     public List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO) throws Exception {
         List<UserDeptAssociationBO> userDeptAssociationBOS = new ArrayList<>();
         // 根据用户id获取所在公司或者部门信息
