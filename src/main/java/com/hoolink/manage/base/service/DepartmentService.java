@@ -105,5 +105,5 @@ public interface DepartmentService {
 	 * @return
 	 * @throws Exception
 	 */
-	List<ReadFileOrgInfoBO> getFileOrgList (List<ReadFileOrgInfoParamBO> treeParamBO) throws Exception;
+	List<ReadFileOrgInfoBO> getFileOrgList (List<Long> treeParamBO) throws Exception;
 }
