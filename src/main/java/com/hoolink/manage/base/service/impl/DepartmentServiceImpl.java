@@ -231,12 +231,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
     @Override
-    public List<ReadFileOrgInfoBO> getFileOrgList(List<ReadFileOrgInfoParamBO> treeParamBO) throws Exception {
+    public List<ReadFileOrgInfoBO> getFileOrgList(List<Long> deptId) throws Exception {
         List<ReadFileOrgInfoBO> orgInfoBOList = new ArrayList<>();
-        if (treeParamBO == null) {
+        if (deptId == null) {
             return null;
         }
-        List<Long> deptId = treeParamBO.stream().map(ReadFileOrgInfoParamBO::getDepartmentId).collect(Collectors.toList());
         List<ManageDepartment> deptList = getDeptList(deptId);
         if (deptList == null) {
             return null;

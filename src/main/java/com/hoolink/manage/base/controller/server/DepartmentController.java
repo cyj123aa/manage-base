@@ -81,7 +81,7 @@ public class DepartmentController {
     @PostMapping(value = "getFileOrgList")
     @ApiOperation(value = "获取组织架构信息")
     @LogAndParam(value = "获取组织架构信息失败")
-    public BackBO<List<ReadFileOrgInfoBO>> getFileOrgList(@RequestBody @Valid List<ReadFileOrgInfoParamBO> paramBO) throws Exception{
-        return BackBOUtil.defaultBackBO(departmentService.getFileOrgList(paramBO));
+    public BackBO<List<ReadFileOrgInfoBO>> getFileOrgList(@RequestBody @Valid List<Long> param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getFileOrgList(param));
     }
 }

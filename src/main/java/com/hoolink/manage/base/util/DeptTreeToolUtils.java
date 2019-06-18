@@ -98,7 +98,7 @@ public class DeptTreeToolUtils {
                         if (CollectionUtils.isNotEmpty(checkedList)){
                             //勾选组织架构
                             for (CheckedParamBO paramBO : checkedList){
-                                if (c.getKey().equals(paramBO.getId())){
+                                if (c.getKey().equals(paramBO.getDepartId())){
                                     c.setChecked(Boolean.TRUE);
                                 }
                             }
