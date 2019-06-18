@@ -50,6 +50,13 @@ public interface ManageDepartmentMapperExt {
     List<DeptPositionBO> listByParentIdCode(@Param("parentIds") List<Long> parentIds);
 
     /**
+     * 根据ids获取部门信息
+     * @param parentIds
+     * @return
+     */
+    List<ManageDepartmentTreeBO> getDeptByParentIdCode(@Param("parentIds") List<Long> parentIds);
+
+    /**
      * 主键查询 （结果集按参数顺序排列）
      * @param ids
      * @return

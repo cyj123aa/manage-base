@@ -3,11 +3,11 @@
 <mapper namespace="com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt">
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into middle_user_department (user_id, dept_id, encry_level_dept, diff_dept_group
+    insert into middle_user_department (user_id, dept_id, encry_level_dept, diff_dept_group, lowest_level
       )
     values
     <foreach collection="middleUserDeptList" item="userDeptPair" separator=",">
-      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept},#{userDeptPair.diffDeptGroup})
+      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept},#{userDeptPair.diffDeptGroup},#{userDeptPair.lowestLevel})
     </foreach>
   </insert>
 
@@ -31,6 +31,8 @@
     <id column="dept_id" jdbcType="BIGINT" property="deptId"/>
     <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
     <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+    <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
+    <result column="lowest_level" jdbcType="BIT" property="lowestLevel" />
   </resultMap>
 
   <select id="getDept" resultMap="UserCompanyMap">
@@ -81,7 +83,9 @@ ORDER BY
     SELECT
       md.id AS dept_id,
       md.dept_name,
-      md.dept_type
+      md.dept_type,
+      mud.encry_level_dept,
+      mud.lowest_level
     FROM
       middle_user_department mud
       LEFT JOIN manage_department md ON mud.dept_id=md.id
