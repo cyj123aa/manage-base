@@ -687,7 +687,7 @@ public class UserServiceImpl implements UserService {
         Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(currentId)).findFirst();
         if (manageDepartmentBOOpt.isPresent()) {
             Long parentId = manageDepartmentBOOpt.get().getParentId();
-            if (parentId != null) {
+            if (parentId != 0) {
                 selectedDeptIdList.add(parentId);
                 traverseGetAllParentDeptId(deptList, selectedDeptIdList, parentId);
             }
@@ -795,12 +795,18 @@ public class UserServiceImpl implements UserService {
         List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
         deptPairList.stream().forEach(dp -> {
             String diffDeptGroup = generateRandom();
-            for (Long deptId : dp.getDeptIdList()) {
+            List<Long> deptIdList = dp.getDeptIdList();
+            for(int i=0; i<deptIdList.size(); i++) {
+            	Long deptId = deptIdList.get(i);
                 MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
                 middleUserDept.setDeptId(deptId);
                 middleUserDept.setUserId(userId);
                 middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
                 middleUserDept.setDiffDeptGroup(diffDeptGroup);
+                middleUserDept.setLowestLevel(false);
+                if(i == deptIdList.size()-1) {
+                	middleUserDept.setLowestLevel(true);	
+                }
                 middleUserDeptList.add(middleUserDept);
             }
         });

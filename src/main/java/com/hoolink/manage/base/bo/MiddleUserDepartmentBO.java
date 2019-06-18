@@ -33,4 +33,9 @@ public class MiddleUserDepartmentBO {
      * 同一用户不同部门区分标识
      */
     private String diffDeptGroup;
+    
+    /**
+     *是否最底层: 是/否
+     */
+    private Boolean lowestLevel;
 }
