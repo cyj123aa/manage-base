@@ -231,6 +231,12 @@ public class DepartmentServiceImpl implements DepartmentService{
 						  getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
           }
 
+          if(EdmDeptEnum.SYSTEM_CENTER.getKey().byteValue() == manageDepartment.getDeptType()){
+              organizationDeptBO.setSystemCenterName(manageDepartment.getName());
+              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+              getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
+          }
+
       }
       return organizationDeptBO;
 	}
@@ -421,6 +427,10 @@ public class DepartmentServiceImpl implements DepartmentService{
 			if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
 				organizationDeptBO.setGroupName(manageDepartment.getName());
 			}
+			if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
+            organizationDeptBO.setDeptName(manageDepartment.getName());
+            getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
+        }
 		}
 	}
 
