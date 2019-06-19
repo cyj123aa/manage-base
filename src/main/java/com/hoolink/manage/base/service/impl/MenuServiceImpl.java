@@ -198,6 +198,7 @@ public class MenuServiceImpl implements MenuService {
         edmMenuTreeBO.setCode(manageMenu.getMenuCode());
         edmMenuTreeBO.setEnableUpdate(false);
         edmMenuTreeBO.setMenuType(null);
+        edmMenuTreeBO.setExpand(true);
         if(middleRoleMenu!=null){
             edmMenuTreeBO.setReadOnly(middleRoleMenu.getPermissionFlag());
         }
@@ -218,6 +219,7 @@ public class MenuServiceImpl implements MenuService {
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
         menuTreeBO.setEnableUpdate(flag);
         menuTreeBO.setMenuType(true);
+        menuTreeBO.setExpand(true);
         menuTreeBO.setRepertoryType(repertoryType);
         return menuTreeBO;
     }
