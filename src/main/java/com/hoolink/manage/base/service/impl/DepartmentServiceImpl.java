@@ -4,8 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.hoolink.sdk.bo.edm.DocumentRetrievalBO;
-import com.hoolink.sdk.bo.edm.OrganizationalStructureFileBO;
+import com.hoolink.sdk.bo.edm.*;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import java.util.ArrayList;
@@ -21,8 +20,6 @@ import javax.annotation.Resource;
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
-import com.hoolink.sdk.bo.edm.CheckedParamBO;
-import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
@@ -466,4 +463,28 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return deptList;
 	}
 
+
+	@Override
+	public DeptVisibleCacheBO getDeptListByUserId() {
+		Boolean jrDept = true;
+		Boolean hlDept = true;
+		//获取当前用户所有的关联部门id
+		List<DeptPositionBO> deptList = middleUserDepartmentMapperExt.getDeptParentIdCode(ContextUtil.getManageCurrentUser().getUserId());
+		//晶日公司下的部门
+		List<String> jrCodeList = deptList.stream().map(DeptPositionBO::getParentIdCode).filter(code ->code.contains("0_1_") ).collect
+				(Collectors.toList());
+		//互灵公司下的部门
+		List<String> hlCodeList = deptList.stream().map(DeptPositionBO::getParentIdCode).filter(code ->code.contains("0_2_") ).collect
+				(Collectors.toList());
+		if (CollectionUtils.isEmpty(jrCodeList)) {
+			jrDept = false;
+		}
+		if (CollectionUtils.isEmpty(hlCodeList)) {
+			hlDept = false;
+		}
+		DeptVisibleCacheBO deptVisibleCacheBO = new DeptVisibleCacheBO();
+		deptVisibleCacheBO.setHlDept(jrDept);
+		deptVisibleCacheBO.setJrDept(hlDept);
+		return deptVisibleCacheBO;
+	}
 }

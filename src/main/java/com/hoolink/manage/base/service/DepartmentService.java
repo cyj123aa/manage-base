@@ -2,14 +2,11 @@ package com.hoolink.manage.base.service;
 
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.sdk.bo.edm.DocumentRetrievalBO;
-import com.hoolink.sdk.bo.edm.OrganizationalStructureFileBO;
+import com.hoolink.sdk.bo.edm.*;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
 
-import com.hoolink.sdk.bo.edm.CheckedParamBO;
-import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
@@ -133,4 +130,10 @@ public interface DepartmentService {
      * @throws Exception
      */
     PageInfo<OrganizationalStructureFileBO> getNextOrganizationalStructureById(DocumentRetrievalBO documentRetrievalBO) throws Exception;
+
+	/**
+	 * 获取当前用户的部门信息
+	 * @return
+	 */
+	DeptVisibleCacheBO getDeptListByUserId();
 }
