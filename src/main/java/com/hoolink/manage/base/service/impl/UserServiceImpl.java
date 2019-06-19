@@ -1138,7 +1138,6 @@ public class UserServiceImpl implements UserService {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getLowestLevel()){
-                    //map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
                         && deptSecurityBO.getLowestLevel()){

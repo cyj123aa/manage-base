@@ -144,4 +144,6 @@ public class Constant {
 
     public static final Integer USER = 0;
     public static final Integer DEPARTMENT = 1;
+
+    public static final int LEVEL = 2;
 }

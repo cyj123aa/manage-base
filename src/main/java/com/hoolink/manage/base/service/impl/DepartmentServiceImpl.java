@@ -96,7 +96,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		example.createCriteria().andEnabledEqualTo(true).andDeptTypeEqualTo(deptType);
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		//criteria.andCompanyEqualTo(company);
 		criteria.andEnabledEqualTo(true);
 		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
 		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);

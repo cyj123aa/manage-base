@@ -30,6 +30,7 @@ public interface ManageRoleMapperExt {
 
     /**
      * 二级用户查询角色（包括模糊查询）
+     * @param roleId
      * @param searchValue
      * @param status
      * @return
