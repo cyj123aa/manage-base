@@ -198,6 +198,7 @@ public class RoleServiceImpl implements RoleService {
         roleParamBO.setName(baseRole.getRoleName());
         roleParamBO.setStatus(baseRole.getRoleStatus());
         roleParamBO.setDescription(baseRole.getRoleDesc());
+        roleParamBO.setRoleType(baseRole.getRoleType());
         //查询当前用户的全部菜单权限
         RoleMenuBO currentRoleMenu = getCurrentRoleMenu();
         if(currentRoleMenu==null || CollectionUtils.isEmpty(currentRoleMenu.getChooseMenu())){
