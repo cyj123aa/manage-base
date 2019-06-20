@@ -29,6 +29,7 @@ public interface MenuService {
      * 通过code码查询初始化菜单
      * @param paramBO
      * @return
+     * @throws Exception
      */
     EdmMenuTreeBO listByCode(ResourceParamBO paramBO) throws Exception;
 

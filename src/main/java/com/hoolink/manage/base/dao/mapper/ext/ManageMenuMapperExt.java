@@ -18,6 +18,7 @@ public interface ManageMenuMapperExt {
     /**
      * 通过code码查询下一级菜单
      * @param code
+     * @param currentCode
      * @return
      */
     ManageMenu selectByExample(@Param("code") String code,@Param("currentCode")String currentCode);

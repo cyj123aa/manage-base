@@ -36,8 +36,8 @@ public interface SessionService {
 
     /**
      * 刷新 token 失效时间
-     *
      * @param userId
+     * @param ismobile
      * @return
      */
     Boolean refreshSession(Long userId,boolean ismobile);

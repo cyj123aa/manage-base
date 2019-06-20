@@ -1,12 +1,12 @@
 package com.hoolink.manage.base.service;
 
+import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.sdk.bo.edm.*;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
 
-import com.hoolink.sdk.bo.edm.CheckedParamBO;
-import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
 import com.hoolink.manage.base.bo.DeptPositionBO;
@@ -74,6 +74,14 @@ public interface DepartmentService {
 	 * @throws Exception
 	 */
 	List<ManageDepartmentTreeBO> getOrgList (DepartmentTreeParamBO treeParamBO) throws Exception;
+
+	/**
+	 * 获取组织架构想信息树
+	 * @param treeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	List<ManageDepartmentTreeBO> getOrgListTree (DepartmentTreeParamBO treeParamBO) throws Exception;
 	/**
 	 * 获取组织
 	 * @param paramBO
@@ -91,10 +99,41 @@ public interface DepartmentService {
 	PermissionManageDeptBO getOrgInfoList (DepartmentTreeParamBO treeParamBO) throws Exception;
 
 	/**
+	 * 获取部门组织架构信息
+	 * @param treeParamBO
+	 * @return
+	 * @throws Exception
+	 */
+	PermissionManageDeptBO getOrgInfoListToDept (DepartmentTreeParamBO treeParamBO) throws Exception;
+
+	/**
 	 * 获取部门名称
 	 * @param deptId
 	 * @return
 	 * @throws Exception
 	 */
 	String getDeptInfo(Long deptId) throws Exception;
+
+	/**
+	 * 获取文件的上层架构
+	 * @param
+	 * @param treeParamBO f
+	 * @return
+	 * @throws Exception
+	 */
+	List<ReadFileOrgInfoBO> getFileOrgList (List<Long> treeParamBO) throws Exception;
+
+    /**
+     * 获取下一级组织架构
+     * @param documentRetrievalBO
+     * @return
+     * @throws Exception
+     */
+    PageInfo<OrganizationalStructureFileBO> getNextOrganizationalStructureById(DocumentRetrievalBO documentRetrievalBO) throws Exception;
+
+	/**
+	 * 获取当前用户的部门信息
+	 * @return
+	 */
+	DeptVisibleCacheBO getDeptListByUserId();
 }

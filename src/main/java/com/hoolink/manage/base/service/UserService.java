@@ -287,6 +287,14 @@ public interface UserService {
     List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO)throws Exception;
 
     /**
+     * 获取用户下关联的组织架构信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<UserDeptAssociationBO> getOrganizationInfoToDept(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
      * 根据用户id获取所在公司的信息
      * @param paramBO
      * @return

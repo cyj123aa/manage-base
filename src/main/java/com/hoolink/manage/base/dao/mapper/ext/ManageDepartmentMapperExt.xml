@@ -111,6 +111,23 @@
         </foreach>
     </select>
 
+    <select id="getDeptByParentIdCode" resultMap="OrgResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            parent_id_code
+        FROM
+            manage_department
+        WHERE
+            enabled=true
+            AND
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
+            locate(concat("_",#{id},"_"),parent_id_code)>0
+        </foreach>
+    </select>
+
     <resultMap id="BaseResultMapBO" type="com.hoolink.sdk.bo.manager.ManageDepartmentBO">
         <!--
         @mbggenerated

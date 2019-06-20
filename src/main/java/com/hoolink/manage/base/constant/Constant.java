@@ -135,12 +135,15 @@ public class Constant {
 
 
     /**
-     * 组织架构层级 1-公司 2-部门 3-小组
+     * 组织架构层级 1-公司 2-部门 3-小组 4-体系中心
      */
     public static final Byte COMPANY_LEVEL = 1;
     public static final Byte DEPT_LEVEL = 2;
     public static final Byte POSITION_LEVEL = 3;
+    public static final Byte SYSTEM_CENTER_LEVEL = 4;
 
     public static final Integer USER = 0;
     public static final Integer DEPARTMENT = 1;
+
+    public static final int LEVEL = 2;
 }

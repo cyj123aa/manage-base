@@ -29,4 +29,12 @@ public class DeptPositionBO {
     private Byte encryLevelDept;
 
     private String parentIdCode;
+
+    /**
+     * <pre>
+     * 是否最底层: 是/否
+     * 表字段 : middle_user_department.lowest_level
+     * </pre>
+     */
+    private Boolean lowestLevel;
 }

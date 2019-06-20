@@ -49,4 +49,12 @@ public interface MiddleUserDepartmentMapperExt {
 	 * @return
 	 */
 	List<UserDeptAssociationBO> getOrganizationInfo(@Param("userId")Long userId);
+
+
+	/**
+	 * 用户绑定组织架构信息
+	 * @param userId
+	 * @return
+	 */
+	List<DeptPositionBO> getDeptParentIdCode(@Param("userId")Long userId);
 }

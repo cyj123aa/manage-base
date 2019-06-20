@@ -1,13 +1,10 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
-import com.hoolink.sdk.bo.edm.TreeParamBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
-import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
+import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
+import com.hoolink.sdk.bo.edm.*;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.utils.BackBOUtil;
@@ -67,8 +64,15 @@ public class DepartmentController {
     @PostMapping(value = "getOrgInfoList")
     @ApiOperation(value = "组织架构信息")
     @LogAndParam(value = "获取组织架构信息失败")
-    public BackBO<PermissionManageDeptBO> getOrgTree(@RequestBody DepartmentTreeParamBO param) throws Exception{
+    public BackBO<PermissionManageDeptBO> getOrgInfoList(@RequestBody DepartmentTreeParamBO param) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getOrgInfoList(param));
+    }
+
+    @PostMapping(value = "getOrgInfoListToDept")
+    @ApiOperation(value = "组织架构信息")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<PermissionManageDeptBO> getOrgInfoListToDept(@RequestBody DepartmentTreeParamBO param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getOrgInfoListToDept(param));
     }
 
     @PostMapping(value = "getDeptInfo")
@@ -76,5 +80,26 @@ public class DepartmentController {
     @LogAndParam(value = "获取部门信息失败")
     public BackBO getDeptInfo(@RequestBody Long deptId) throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getDeptInfo(deptId));
+    }
+
+    @PostMapping(value = "getFileOrgList")
+    @ApiOperation(value = "获取组织架构信息")
+    @LogAndParam(value = "获取组织架构信息失败")
+    public BackBO<List<ReadFileOrgInfoBO>> getFileOrgList(@RequestBody @Valid List<Long> param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getFileOrgList(param));
+    }
+
+    @PostMapping(value = "getNextOrganizationalStructureById")
+    @ApiOperation(value = "获取下级组织架构信息")
+    @LogAndParam(value = "获取下级组织架构信息失败")
+    public BackBO<PageInfo<OrganizationalStructureFileBO>> getNextOrganizationalStructureById(@RequestBody DocumentRetrievalBO param) throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getNextOrganizationalStructureById(param));
+    }
+
+    @PostMapping(value = "getDeptListByUserId")
+    @ApiOperation(value = "获取当前用户的部门信息")
+    @LogAndParam(value = "获取当前用户的部门信息")
+    public BackBO<DeptVisibleCacheBO> getDeptListByUserId() throws Exception{
+        return BackBOUtil.defaultBackBO(departmentService.getDeptListByUserId());
     }
 }

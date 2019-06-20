@@ -49,7 +49,7 @@
 
   <select id="selectAllByDeptIds" resultMap="BaseResultMap">
   SELECT
-        u.id,
+        DISTINCT (u.id),
         u.user_no,
         u.user_account,
         u.user_name,

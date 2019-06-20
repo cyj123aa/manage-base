@@ -2,8 +2,29 @@ package com.hoolink.manage.base.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.bo.DeptPositionBO;
+import com.hoolink.manage.base.bo.DeptSecurityBO;
+import com.hoolink.manage.base.bo.DeptTreeBO;
+import com.hoolink.manage.base.bo.DictInfoBO;
+import com.hoolink.manage.base.bo.DictParamBO;
+import com.hoolink.manage.base.bo.LoginParamBO;
+import com.hoolink.manage.base.bo.LoginResultBO;
+import com.hoolink.manage.base.bo.ManageRoleBO;
+import com.hoolink.manage.base.bo.ManagerUserInfoBO;
+import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
+import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
+import com.hoolink.manage.base.bo.ManagerUserParamBO;
+import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
+import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
+import com.hoolink.manage.base.bo.PersonalInfoBO;
+import com.hoolink.manage.base.bo.PhoneParamBO;
+import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
+import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
+import com.hoolink.manage.base.bo.UserDeptPairBO;
+import com.hoolink.manage.base.bo.UserDeptPairParamBO;
+import com.hoolink.manage.base.bo.UserInfoBO;
+import com.hoolink.manage.base.bo.UserSecurityBO;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.consumer.edm.EdmClient;
@@ -14,9 +35,19 @@ import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.manage.base.dao.model.*;
+import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
+import com.hoolink.manage.base.dao.model.ManageRole;
+import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
+import com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample;
+import com.hoolink.manage.base.dao.model.User;
+import com.hoolink.manage.base.dao.model.UserExample;
 import com.hoolink.manage.base.dict.AbstractDict;
-import com.hoolink.manage.base.service.*;
+import com.hoolink.manage.base.service.DepartmentService;
+import com.hoolink.manage.base.service.MiddleUserDepartmentService;
+import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.manage.base.service.SessionService;
+import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.BackBO;
@@ -28,7 +59,16 @@ import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.edm.RepertoryBO;
-import com.hoolink.sdk.bo.manager.*;
+import com.hoolink.sdk.bo.manager.DeptPairBO;
+import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageUserDeptBO;
+import com.hoolink.sdk.bo.manager.ManageUserInfoBO;
+import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
+import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
@@ -40,6 +80,23 @@ import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.utils.MD5Util;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -51,12 +108,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @Author: xuli
@@ -687,7 +738,7 @@ public class UserServiceImpl implements UserService {
         Optional<ManageDepartmentBO> manageDepartmentBOOpt = deptList.stream().filter(d -> d.getId().equals(currentId)).findFirst();
         if (manageDepartmentBOOpt.isPresent()) {
             Long parentId = manageDepartmentBOOpt.get().getParentId();
-            if (parentId != null) {
+            if (parentId != 0) {
                 selectedDeptIdList.add(parentId);
                 traverseGetAllParentDeptId(deptList, selectedDeptIdList, parentId);
             }
@@ -795,12 +846,18 @@ public class UserServiceImpl implements UserService {
         List<MiddleUserDepartmentBO> middleUserDeptList = new ArrayList<>();
         deptPairList.stream().forEach(dp -> {
             String diffDeptGroup = generateRandom();
-            for (Long deptId : dp.getDeptIdList()) {
+            List<Long> deptIdList = dp.getDeptIdList();
+            for(int i=0; i<deptIdList.size(); i++) {
+            	Long deptId = deptIdList.get(i);
                 MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
                 middleUserDept.setDeptId(deptId);
                 middleUserDept.setUserId(userId);
                 middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
                 middleUserDept.setDiffDeptGroup(diffDeptGroup);
+                middleUserDept.setLowestLevel(false);
+                if(i == deptIdList.size()-1) {
+                	middleUserDept.setLowestLevel(true);	
+                }
                 middleUserDeptList.add(middleUserDept);
             }
         });
@@ -1080,10 +1137,10 @@ public class UserServiceImpl implements UserService {
             list.forEach(deptSecurityBO -> {
                 positionList.add(deptSecurityBO.getId());
                 if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                        && deptSecurityBO.getLowestLevel()){
                     dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
                 } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getEncryLevelDept()!=null && deptSecurityBO.getEncryLevelDept()!=0){
+                        && deptSecurityBO.getLowestLevel()){
                     //小组密保等级
                     map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
                 }
@@ -1139,6 +1196,16 @@ public class UserServiceImpl implements UserService {
             deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
         }
         return deptIdList;
+    }
+
+    @Override
+    public List<UserDeptAssociationBO> getOrganizationInfoToDept(OrganizationInfoParamBO paramBO) throws Exception {
+        // 根据用户id获取所在公司或者部门信息
+        List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
+        //过滤出部门以下的层级
+        userDeptInfoBOList = userDeptInfoBOList.stream().filter(data -> !Constant.COMPANY_LEVEL.equals(data.getDeptType())
+                || !Constant.SYSTEM_CENTER_LEVEL.equals(data.getDeptType())).collect(Collectors.toList());
+        return userDeptInfoBOList;
     }
 
     @Override
@@ -1257,5 +1324,4 @@ public class UserServiceImpl implements UserService {
 	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
 		return edmClient.listOperateLog(paramBO).getData();
 	}
-
 }
