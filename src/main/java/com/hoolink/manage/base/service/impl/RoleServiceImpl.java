@@ -576,6 +576,9 @@ public class RoleServiceImpl implements RoleService {
 	        	}else if(PermissionEnum.ALL.getKey().equals(rm.getPermissionFlag())) {
 	        		//可读写菜单的话，把所有的按钮url加进来
 	        		urlSet.addAll(buttonStream.map(b -> b.getButtonUrl()).collect(Collectors.toList()));
+	        	}else if(rm.getPermissionFlag() == null){
+	        		//如果为null(菜单顶级)，放行
+	        		urlSet.addAll(buttonStream.map(b -> b.getButtonUrl()).collect(Collectors.toList()));
 	        	}
 	        });
 	        urlSet.removeIf(u -> u==null);
