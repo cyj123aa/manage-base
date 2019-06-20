@@ -242,7 +242,6 @@ public class UserServiceImpl implements UserService {
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_TWO);
             repertoryBO.setName(Constant.REPERTORY_TWO_NAME);
-            repertory.add(repertoryBO);
             edmRepertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
