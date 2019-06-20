@@ -1324,4 +1324,17 @@ public class UserServiceImpl implements UserService {
 	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
 		return edmClient.listOperateLog(paramBO).getData();
 	}
+
+    @Override
+    public SimpleDeptUserBO getUserByDeviceCode(String deviceCode) {
+        UserExample example = new UserExample();
+        UserExample.Criteria criteria = example.createCriteria();
+        criteria.andDeviceCodeEqualTo(deviceCode);
+        List<User> userList = userMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(userList)){
+            return null;
+        }
+        SimpleDeptUserBO userBO = CopyPropertiesUtil.copyBean(userList.get(0), SimpleDeptUserBO.class);
+        return userBO;
+    }
 }
