@@ -54,7 +54,7 @@ public class LoginResultBO implements Serializable {
     /**
      * edm库的权限，1 部门资源，2 缓存库，3 资源库
      */
-    private List<Integer> edmRepertory;
+    private List<RepertoryBO> edmRepertory;
 
 
     private List<RepertoryBO> repertoryList;
@@ -63,4 +63,6 @@ public class LoginResultBO implements Serializable {
      * 角色名称
      */
     private String roleName;
+
+    private Byte roleLevel;
 }

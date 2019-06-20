@@ -348,4 +348,11 @@ public interface UserService {
      */
     PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception;
 
+    /**
+     * 根据手机code码获取用户
+     * @param deviceCode
+     * @return
+     */
+    SimpleDeptUserBO getUserByDeviceCode(String deviceCode);
+
 }

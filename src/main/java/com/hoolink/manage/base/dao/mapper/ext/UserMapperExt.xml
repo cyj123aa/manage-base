@@ -19,7 +19,7 @@
         from middle_user_department mud
         inner join manage_department md on md.id=mud.dept_id
         inner join manage_user mu on mu.id=mud.user_id
-        where mud.user_id=#{id}
+        where mud.user_id=#{id} and mud.lowest_level=1
     </select>
 
     <select id="getDeptIdByParentId" resultMap="DeptUserResult">
