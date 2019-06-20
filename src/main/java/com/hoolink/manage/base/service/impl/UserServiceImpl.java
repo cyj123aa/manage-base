@@ -199,6 +199,7 @@ public class UserServiceImpl implements UserService {
         loginResult.setPhone(user.getPhone());
         loginResult.setName(user.getName());
         loginResult.setRoleName(manageRole.getRoleName());
+        loginResult.setRoleLevel(manageRole.getRoleLevel());
         //设置头像
         if (user.getImgId() != null) {
             try {

@@ -63,4 +63,6 @@ public class LoginResultBO implements Serializable {
      * 角色名称
      */
     private String roleName;
+
+    private Byte roleLevel;
 }

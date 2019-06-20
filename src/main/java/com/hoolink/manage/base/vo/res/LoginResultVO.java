@@ -60,4 +60,6 @@ public class LoginResultVO {
      * 角色名称
      */
     private String roleName;
+
+    private Byte roleLevel;
 }
