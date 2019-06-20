@@ -90,7 +90,7 @@ public class UserController {
         return BackBOUtil.defaultBackBO(userService.getUserInfoById(id));
     }
 
-    @PostMapping(value = "getUserBys")
+    @PostMapping(value = "getUserByDeptIds")
     @ApiOperation(value = "根据组织架构获取用户")
     @LogAndParam(value = "根据组织架构获取用户失败，请稍后重试")
     public BackBO<List<SimpleDeptUserBO>> getUserByDeptIds(@RequestBody List<Long> deptIds){
