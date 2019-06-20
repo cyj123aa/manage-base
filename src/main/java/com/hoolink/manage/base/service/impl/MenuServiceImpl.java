@@ -171,13 +171,6 @@ public class MenuServiceImpl implements MenuService {
                 deptAllList.addAll(deptPositionBOS);
             }
         }
-        //可见组织架构
-        List<Long> positions = paramBO.getPositionList();
-        if (CollectionUtils.isNotEmpty(positions)) {
-            List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByIdList(positions);
-            //同部门下选择可见组织结构 可见文件上层组织架构 用户必然拥有
-            deptAllList.addAll(deptPositionBOS);
-        }
         deptAllList = removeDuplict(deptAllList);
         return deptAllList;
     }
