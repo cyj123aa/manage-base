@@ -52,7 +52,7 @@ public class LoginResultVO {
     /**
      * edm库的权限，1 部门资源，2 缓存库，3 资源库
      */
-    private List<Integer> edmRepertory;
+    private List<RepertoryBO> edmRepertory;
 
     private List<RepertoryBO> repertoryList;
 

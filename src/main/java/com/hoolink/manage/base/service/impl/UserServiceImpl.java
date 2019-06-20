@@ -178,28 +178,28 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult){
-        List<Integer> edmRepertory=new ArrayList<>();
+        List<RepertoryBO> edmRepertory=new ArrayList<>();
         List<RepertoryBO> repertory=new ArrayList<>();
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_ONE);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_ONE);
             repertoryBO.setName(Constant.REPERTORY_ONE_NAME);
             repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_TWO);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_TWO);
             repertoryBO.setName(Constant.REPERTORY_TWO_NAME);
             repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_THREE);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_THREE);
             repertoryBO.setName(Constant.REPERTORY_THREE_NAME);
             repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         loginResult.setEdmRepertory(edmRepertory);
         loginResult.setRepertoryList(repertory);
