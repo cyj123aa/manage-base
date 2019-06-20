@@ -118,4 +118,11 @@ public class UserController {
     public BackBO<List<MobileFileBO>> getDeptByParentId(@RequestBody  Long id) throws Exception{
         return BackBOUtil.defaultBackBO(userService.getDeptByParentId(id));
     }
+
+    @PostMapping(value = "getUserByDeviceCode")
+    @ApiOperation(value = "根据手机code码获取用户")
+    @LogAndParam(value = "根据手机code码获取用户失败，请稍后重试")
+    public BackBO<SimpleDeptUserBO> getUserByDeviceCode(@RequestBody  String deviceCode) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getUserByDeviceCode(deviceCode));
+    }
 }
