@@ -406,6 +406,9 @@ public class DepartmentServiceImpl implements DepartmentService{
           if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
               organizationDeptBO.setCompanyName(manageDepartment.getName());
           }
+				if(EdmDeptEnum.SYSTEM_CENTER.getKey().byteValue() == manageDepartment.getDeptType()){
+					organizationDeptBO.setSystemCenterName(manageDepartment.getName());
+				}
           if(manageDepartment.getParentId() != null){
               getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
           }
