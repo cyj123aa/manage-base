@@ -24,4 +24,8 @@ public class BackRoleVO implements Serializable {
     private Boolean roleType;
     /*** 该角色所已选权限 */
     private RoleMenuVO beSelectMenus;
+    /**
+     * 所属层级
+     */
+    private Byte roleLevel;
 }
