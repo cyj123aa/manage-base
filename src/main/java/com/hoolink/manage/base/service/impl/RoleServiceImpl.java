@@ -15,6 +15,7 @@ import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.service.ButtonService;
 import com.hoolink.manage.base.service.MenuService;
 import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.RedisUtil;
 import com.hoolink.manage.base.vo.req.MiddleRoleMenuVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
@@ -68,6 +69,8 @@ public class RoleServiceImpl implements RoleService {
     private ManageMenuMapperExt manageMenuMapperExt;
     @Resource
     private UserMapper userMapper;
+    @Autowired
+    private SessionService sessionService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -106,6 +109,19 @@ public class RoleServiceImpl implements RoleService {
      */
     private ManageRole getUserRole() throws Exception {
         Long userId = ContextUtil.getManageCurrentUser().getUserId();
+        if(userId==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_USER_NOT_EXIST);
+        }
+        return manageRoleMapperExt.getUserRole(userId);
+    }
+
+    /**
+     * 获得用户角色
+     * @return
+     * @throws Exception
+     */
+    private ManageRole getUserRoleByToken() throws Exception {
+        Long userId = sessionService.getUserIdByToken();
         if(userId==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_USER_NOT_EXIST);
         }
@@ -330,7 +346,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception {
         //当前用户权限菜单
-        ManageRole userRole = getUserRole();
+        ManageRole userRole = getUserRoleByToken();
         if(userRole==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
         }
