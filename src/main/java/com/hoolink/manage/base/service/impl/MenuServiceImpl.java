@@ -145,7 +145,6 @@ public class MenuServiceImpl implements MenuService {
             case CACHE_RESOURCE_CODE:
                 //缓冲库
                 edmMenuTreeBO.setEnableUpdate(true);
-                edmMenuTreeBO.setMenuType(true);
                 break;
             default:break;
         }
@@ -170,13 +169,6 @@ public class MenuServiceImpl implements MenuService {
             if (CollectionUtils.isNotEmpty(deptPositionBOS)) {
                 deptAllList.addAll(deptPositionBOS);
             }
-        }
-        //可见组织架构
-        List<Long> positions = paramBO.getPositionList();
-        if (CollectionUtils.isNotEmpty(positions)) {
-            List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByIdList(positions);
-            //同部门下选择可见组织结构 可见文件上层组织架构 用户必然拥有
-            deptAllList.addAll(deptPositionBOS);
         }
         deptAllList = removeDuplict(deptAllList);
         return deptAllList;
@@ -272,6 +264,7 @@ public class MenuServiceImpl implements MenuService {
                 EdmMenuTreeBO edmMenuTreeBO;
                 if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
                     edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true,DEPT_RESOURCE_CODE.getKey());
+                    edmMenuTreeBO.setExpand(false);
                 }else{
                     edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false,DEPT_RESOURCE_CODE.getKey());
                 }

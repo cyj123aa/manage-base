@@ -199,6 +199,7 @@ public class UserServiceImpl implements UserService {
         loginResult.setPhone(user.getPhone());
         loginResult.setName(user.getName());
         loginResult.setRoleName(manageRole.getRoleName());
+        loginResult.setRoleLevel(manageRole.getRoleLevel());
         //设置头像
         if (user.getImgId() != null) {
             try {
@@ -229,28 +230,27 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult){
-        List<Integer> edmRepertory=new ArrayList<>();
+        List<RepertoryBO> edmRepertory=new ArrayList<>();
         List<RepertoryBO> repertory=new ArrayList<>();
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_ONE);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_ONE);
             repertoryBO.setName(Constant.REPERTORY_ONE_NAME);
             repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_TWO);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_TWO);
             repertoryBO.setName(Constant.REPERTORY_TWO_NAME);
-            repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            edmRepertory.add(Constant.REPERTORY_THREE);
             RepertoryBO repertoryBO=new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_THREE);
             repertoryBO.setName(Constant.REPERTORY_THREE_NAME);
             repertory.add(repertoryBO);
+            edmRepertory.add(repertoryBO);
         }
         loginResult.setEdmRepertory(edmRepertory);
         loginResult.setRepertoryList(repertory);
@@ -1279,8 +1279,19 @@ public class UserServiceImpl implements UserService {
         if(id==null){
             return null;
         }
+        //查询下层的时候需要通过人的权限进行过滤
+        CurrentUserBO currentUserBO=ContextUtil.getManageCurrentUser();
+        List<DeptSecurityRepertoryBO> userList=userMapperExt.getDeptByUser(currentUserBO.getUserId());
+        List<Long> deptId=new ArrayList<>();
+        for(DeptSecurityRepertoryBO deptSecurity:userList){
+            deptId.add(deptSecurity.getDeptId());
+            List<DeptSecurityRepertoryBO> childs=deptSecurity.getChilds();
+            if(!CollectionUtils.isEmpty(childs)){
+                recursionUserDeptId(childs,deptId);
+            }
+        }
         ManageDepartmentExample example=new ManageDepartmentExample();
-        example.createCriteria().andParentIdEqualTo(id);
+        example.createCriteria().andParentIdEqualTo(id).andIdIn(deptId);
         example.setOrderByClause(" dept_name asc ");
         List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(list)){
@@ -1301,6 +1312,18 @@ public class UserServiceImpl implements UserService {
             mobileFile.add(mobileFileBO);
         });
         return mobileFile;
+    }
+
+    private void recursionUserDeptId(List<DeptSecurityRepertoryBO> deptSecurity,List<Long> deptids){
+        for(DeptSecurityRepertoryBO deptSecurityRepertory:deptSecurity){
+            deptids.add(deptSecurityRepertory.getDeptId());
+            if(!org.springframework.util.CollectionUtils.isEmpty(deptSecurityRepertory.getChilds())){
+                List<DeptSecurityRepertoryBO> list=deptSecurityRepertory.getChilds();
+                if(!org.springframework.util.CollectionUtils.isEmpty(list)){
+                    recursionUserDeptId(list,deptids);
+                }
+            }
+        }
     }
 
     @Override
@@ -1324,4 +1347,17 @@ public class UserServiceImpl implements UserService {
 	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
 		return edmClient.listOperateLog(paramBO).getData();
 	}
+
+    @Override
+    public SimpleDeptUserBO getUserByDeviceCode(String deviceCode) {
+        UserExample example = new UserExample();
+        UserExample.Criteria criteria = example.createCriteria();
+        criteria.andDeviceCodeEqualTo(deviceCode);
+        List<User> userList = userMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(userList)){
+            return null;
+        }
+        SimpleDeptUserBO userBO = CopyPropertiesUtil.copyBean(userList.get(0), SimpleDeptUserBO.class);
+        return userBO;
+    }
 }
