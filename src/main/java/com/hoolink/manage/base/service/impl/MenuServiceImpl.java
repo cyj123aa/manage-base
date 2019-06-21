@@ -145,7 +145,6 @@ public class MenuServiceImpl implements MenuService {
             case CACHE_RESOURCE_CODE:
                 //缓冲库
                 edmMenuTreeBO.setEnableUpdate(true);
-                edmMenuTreeBO.setMenuType(true);
                 break;
             default:break;
         }
@@ -265,6 +264,7 @@ public class MenuServiceImpl implements MenuService {
                 EdmMenuTreeBO edmMenuTreeBO;
                 if(EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue())){
                     edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,true,DEPT_RESOURCE_CODE.getKey());
+                    edmMenuTreeBO.setExpand(false);
                 }else{
                     edmMenuTreeBO=getEdmMenuTreeBO(deptPositionBO,false,DEPT_RESOURCE_CODE.getKey());
                 }
