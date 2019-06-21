@@ -54,7 +54,7 @@
         u.user_account,
         u.user_name,
         u.role_id,
-      DISTINCT (u.phone),
+        u.phone,
         u.position,
         u.encry_level_company,
         u.view_encry_level_permitted,
