@@ -27,6 +27,12 @@ public interface SessionService {
     CurrentUserBO getCurrentUser(String token);
 
     /**
+     * 根据token获取userid
+     * @return
+     */
+    Long getUserIdByToken();
+
+    /**
      * 根据用户ID查询当前用户信息
      *
      * @param userId

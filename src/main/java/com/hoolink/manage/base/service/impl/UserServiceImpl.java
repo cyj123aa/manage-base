@@ -1279,8 +1279,19 @@ public class UserServiceImpl implements UserService {
         if(id==null){
             return null;
         }
+        //查询下层的时候需要通过人的权限进行过滤
+        CurrentUserBO currentUserBO=ContextUtil.getManageCurrentUser();
+        List<DeptSecurityRepertoryBO> userList=userMapperExt.getDeptByUser(currentUserBO.getUserId());
+        List<Long> deptId=new ArrayList<>();
+        for(DeptSecurityRepertoryBO deptSecurity:userList){
+            deptId.add(deptSecurity.getDeptId());
+            List<DeptSecurityRepertoryBO> childs=deptSecurity.getChilds();
+            if(!CollectionUtils.isEmpty(childs)){
+                recursionUserDeptId(childs,deptId);
+            }
+        }
         ManageDepartmentExample example=new ManageDepartmentExample();
-        example.createCriteria().andParentIdEqualTo(id);
+        example.createCriteria().andParentIdEqualTo(id).andIdIn(deptId);
         example.setOrderByClause(" dept_name asc ");
         List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(list)){
@@ -1301,6 +1312,18 @@ public class UserServiceImpl implements UserService {
             mobileFile.add(mobileFileBO);
         });
         return mobileFile;
+    }
+
+    private void recursionUserDeptId(List<DeptSecurityRepertoryBO> deptSecurity,List<Long> deptids){
+        for(DeptSecurityRepertoryBO deptSecurityRepertory:deptSecurity){
+            deptids.add(deptSecurityRepertory.getDeptId());
+            if(!org.springframework.util.CollectionUtils.isEmpty(deptSecurityRepertory.getChilds())){
+                List<DeptSecurityRepertoryBO> list=deptSecurityRepertory.getChilds();
+                if(!org.springframework.util.CollectionUtils.isEmpty(list)){
+                    recursionUserDeptId(list,deptids);
+                }
+            }
+        }
     }
 
     @Override
