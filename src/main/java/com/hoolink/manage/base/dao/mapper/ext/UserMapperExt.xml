@@ -49,12 +49,12 @@
 
   <select id="selectAllByDeptIds" resultMap="BaseResultMap">
   SELECT
-        DISTINCT (u.id),
+        u.id,
         u.user_no,
         u.user_account,
         u.user_name,
         u.role_id,
-        u.phone,
+      DISTINCT (u.phone),
         u.position,
         u.encry_level_company,
         u.view_encry_level_permitted,
