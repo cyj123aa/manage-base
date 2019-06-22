@@ -267,45 +267,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return manageDeptBO;
 	}
 
-    /**
-     * 获取下一级组织架构
-     * @param documentRetrievalBO
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public PageInfo<OrganizationalStructureFileBO> getNextOrganizationalStructureById(DocumentRetrievalBO documentRetrievalBO) throws Exception {
-        List<OrganizationalStructureFileBO> fileBOS = new ArrayList<>();
-
-        ManageDepartmentExample departmentExample = new ManageDepartmentExample();
-        if (null == documentRetrievalBO.getMenuType()){
-            departmentExample.createCriteria().andParentIdEqualTo(0L);
-        }else {
-            departmentExample.createCriteria().andParentIdEqualTo(documentRetrievalBO.getDepartmentId());
-        }
-
-        PageHelper.startPage(documentRetrievalBO.getPageNo(), documentRetrievalBO.getPageSize());
-        List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
-
-        List<Long> collect = manageDepartments.stream().map(ManageDepartment::getId).collect(Collectors.toList());
-        departmentExample.clear();
-        departmentExample.createCriteria().andParentIdIn(collect);
-        Map<Long, List<ManageDepartment>> childDepartment = manageDepartmentMapper.selectByExample(departmentExample).stream()
-                .collect(Collectors.groupingBy(ManageDepartment::getParentId));
-
-        manageDepartments.forEach(manageDepartment -> {
-            OrganizationalStructureFileBO organizationalStructureFileBO = new OrganizationalStructureFileBO();
-            organizationalStructureFileBO.setDirectoryId(manageDepartment.getId());
-            organizationalStructureFileBO.setResourceName(manageDepartment.getName());
-            organizationalStructureFileBO.setIsOrganizationalStructure(true);
-            organizationalStructureFileBO.setIsLastOrganizationalStructure(true);
-            if (null != childDepartment.get(manageDepartment.getId()) && !childDepartment.get(manageDepartment.getId()).isEmpty()){
-                organizationalStructureFileBO.setIsLastOrganizationalStructure(false);
-            }
-            fileBOS.add(organizationalStructureFileBO);
-        });
-        return new PageInfo<>(fileBOS);
-    }
 
 	private PermissionManageDeptBO getPermissionManageDeptBO() throws Exception {
 		PermissionManageDeptBO manageDeptBO = new PermissionManageDeptBO();

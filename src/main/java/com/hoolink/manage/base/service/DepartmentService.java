@@ -123,14 +123,6 @@ public interface DepartmentService {
 	 */
 	List<ReadFileOrgInfoBO> getFileOrgList (List<Long> treeParamBO) throws Exception;
 
-    /**
-     * 获取下一级组织架构
-     * @param documentRetrievalBO
-     * @return
-     * @throws Exception
-     */
-    PageInfo<OrganizationalStructureFileBO> getNextOrganizationalStructureById(DocumentRetrievalBO documentRetrievalBO) throws Exception;
-
 	/**
 	 * 获取当前用户的部门信息
 	 * @return
