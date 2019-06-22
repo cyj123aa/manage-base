@@ -434,6 +434,8 @@ public class UserServiceImpl implements UserService {
                 .map(cudwm -> cudwm.getDeptId()).collect(Collectors.toSet()));
         //设置权限url
         currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
+        //设置角色类型
+        currentUserBO.setRoleType(role.getRoleType());
         return sessionService.cacheCurrentUser(currentUserBO);
     }
 
