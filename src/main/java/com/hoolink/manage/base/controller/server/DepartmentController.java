@@ -89,13 +89,6 @@ public class DepartmentController {
         return BackBOUtil.defaultBackBO(departmentService.getFileOrgList(param));
     }
 
-    @PostMapping(value = "getNextOrganizationalStructureById")
-    @ApiOperation(value = "获取下级组织架构信息")
-    @LogAndParam(value = "获取下级组织架构信息失败")
-    public BackBO<PageInfo<OrganizationalStructureFileBO>> getNextOrganizationalStructureById(@RequestBody DocumentRetrievalBO param) throws Exception{
-        return BackBOUtil.defaultBackBO(departmentService.getNextOrganizationalStructureById(param));
-    }
-
     @PostMapping(value = "getDeptListByUserId")
     @ApiOperation(value = "获取当前用户的部门信息")
     @LogAndParam(value = "获取当前用户的部门信息")
