@@ -39,12 +39,6 @@ public class DeptTreeToolUtils {
             List<DepartmentAndUserTreeBO> rootUserList = new ArrayList<>();
             rootList.forEach(beanTree -> {
                 getChild(beanTree, map, hasAddUser, userMap, checkedList);
-              /*  if (hasAddUser){
-                    List<SimpleDeptUserBO> userBOList = userMap.get(beanTree.getKey());
-                    if (CollectionUtils.isNotEmpty(userBOList)){
-                        buildUserList(rootUserList, beanTree, userBOList, checkedList);
-                    }
-                }*/
             });
             rootList.addAll(rootUserList);
             return rootList;

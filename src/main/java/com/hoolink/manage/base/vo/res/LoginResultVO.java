@@ -28,11 +28,11 @@ public class LoginResultVO {
     /**
      * EDM系统权限
      */
-    private Boolean accessEDM = false;
+    private Boolean accessEDM;
     /**
      * hoolink系统权限
      */
-    private Boolean accessHoolink = false;
+    private Boolean accessHoolink;
 
     /**
      * 问候语
