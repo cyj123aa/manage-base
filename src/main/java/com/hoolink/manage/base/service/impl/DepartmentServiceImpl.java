@@ -107,19 +107,14 @@ public class DepartmentServiceImpl implements DepartmentService{
 		if (CollectionUtils.isEmpty(positionBOList)){
 			return new ArrayList<>(0);
 		}
-		List<ManageDepartment> departmentBOList = getTopDepartByDepartId(positionBOList.stream().map(DeptPositionBO::getId).collect(Collectors.toList()));
-		ManageDepartmentExample example = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = example.createCriteria();
-		criteria.andEnabledEqualTo(true);
-		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
-		if (CollectionUtils.isEmpty(deptList)){
-			return new ArrayList<>(0);
-		}
+		boolean belongJR = positionBOList.stream().anyMatch(p -> p.getParentIdCode().indexOf(Constant.JR_PARENT_ID_CODE) == 0);
+		boolean belongHL = positionBOList.stream().anyMatch(p -> p.getParentIdCode().indexOf(Constant.HL_PARENT_ID_CODE) == 0);
+		List<ManageDepartment> departmentList =  getDepartmentByCompany(belongJR, belongHL);
 		//拿到父节点
-		List<ManageDepartment> allParentList = deptList.stream().filter(d -> Objects.isNull(d.getParentId()) || d.getParentId() == 0).collect(Collectors.toList());
+		List<ManageDepartment> allParentList = departmentList.stream().filter(d -> Objects.isNull(d.getParentId()) || d.getParentId() == 0).collect(Collectors.toList());
 		//过滤两个list中相同的元素放到新集合中
-		List<ManageDepartment> parentList = departmentBOList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
-		List<ManageDepartment> childList = deptList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
+		List<ManageDepartment> parentList = departmentList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
+		List<ManageDepartment> childList = departmentList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
 		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(convertToDepartmentAndUserTree(parentList), convertToDepartmentAndUserTree(childList));
 		//组织架构用户map
 		Map<Long, List<SimpleDeptUserBO>> userMap = null;
@@ -128,6 +123,28 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}
 		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(flag, userMap, checkedList);
 		return treeBOList;
+	}
+
+	private List<ManageDepartment> getDepartmentByCompany(Boolean belongJR, Boolean belongHL){
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = example.createCriteria();
+		ManageDepartmentExample.Criteria criteria2 = example.createCriteria();
+		criteria.andEnabledEqualTo(true);
+		if (belongJR && !belongHL){
+			//当前用户所属晶日
+			criteria.andParentIdCodeLike(Constant.JR_PARENT_ID_CODE + Constant.PERCENT);
+		}else if (belongHL && !belongJR){
+			//当前用户所属互灵
+			criteria.andParentIdCodeLike(Constant.HL_PARENT_ID_CODE + Constant.PERCENT);
+		}else {
+			//属于晶日和互灵
+			criteria.andParentIdCodeLike(Constant.HL_PARENT_ID_CODE + Constant.PERCENT);
+			criteria2.andEnabledEqualTo(true);
+			criteria2.andParentIdCodeLike(Constant.JR_PARENT_ID_CODE + Constant.PERCENT);
+			example.or(criteria2);
+		}
+		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
+		return deptList;
 	}
 
 	private List<DepartmentAndUserTreeBO> convertToDepartmentAndUserTree(List<ManageDepartment> departmentList){
