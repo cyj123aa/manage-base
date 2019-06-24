@@ -9,8 +9,8 @@
     <result column="user_id" jdbcType="BIGINT" property="userId" />
     <result column="dept_id" jdbcType="BIGINT" property="deptId" />
     <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
-    <result column="deduce_status" jdbcType="BIT" property="deduceStatus" />
     <result column="diff_dept_group" jdbcType="VARCHAR" property="diffDeptGroup" />
+    <result column="lowest_level" jdbcType="BIT" property="lowestLevel" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -80,7 +80,7 @@
     <!--
     @mbggenerated
     -->
-    id, user_id, dept_id, encry_level_dept, deduce_status, diff_dept_group
+    id, user_id, dept_id, encry_level_dept, diff_dept_group, lowest_level
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample" resultMap="BaseResultMap">
     <!--
@@ -129,9 +129,9 @@
     @mbggenerated
     -->
     insert into middle_user_department (user_id, dept_id, encry_level_dept, 
-      deduce_status, diff_dept_group)
+      diff_dept_group, lowest_level)
     values (#{userId,jdbcType=BIGINT}, #{deptId,jdbcType=BIGINT}, #{encryLevelDept,jdbcType=INTEGER}, 
-      #{deduceStatus,jdbcType=BIT}, #{diffDeptGroup,jdbcType=VARCHAR})
+      #{diffDeptGroup,jdbcType=VARCHAR}, #{lowestLevel,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.MiddleUserDepartment" useGeneratedKeys="true">
     <!--
@@ -148,11 +148,11 @@
       <if test="encryLevelDept != null">
         encry_level_dept,
       </if>
-      <if test="deduceStatus != null">
-        deduce_status,
-      </if>
       <if test="diffDeptGroup != null">
         diff_dept_group,
+      </if>
+      <if test="lowestLevel != null">
+        lowest_level,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -165,11 +165,11 @@
       <if test="encryLevelDept != null">
         #{encryLevelDept,jdbcType=INTEGER},
       </if>
-      <if test="deduceStatus != null">
-        #{deduceStatus,jdbcType=BIT},
-      </if>
       <if test="diffDeptGroup != null">
         #{diffDeptGroup,jdbcType=VARCHAR},
+      </if>
+      <if test="lowestLevel != null">
+        #{lowestLevel,jdbcType=BIT},
       </if>
     </trim>
   </insert>
@@ -200,11 +200,11 @@
       <if test="record.encryLevelDept != null">
         encry_level_dept = #{record.encryLevelDept,jdbcType=INTEGER},
       </if>
-      <if test="record.deduceStatus != null">
-        deduce_status = #{record.deduceStatus,jdbcType=BIT},
-      </if>
       <if test="record.diffDeptGroup != null">
         diff_dept_group = #{record.diffDeptGroup,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lowestLevel != null">
+        lowest_level = #{record.lowestLevel,jdbcType=BIT},
       </if>
     </set>
     <if test="_parameter != null">
@@ -220,8 +220,8 @@
       user_id = #{record.userId,jdbcType=BIGINT},
       dept_id = #{record.deptId,jdbcType=BIGINT},
       encry_level_dept = #{record.encryLevelDept,jdbcType=INTEGER},
-      deduce_status = #{record.deduceStatus,jdbcType=BIT},
-      diff_dept_group = #{record.diffDeptGroup,jdbcType=VARCHAR}
+      diff_dept_group = #{record.diffDeptGroup,jdbcType=VARCHAR},
+      lowest_level = #{record.lowestLevel,jdbcType=BIT}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -241,11 +241,11 @@
       <if test="encryLevelDept != null">
         encry_level_dept = #{encryLevelDept,jdbcType=INTEGER},
       </if>
-      <if test="deduceStatus != null">
-        deduce_status = #{deduceStatus,jdbcType=BIT},
-      </if>
       <if test="diffDeptGroup != null">
         diff_dept_group = #{diffDeptGroup,jdbcType=VARCHAR},
+      </if>
+      <if test="lowestLevel != null">
+        lowest_level = #{lowestLevel,jdbcType=BIT},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -258,8 +258,8 @@
     set user_id = #{userId,jdbcType=BIGINT},
       dept_id = #{deptId,jdbcType=BIGINT},
       encry_level_dept = #{encryLevelDept,jdbcType=INTEGER},
-      deduce_status = #{deduceStatus,jdbcType=BIT},
-      diff_dept_group = #{diffDeptGroup,jdbcType=VARCHAR}
+      diff_dept_group = #{diffDeptGroup,jdbcType=VARCHAR},
+      lowest_level = #{lowestLevel,jdbcType=BIT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

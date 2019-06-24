@@ -25,6 +25,7 @@
     <result column="created" jdbcType="BIGINT" property="created" />
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -96,7 +97,7 @@
     -->
     id, user_no, user_account, user_name, sex, role_id, passwd, img_id, phone, position, 
     encry_level_company, first_login, last_time, user_status, view_encry_level_permitted, 
-    creator, updator, created, updated, enabled
+    creator, updator, created, updated, enabled, device_code
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.UserExample" resultMap="BaseResultMap">
     <!--
@@ -149,15 +150,15 @@
       phone, position, encry_level_company, 
       first_login, last_time, user_status, 
       view_encry_level_permitted, creator, updator, 
-      created, updated, enabled
-      )
+      created, updated, enabled, 
+      device_code)
     values (#{userNo,jdbcType=VARCHAR}, #{userAccount,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{sex,jdbcType=BIT}, #{roleId,jdbcType=BIGINT}, #{passwd,jdbcType=VARCHAR}, #{imgId,jdbcType=BIGINT}, 
       #{phone,jdbcType=VARCHAR}, #{position,jdbcType=VARCHAR}, #{encryLevelCompany,jdbcType=INTEGER}, 
       #{firstLogin,jdbcType=BIT}, #{lastTime,jdbcType=BIGINT}, #{status,jdbcType=BIT}, 
       #{viewEncryLevelPermitted,jdbcType=BIT}, #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, 
-      #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}
-      )
+      #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}, 
+      #{deviceCode,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.User" useGeneratedKeys="true">
     <!--
@@ -222,6 +223,9 @@
       <if test="enabled != null">
         enabled,
       </if>
+      <if test="deviceCode != null">
+        device_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userNo != null">
@@ -280,6 +284,9 @@
       </if>
       <if test="enabled != null">
         #{enabled,jdbcType=BIT},
+      </if>
+      <if test="deviceCode != null">
+        #{deviceCode,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -358,6 +365,9 @@
       <if test="record.enabled != null">
         enabled = #{record.enabled,jdbcType=BIT},
       </if>
+      <if test="record.deviceCode != null">
+        device_code = #{record.deviceCode,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -387,7 +397,8 @@
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
       updated = #{record.updated,jdbcType=BIGINT},
-      enabled = #{record.enabled,jdbcType=BIT}
+      enabled = #{record.enabled,jdbcType=BIT},
+      device_code = #{record.deviceCode,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -455,6 +466,9 @@
       <if test="enabled != null">
         enabled = #{enabled,jdbcType=BIT},
       </if>
+      <if test="deviceCode != null">
+        device_code = #{deviceCode,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -481,7 +495,8 @@
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},
       updated = #{updated,jdbcType=BIGINT},
-      enabled = #{enabled,jdbcType=BIT}
+      enabled = #{enabled,jdbcType=BIT},
+      device_code = #{deviceCode,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

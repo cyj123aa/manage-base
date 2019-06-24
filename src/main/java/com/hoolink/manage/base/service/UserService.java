@@ -16,10 +16,25 @@ import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.bo.PhoneParamBO;
 import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
 import com.hoolink.manage.base.bo.UserInfoBO;
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.base.UserBO;
+import com.hoolink.sdk.bo.edm.MobileFileBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
+import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
+import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
+import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
+import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: xuli
@@ -40,13 +55,14 @@ public interface UserService {
      */
     void logout();
 
+
     /**
      * 根据token获取当前用户，该接口仅供网关鉴权使用
-     *
      * @param token
+     * @param isMobile
      * @return
      */
-    CurrentUserBO getSessionUser(String token);
+    CurrentUserBO getSessionUser(String token,boolean isMobile);
 
     /**
      * 重置密码
@@ -113,7 +129,14 @@ public interface UserService {
      * @return
      */
     ManagerUserBO getById(Long id);
-    
+
+    /**
+     * 根据id获取用户
+     * @param id
+     * @return
+     */
+    ManageUserInfoBO getUserInfoById(Long id);
+
     /**
      * 根据id集合获取用户
      * @param idList
@@ -165,53 +188,53 @@ public interface UserService {
      * @return
      */
     List<DeptTreeBO> getDeptTree(List<Long> companyIdList);
-    
+
     /**
      * 删除用户
      * @param id
      * @return
      */
     boolean removeUser(Long id);
-    
+
     /**
      * 启用/禁用用户
      * @param param
      * @return
      */
     boolean enableOrDisableUser(EnableOrDisableUserParamVO param);
-    
+
     /**
      * 获取个人中心基础信息
      * @return
      * @throws Exception
      */
     PersonalInfoBO getPersonalInfo() throws Exception;
-    
+
     /**
      * 修改密码
      * @param updatePasswdParam
      */
     void updatePasswd(UpdatePasswdParamBO updatePasswdParam);
-    
+
     /**
      * 重置手机号
      * @param userId
      */
     void resetPhone(Long userId);
-    
+
     /**
      * 重置密码
      * @param userId
      */
     void resetPasswd(Long userId);
-    
+
     /**
      * 个人中心-保存头像
      * @param imageId
      * @return
      */
     boolean updateImage(Long imageId);
-    
+
     /**
      * excel导出列表(无分页)
      * @param userPageParamBO
@@ -219,4 +242,124 @@ public interface UserService {
      * @throws Exception
      */
     List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception;
+
+    /**
+     * 用户密保等级
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    UserDeptInfoBO getUserSecurity(Long userId) throws Exception;
+
+    /**
+     * 根据id集合获取用户
+     * @param idList
+     * @return
+     */
+    List<ManagerUserBO> getUserList(List<Long> idList);
+
+    /**
+     * 根据用户id查询部门资源密保等级
+     * @param id
+     * @return
+     */
+    List<DeptSecurityRepertoryBO> getDeptByUser(Long id);
+    /**
+     * 查询组织结构id集合下的所有用户 deptIdList查询所有
+     * @param deptIdList
+     * @return
+     */
+    Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList);
+
+    /**
+     * 查询组织结构id集合下的所有用户 deptIdList查询所有
+     * @param deptIdList
+     * @return
+     */
+    List<SimpleDeptUserBO> listUserByDeptIds(List<Long> deptIdList);
+
+    /**
+     * 根据用户id获取所在公司或者部门信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<Long> getOrganizationInfo(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 获取用户下关联的组织架构信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<UserDeptAssociationBO> getOrganizationInfoToDept(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 根据用户id获取所在公司的信息
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<UserDeptAssociationBO> getOrgInfoToCompany(OrganizationInfoParamBO paramBO)throws Exception;
+
+    /**
+     * 根据用户id集合获取用户名称
+     * @param ids
+     * @return
+     */
+    List<User> getUserNameByIds(List<Long> ids);
+
+    /**
+     * 更新设备码
+     * @param deviceCode
+     * @throws Exception
+     */
+    void updateDeviceCode(String deviceCode) throws Exception;
+
+    /**
+     * 根据用户id查询公司
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    List<MobileFileBO> getCompanyById(Long id) throws Exception;
+
+    /**
+     * 根据id获取下层架构
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    List<MobileFileBO> getDeptByParentId(Long id) throws Exception;
+
+    /**
+     * 个人中心-上传保存头像
+     * @param multipartFile
+     * @return
+     */
+    boolean uploadImage(MultipartFile multipartFile);
+    
+    
+    /**
+     * 获取用户操作日志(分页)
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception;
+
+    /**
+     * 根据手机code码获取用户
+     * @param deviceCode
+     * @return
+     */
+    SimpleDeptUserBO getUserByDeviceCode(String deviceCode);
+
+    /**
+     * 根据用户id获取上级组织架构
+     * @param userId
+     * @return
+     */
+    List<Long> getParentDeptByUserId(Long userId);
+
 }

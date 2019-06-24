@@ -5,7 +5,10 @@ import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.Base64Util;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.constants.ContextConstant;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
+import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,7 @@ public class SessionServiceImpl implements SessionService {
     private static final String TOKEN_SEPARATOR = "_";
     private static final int TOKEN_SPLIT_COUNT = 2;
     private static final int SESSION_TIMEOUT_SECONDS = 60;
+    private static final int SESSION_TIMEOUT_HOURS = 24;
 
     @Override
     public String cacheCurrentUser(CurrentUserBO currentUserBO) {
@@ -56,12 +60,31 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public Long getUserIdByToken() {
+        InvocationContext context = ContextUtils.getInvocationContext();
+        String token =context.getContext(ContextConstant.TOKEN);
+        String decrypt = Base64Util.decode(token);
+        if (decrypt == null) {
+            return null;
+        }
+        String[] split = decrypt.split(TOKEN_SEPARATOR);
+        if (split.length == TOKEN_SPLIT_COUNT) {
+            Long userId = Long.valueOf(split[0]);
+            return userId;
+        }
+        return null;
+    }
+
+    @Override
     public CurrentUserBO getCurrentUser(Long userId) {
         return sessionOperation.get(getKey(userId));
     }
 
     @Override
-    public Boolean refreshSession(Long userId) {
+    public Boolean refreshSession(Long userId,boolean isMobile) {
+        if(isMobile){
+            return sessionOperation.getOperations().expire(getKey(userId), SESSION_TIMEOUT_HOURS, TimeUnit.HOURS);
+        }
         return sessionOperation.getOperations().expire(getKey(userId), SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
     }
 

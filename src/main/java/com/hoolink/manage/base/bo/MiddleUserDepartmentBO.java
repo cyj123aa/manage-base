@@ -35,7 +35,7 @@ public class MiddleUserDepartmentBO {
     private String diffDeptGroup;
     
     /**
-     * 选择某组织，会推导并保存其所有子组织，状态: 选中的/推导的
+     *是否最底层: 是/否
      */
-    private Boolean deduceStatus;
+    private Boolean lowestLevel;
 }

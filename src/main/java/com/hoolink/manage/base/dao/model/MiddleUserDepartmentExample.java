@@ -403,66 +403,6 @@ public class MiddleUserDepartmentExample {
             return (Criteria) this;
         }
 
-        public Criteria andDeduceStatusIsNull() {
-            addCriterion("deduce_status is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusIsNotNull() {
-            addCriterion("deduce_status is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusEqualTo(Boolean value) {
-            addCriterion("deduce_status =", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusNotEqualTo(Boolean value) {
-            addCriterion("deduce_status <>", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusGreaterThan(Boolean value) {
-            addCriterion("deduce_status >", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusGreaterThanOrEqualTo(Boolean value) {
-            addCriterion("deduce_status >=", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusLessThan(Boolean value) {
-            addCriterion("deduce_status <", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusLessThanOrEqualTo(Boolean value) {
-            addCriterion("deduce_status <=", value, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusIn(List<Boolean> values) {
-            addCriterion("deduce_status in", values, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusNotIn(List<Boolean> values) {
-            addCriterion("deduce_status not in", values, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusBetween(Boolean value1, Boolean value2) {
-            addCriterion("deduce_status between", value1, value2, "deduceStatus");
-            return (Criteria) this;
-        }
-
-        public Criteria andDeduceStatusNotBetween(Boolean value1, Boolean value2) {
-            addCriterion("deduce_status not between", value1, value2, "deduceStatus");
-            return (Criteria) this;
-        }
-
         public Criteria andDiffDeptGroupIsNull() {
             addCriterion("diff_dept_group is null");
             return (Criteria) this;
@@ -530,6 +470,66 @@ public class MiddleUserDepartmentExample {
 
         public Criteria andDiffDeptGroupNotBetween(String value1, String value2) {
             addCriterion("diff_dept_group not between", value1, value2, "diffDeptGroup");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelIsNull() {
+            addCriterion("lowest_level is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelIsNotNull() {
+            addCriterion("lowest_level is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelEqualTo(Boolean value) {
+            addCriterion("lowest_level =", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotEqualTo(Boolean value) {
+            addCriterion("lowest_level <>", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelGreaterThan(Boolean value) {
+            addCriterion("lowest_level >", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("lowest_level >=", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelLessThan(Boolean value) {
+            addCriterion("lowest_level <", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelLessThanOrEqualTo(Boolean value) {
+            addCriterion("lowest_level <=", value, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelIn(List<Boolean> values) {
+            addCriterion("lowest_level in", values, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotIn(List<Boolean> values) {
+            addCriterion("lowest_level not in", values, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelBetween(Boolean value1, Boolean value2) {
+            addCriterion("lowest_level between", value1, value2, "lowestLevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andLowestLevelNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("lowest_level not between", value1, value2, "lowestLevel");
             return (Criteria) this;
         }
     }
