@@ -1422,6 +1422,76 @@ public class UserExample {
             addCriterion("enabled not between", value1, value2, "enabled");
             return (Criteria) this;
         }
+
+        public Criteria andDeviceCodeIsNull() {
+            addCriterion("device_code is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeIsNotNull() {
+            addCriterion("device_code is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeEqualTo(String value) {
+            addCriterion("device_code =", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeNotEqualTo(String value) {
+            addCriterion("device_code <>", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeGreaterThan(String value) {
+            addCriterion("device_code >", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeGreaterThanOrEqualTo(String value) {
+            addCriterion("device_code >=", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeLessThan(String value) {
+            addCriterion("device_code <", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeLessThanOrEqualTo(String value) {
+            addCriterion("device_code <=", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeLike(String value) {
+            addCriterion("device_code like", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeNotLike(String value) {
+            addCriterion("device_code not like", value, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeIn(List<String> values) {
+            addCriterion("device_code in", values, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeNotIn(List<String> values) {
+            addCriterion("device_code not in", values, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeBetween(String value1, String value2) {
+            addCriterion("device_code between", value1, value2, "deviceCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andDeviceCodeNotBetween(String value1, String value2) {
+            addCriterion("device_code not between", value1, value2, "deviceCode");
+            return (Criteria) this;
+        }
     }
 
     /**

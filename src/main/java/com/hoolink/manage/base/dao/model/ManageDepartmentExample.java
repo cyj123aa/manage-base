@@ -712,6 +712,76 @@ public class ManageDepartmentExample {
             addCriterion("enabled not between", value1, value2, "enabled");
             return (Criteria) this;
         }
+
+        public Criteria andParentIdCodeIsNull() {
+            addCriterion("parent_id_code is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeIsNotNull() {
+            addCriterion("parent_id_code is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeEqualTo(String value) {
+            addCriterion("parent_id_code =", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeNotEqualTo(String value) {
+            addCriterion("parent_id_code <>", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeGreaterThan(String value) {
+            addCriterion("parent_id_code >", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeGreaterThanOrEqualTo(String value) {
+            addCriterion("parent_id_code >=", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeLessThan(String value) {
+            addCriterion("parent_id_code <", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeLessThanOrEqualTo(String value) {
+            addCriterion("parent_id_code <=", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeLike(String value) {
+            addCriterion("parent_id_code like", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeNotLike(String value) {
+            addCriterion("parent_id_code not like", value, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeIn(List<String> values) {
+            addCriterion("parent_id_code in", values, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeNotIn(List<String> values) {
+            addCriterion("parent_id_code not in", values, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeBetween(String value1, String value2) {
+            addCriterion("parent_id_code between", value1, value2, "parentIdCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andParentIdCodeNotBetween(String value1, String value2) {
+            addCriterion("parent_id_code not between", value1, value2, "parentIdCode");
+            return (Criteria) this;
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ spring:
   cloud:
     config:
       uri: ${CONFIG_SERVER_URL:http://192.168.1.153:8888}
-      profile: ${CONFIG_PROFILE:local}
+      profile: ${CONFIG_PROFILE:dev}
       label: ${CONFIG_LABEL:master}
   main:
     web-application-type: none

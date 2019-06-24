@@ -27,6 +27,12 @@ public interface SessionService {
     CurrentUserBO getCurrentUser(String token);
 
     /**
+     * 根据token获取userid
+     * @return
+     */
+    Long getUserIdByToken();
+
+    /**
      * 根据用户ID查询当前用户信息
      *
      * @param userId
@@ -36,11 +42,11 @@ public interface SessionService {
 
     /**
      * 刷新 token 失效时间
-     *
      * @param userId
+     * @param ismobile
      * @return
      */
-    Boolean refreshSession(Long userId);
+    Boolean refreshSession(Long userId,boolean ismobile);
 
     /**
      * 删除用户及其token

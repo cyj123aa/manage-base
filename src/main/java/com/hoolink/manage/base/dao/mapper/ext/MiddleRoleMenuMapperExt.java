@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.dao.mapper.ext;
 
 import com.hoolink.manage.base.dao.model.MiddleRoleMenu;
+import com.hoolink.sdk.bo.manager.RoleMenuBO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -17,5 +18,12 @@ public interface MiddleRoleMenuMapperExt {
      * @param middleRoleMenus
      */
     void bulkInsert(@Param("middleRoleMenus") List<MiddleRoleMenu> middleRoleMenus);
+
+    /**
+     * 根据角色id查找菜单
+     * @param roleId
+     * @return
+     */
+    List<RoleMenuBO> listMenuByRoleId(Long roleId);
 
 }

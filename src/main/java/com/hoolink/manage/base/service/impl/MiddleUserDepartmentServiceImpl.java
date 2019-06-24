@@ -12,7 +12,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
 import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.dao.mapper.MiddleUserDepartmentMapper;
