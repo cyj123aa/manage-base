@@ -125,4 +125,11 @@ public class UserController {
     public BackBO<SimpleDeptUserBO> getUserByDeviceCode(@RequestBody  String deviceCode) throws Exception{
         return BackBOUtil.defaultBackBO(userService.getUserByDeviceCode(deviceCode));
     }
+
+    @PostMapping(value = "getParentDeptByUserId")
+    @ApiOperation(value = "根据用户id获取上级组织架构")
+    @LogAndParam(value = "根据用户id获取上级组织架构失败，请稍后重试")
+    public BackBO<List<Long>> getParentDeptByUserId(@RequestBody Long  userId){
+        return BackBOUtil.defaultBackBO(userService.getParentDeptByUserId(userId));
+    }
 }

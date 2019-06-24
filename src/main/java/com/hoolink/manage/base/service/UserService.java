@@ -355,4 +355,11 @@ public interface UserService {
      */
     SimpleDeptUserBO getUserByDeviceCode(String deviceCode);
 
+    /**
+     * 根据用户id获取上级组织架构
+     * @param userId
+     * @return
+     */
+    List<Long> getParentDeptByUserId(Long userId);
+
 }

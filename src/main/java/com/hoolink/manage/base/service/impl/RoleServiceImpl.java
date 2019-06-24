@@ -565,10 +565,6 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Set<String> listAccessUrlByRoleId(Long roleId) {
-//		String rolePermittedUrlKey = RedisConstant.ROLE_PERMITTED_URL_PREFIX + roleId;
-//		if(redisUtil.hasKey(rolePermittedUrlKey)) {
-//			return redisUtil.sGet(rolePermittedUrlKey).stream().map(u -> (String)u).collect(Collectors.toSet());
-//		}else {
 			Set<String> urlSet = new HashSet<>();
 			/* 1.查询角色权限菜单url */
 	        MiddleRoleMenuExample example = new MiddleRoleMenuExample();
@@ -598,9 +594,7 @@ public class RoleServiceImpl implements RoleService {
 	        	}
 	        });
 	        urlSet.removeIf(u -> u==null);
-//	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
 	        return urlSet;
-//		}
 	}
 
 	@Override
