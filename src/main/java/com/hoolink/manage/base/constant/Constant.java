@@ -146,4 +146,8 @@ public class Constant {
     public static final Integer DEPARTMENT = 1;
 
     public static final int LEVEL = 2;
+
+    public static final String DEPT_PREFIX="dept_";
+    public static final String EDM_PREFIX="edm_";
+    public static final String MENU_PREFIX="menu_";
 }
