@@ -118,6 +118,9 @@ public class Constant {
     public static final String REPERTORY_TWO_NAME = "缓存库";
     public static final Integer REPERTORY_THREE = 3;
     public static final String REPERTORY_THREE_NAME = "资源库";
+    public static final String JR_PARENT_ID_CODE = "0_1_";
+    public static final String HL_PARENT_ID_CODE = "0_2_";
+    public static final String PERCENT = "%";
 
     /**
      * 登录
