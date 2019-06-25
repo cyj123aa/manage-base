@@ -195,7 +195,7 @@ public class MenuServiceImpl implements MenuService {
     private EdmMenuTreeBO getEdmMenuTreeBO(Integer repertoryType, ManageMenu manageMenu, MiddleRoleMenu middleRoleMenu) {
         EdmMenuTreeBO edmMenuTreeBO;
         edmMenuTreeBO = new EdmMenuTreeBO();
-        edmMenuTreeBO.setKey(manageMenu.getId());
+        edmMenuTreeBO.setKey(Constant.MENU_PREFIX+manageMenu.getId());
         edmMenuTreeBO.setValue(manageMenu.getId().toString());
         edmMenuTreeBO.setCode(manageMenu.getMenuCode());
         edmMenuTreeBO.setEnableUpdate(false);
@@ -216,7 +216,7 @@ public class MenuServiceImpl implements MenuService {
      */
     private EdmMenuTreeBO getEdmMenuTreeBO(DeptPositionBO deptPositionBO,boolean flag,Integer repertoryType) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
-        menuTreeBO.setKey(deptPositionBO.getId());
+        menuTreeBO.setKey(Constant.DEPT_PREFIX+deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getDeptName());
         menuTreeBO.setEnableUpdate(flag);
@@ -233,7 +233,7 @@ public class MenuServiceImpl implements MenuService {
      */
     private EdmMenuTreeBO getEdmMenuTreeBO(ManageDepartmentBO deptPositionBO,Integer repertoryType,Boolean flag) {
         EdmMenuTreeBO menuTreeBO = new EdmMenuTreeBO();
-        menuTreeBO.setKey(deptPositionBO.getId());
+        menuTreeBO.setKey(Constant.DEPT_PREFIX+deptPositionBO.getId());
         menuTreeBO.setValue(deptPositionBO.getId().toString());
         menuTreeBO.setTitle(deptPositionBO.getName());
         menuTreeBO.setMenuType(true);
@@ -295,8 +295,8 @@ public class MenuServiceImpl implements MenuService {
      */
     private void fillNextMenu(Map<Long, List<EdmMenuTreeBO>> map,List<EdmMenuTreeBO> edmMenuTreeBOList){
         for (EdmMenuTreeBO childMenu : edmMenuTreeBOList) {
-            Long menuId = childMenu.getKey();
-            List<EdmMenuTreeBO> menuBOS = map.get(menuId);
+            String menuId = childMenu.getValue();
+            List<EdmMenuTreeBO> menuBOS = map.get(Long.valueOf(menuId));
             if (org.springframework.util.CollectionUtils.isEmpty(menuBOS)) {
                 childMenu.setExistChild(false);
                 childMenu.setEnableUpdate(true);
@@ -323,14 +323,19 @@ public class MenuServiceImpl implements MenuService {
         }
         EdmMenuTreeBO edmMenuTreeBO = getEdmMenuTreeBO(paramBO.getRepertoryType(), manageMenu, null);
         edmMenuTreeBOS.add(edmMenuTreeBO);
-        if(paramBO.getBelongId()==null|| paramBO.getBelongId()==0){
+        if (StringUtils.isEmpty(paramBO.getBelongId())) {
             //只有一级目录
             return edmMenuTreeBOS;
         }
-        ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getBelongId());
+        Long strId = Long.valueOf(paramBO.getBelongId());
+        if(strId==0){
+            //只有一级目录
+            return edmMenuTreeBOS;
+        }
+        ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(strId);
         //查询下级
         ManageDepartmentExample example = new ManageDepartmentExample();
-        example.createCriteria().andEnabledEqualTo(true).andParentIdEqualTo(paramBO.getBelongId());
+        example.createCriteria().andEnabledEqualTo(true).andParentIdEqualTo(strId);
         List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(example);
         Boolean flag=true;
         if(CollectionUtils.isNotEmpty(manageDepartments)){
