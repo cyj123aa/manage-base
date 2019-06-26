@@ -83,6 +83,7 @@ import com.hoolink.sdk.utils.MD5Util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -473,6 +474,13 @@ public class UserServiceImpl implements UserService {
         if (userPageParamBO.getPageNo() == null || userPageParamBO.getPageSize() == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		if(CollectionUtils.isEmpty(roleList)) {
+			return new PageInfo<ManagerUserBO>();
+		}
+		
         UserExample example = buildUserCriteria(userPageParamBO);
         PageInfo<User> userPageInfo = PageHelper
                 .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
@@ -495,6 +503,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		if(CollectionUtils.isEmpty(roleList)) {
+			return Collections.emptyList();
+		}
         UserExample example = buildUserCriteria(userPageParamBO);
         return buildUserBOList(userMapper.selectByExample(example));
     }
@@ -930,7 +943,14 @@ public class UserServiceImpl implements UserService {
             manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
             manageUserInfoBO.setCompanyId(userCompany.stream().map(UserDeptBO::getDeptId).collect(Collectors.toList()));
         }
+
         List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+        if(CollectionUtils.isEmpty(userDept)){
+           userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
+           if(CollectionUtils.isEmpty(userDept)){
+               userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
+           }
+        }
         manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
         return manageUserInfoBO;
     }
@@ -1340,9 +1360,10 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public boolean uploadImage(MultipartFile multipartFile) {
+	public String uploadImage(MultipartFile multipartFile) {
 		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
-		return updateImage(obsBo.getData().getId());
+		updateImage(obsBo.getData().getId());
+        return obsBo.getData().getObjectUrl();
 	}
 
 	@Override

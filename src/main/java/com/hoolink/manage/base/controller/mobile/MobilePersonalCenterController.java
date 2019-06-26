@@ -53,8 +53,7 @@ public class MobilePersonalCenterController {
     @PostMapping(value = "uploadImage", consumes = MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(value = "个人中心保存头像")
     @LogAndParam(value = "个人中心保存头像失败")
-    public BackVO<Void> uploadImage(@RequestPart("file") MultipartFile multipartFile) throws Exception{
-    	userService.uploadImage(multipartFile);
-    	return BackVOUtil.operateAccess();
+    public BackVO<String> uploadImage(@RequestPart("file") MultipartFile multipartFile) throws Exception{
+    	return BackVOUtil.operateAccess(userService.uploadImage(multipartFile));
     }
 }

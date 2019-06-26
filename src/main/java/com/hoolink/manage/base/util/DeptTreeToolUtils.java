@@ -39,8 +39,15 @@ public class DeptTreeToolUtils {
             List<DepartmentAndUserTreeBO> rootUserList = new ArrayList<>();
             rootList.forEach(beanTree -> {
                 getChild(beanTree, map, hasAddUser, userMap, checkedList);
+                if (hasAddUser){
+                    List<SimpleDeptUserBO> userBOList = userMap.get(beanTree.getKey());
+                    if (CollectionUtils.isNotEmpty(userBOList)){
+                        buildUserList(rootUserList, beanTree, userBOList, checkedList);
+                        List<DepartmentAndUserTreeBO> root = beanTree.getChildren();
+                        root.addAll(rootUserList);
+                    }
+                }
             });
-            rootList.addAll(rootUserList);
             return rootList;
         }
         return null;
