@@ -337,7 +337,7 @@ public interface UserService {
      * @param multipartFile
      * @return
      */
-    boolean uploadImage(MultipartFile multipartFile);
+    String uploadImage(MultipartFile multipartFile);
     
     
     /**

@@ -1360,9 +1360,10 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public boolean uploadImage(MultipartFile multipartFile) {
+	public String uploadImage(MultipartFile multipartFile) {
 		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
-		return updateImage(obsBo.getData().getId());
+		updateImage(obsBo.getData().getId());
+        return obsBo.getData().getObjectUrl();
 	}
 
 	@Override
