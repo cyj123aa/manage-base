@@ -83,6 +83,7 @@ import com.hoolink.sdk.utils.MD5Util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -473,6 +474,13 @@ public class UserServiceImpl implements UserService {
         if (userPageParamBO.getPageNo() == null || userPageParamBO.getPageSize() == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		if(CollectionUtils.isEmpty(roleList)) {
+			return new PageInfo<ManagerUserBO>();
+		}
+		
         UserExample example = buildUserCriteria(userPageParamBO);
         PageInfo<User> userPageInfo = PageHelper
                 .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
@@ -495,6 +503,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
+		//只能看见当前用户对应角色的所有子角色用户
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		if(CollectionUtils.isEmpty(roleList)) {
+			return Collections.emptyList();
+		}
         UserExample example = buildUserCriteria(userPageParamBO);
         return buildUserBOList(userMapper.selectByExample(example));
     }

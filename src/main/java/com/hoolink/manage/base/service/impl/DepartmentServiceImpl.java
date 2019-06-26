@@ -250,6 +250,10 @@ public class DepartmentServiceImpl implements DepartmentService{
               getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
           }
 
+				if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
+					organizationDeptBO.setCompanyName(manageDepartment.getName());
+				}
+
       }
       return organizationDeptBO;
 	}
