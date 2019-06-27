@@ -41,7 +41,7 @@
     left join manage_department md on mud.dept_id=md.id
     where mud.user_id=#{userId}
     and md.enabled=true
-    order by md.created asc
+    order by CONVERT( md.dept_name USING gbk ) COLLATE gbk_chinese_ci ASC
   </select>
 
   <resultMap id="UserDeptInfoMap" type="com.hoolink.manage.base.bo.UserSecurityBO">

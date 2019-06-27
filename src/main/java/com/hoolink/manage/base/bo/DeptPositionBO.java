@@ -11,7 +11,7 @@ import java.util.Map;
  * @date: 2019-05-21
  **/
 @Data
-public class DeptPositionBO {
+public class DeptPositionBO  implements Comparable<DeptPositionBO>{
     private Long id;
 
     private String deptName;
@@ -37,4 +37,9 @@ public class DeptPositionBO {
      * </pre>
      */
     private Boolean lowestLevel;
+
+    @Override
+    public int compareTo(DeptPositionBO positionBO) {
+        return this.deptName.compareTo(positionBO.getDeptName());
+    }
 }
