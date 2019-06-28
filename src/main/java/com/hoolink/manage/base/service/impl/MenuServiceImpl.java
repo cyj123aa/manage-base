@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,6 @@ public class MenuServiceImpl implements MenuService {
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
     @Resource
     private MiddleRoleMenuMapperExt middleRoleMenuMapperExt;
-    @Autowired
-    private DepartmentService departmentService;
     @Resource
     private ManageDepartmentMapper manageDepartmentMapper;
     @Resource
@@ -114,9 +113,9 @@ public class MenuServiceImpl implements MenuService {
         //EDM展示 默认3级 部门资源库初始化所有组织架构
         //用户权限下所有组织架构列表
         List<DeptPositionBO> deptAllList = middleUserDepartmentMapperExt.getDept(userId);
-        if (DEPT_RESOURCE_CODE.getKey().equals(paramBO.getRepertoryType())) {
+        if (DEPT_RESOURCE_CODE.getKey().equals(paramBO.getRepertoryType()) && CollectionUtils.isNotEmpty(deptAllList)) {
             //用户处在 公司级别 体系中心级别 部门级别
-            deptAllList = getAllDeptOnUser(paramBO, deptAllList);
+            deptAllList = getAllDeptOnUser(deptAllList);
         }
         switch (byType) {
             case DEPT_RESOURCE_CODE:
@@ -153,11 +152,10 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 获得用户权限下所有组织架构
-     * @param paramBO
      * @param deptAllList
      * @return
      */
-    private List<DeptPositionBO> getAllDeptOnUser(ResourceParamBO paramBO, List<DeptPositionBO> deptAllList) {
+    private List<DeptPositionBO> getAllDeptOnUser(List<DeptPositionBO> deptAllList) {
         List<Long> highLevel = new ArrayList<>();
         for (DeptPositionBO deptPositionBO : deptAllList) {
             if (!EdmDeptEnum.POSITION.getKey().equals(deptPositionBO.getDeptType().intValue()) && deptPositionBO.getLowestLevel()) {
@@ -171,6 +169,15 @@ public class MenuServiceImpl implements MenuService {
             }
         }
         deptAllList = removeDuplict(deptAllList);
+        //Collections工具类的sort()方法对list集合元素排序　
+        Collections.sort(deptAllList, new Comparator<DeptPositionBO>() {
+            @Override
+            public int compare(DeptPositionBO info1, DeptPositionBO info2) {
+                //获取中文环境
+                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+                return com.compare(info1.getDeptName(), info2.getDeptName());
+            }
+        });
         return deptAllList;
     }
 
