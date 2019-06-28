@@ -109,6 +109,7 @@
         <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
           locate(concat("_",#{id},"_"),parent_id_code)>0
         </foreach>
+        order by CONVERT( dept_name USING gbk ) COLLATE gbk_chinese_ci ASC
     </select>
 
     <select id="getDeptByParentIdCode" resultMap="OrgResultMap">
