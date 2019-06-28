@@ -1,6 +1,7 @@
 package com.hoolink.manage.base.controller.server;
 
 import com.github.pagehelper.PageInfo;
+import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
@@ -92,7 +93,7 @@ public class DepartmentController {
     @PostMapping(value = "getDeptListByUserId")
     @ApiOperation(value = "获取当前用户的部门信息")
     @LogAndParam(value = "获取当前用户的部门信息")
-    public BackBO<DeptVisibleCacheBO> getDeptListByUserId() throws Exception{
+    public BackBO<List<DeptVisibleCacheBO>>  getDeptListByUserId() throws Exception{
         return BackBOUtil.defaultBackBO(departmentService.getDeptListByUserId());
     }
 }

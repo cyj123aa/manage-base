@@ -127,5 +127,5 @@ public interface DepartmentService {
 	 * 获取当前用户的部门信息
 	 * @return
 	 */
-	DeptVisibleCacheBO getDeptListByUserId();
+	List<DeptVisibleCacheBO>  getDeptListByUserId();
 }

@@ -101,10 +101,16 @@ ORDER BY
   </select>
 
   <select id="getDeptParentIdCode" resultType="com.hoolink.manage.base.bo.DeptPositionBO">
-    select md.parent_id_code AS parentIdCode from  middle_user_department mud
+    select md.parent_id_code AS parentIdCode,
+     md.dept_name AS deptName,
+     md.parent_id AS parentId,
+     md.dept_type AS deptType,
+     md.id AS id
+    from  middle_user_department mud
     left join manage_department md on mud.dept_id=md.id
     where mud.user_id=#{userId}
     and md.enabled=true
+    AND parent_id = 0
   </select>
 
 </mapper>
