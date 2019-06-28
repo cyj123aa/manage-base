@@ -450,26 +450,12 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 
-	@Override
-	public DeptVisibleCacheBO getDeptListByUserId() {
-		Boolean jrDept = true;
-		Boolean hlDept = true;
-		//获取当前用户所有的关联部门id
-		List<DeptPositionBO> deptList = middleUserDepartmentMapperExt.getDeptParentIdCode(ContextUtil.getManageCurrentUser().getUserId());
-		//晶日公司下的部门
-		List<String> jrCodeList = deptList.stream().map(DeptPositionBO::getParentIdCode).filter(code ->code.contains("0_1_") ).collect
-				(Collectors.toList());
-		//互灵公司下的部门
-		List<String> hlCodeList = deptList.stream().map(DeptPositionBO::getParentIdCode).filter(code ->code.contains("0_2_") ).collect
-				(Collectors.toList());
-		if (CollectionUtils.isEmpty(jrCodeList)) {
-			jrDept = false;
-		}
-		if (CollectionUtils.isEmpty(hlCodeList)) {
-			hlDept = false;
-		}
-		DeptVisibleCacheBO deptVisibleCacheBO = new DeptVisibleCacheBO();
+    @Override
+    public List<DeptVisibleCacheBO> getDeptListByUserId() {
+        //获取当前用户所有的关联部门信息
+        List<DeptPositionBO> deptList = middleUserDepartmentMapperExt.getDeptParentIdCode(ContextUtil.getManageCurrentUser().getUserId());
+        List<DeptVisibleCacheBO> deptVisibleCacheBOS = CopyPropertiesUtil.copyList(deptList, DeptVisibleCacheBO.class);
+        return deptVisibleCacheBOS;
+    }
 
-		return deptVisibleCacheBO;
-	}
 }
