@@ -124,30 +124,45 @@ public class MenuServiceImpl implements MenuService {
                 break;
             case COMPANY_RESOURCE_CODE:
                 //资源库 二级菜单
-                List<DeptPositionBO> companyList = null;
-                if(CollectionUtils.isNotEmpty(deptAllList)){
-                    companyList = deptAllList.stream().filter(deptPositionBO -> EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()))
-                            .collect(Collectors.toList());
-                }
-                if(CollectionUtils.isEmpty(companyList)){
-                    edmMenuTreeBO.setExistChild(false);
-                    break;
-                }
-                List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
-                companyList.forEach(company -> {
-                    EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,true,byType.getKey());
-                    twoMenuBOS.add(twoMenu);
-                });
-                edmMenuTreeBO.setChildren(twoMenuBOS);
-                edmMenuTreeBO.setExistChild(true);
-                break;
+                fillDept(byType, edmMenuTreeBO, deptAllList);
+            break;
             case CACHE_RESOURCE_CODE:
                 //缓冲库
-                edmMenuTreeBO.setEnableUpdate(true);
+                fillDept(byType, edmMenuTreeBO, deptAllList);
                 break;
             default:break;
         }
         return edmMenuTreeBO;
+    }
+
+    /**
+     * 组装组织架构
+     * @param byType
+     * @param edmMenuTreeBO
+     * @param deptAllList
+     */
+    private void fillDept(EdmResourceRepertory byType, EdmMenuTreeBO edmMenuTreeBO, List<DeptPositionBO> deptAllList) {
+        List<DeptPositionBO> companyList = null;
+        if(CollectionUtils.isNotEmpty(deptAllList)){
+            companyList = deptAllList.stream().filter(deptPositionBO -> EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()))
+                    .collect(Collectors.toList());
+        }
+        if(CollectionUtils.isEmpty(companyList)){
+            edmMenuTreeBO.setExistChild(false);
+            return;
+        }
+        List<EdmMenuTreeBO> twoMenuBOS = new ArrayList<>();
+        Boolean flag=true;
+        if(CACHE_RESOURCE_CODE.equals(byType)){
+            flag=false;
+        }
+        final Boolean result=flag;
+        companyList.forEach(company -> {
+            EdmMenuTreeBO twoMenu = getEdmMenuTreeBO(company,result,byType.getKey());
+            twoMenuBOS.add(twoMenu);
+        });
+        edmMenuTreeBO.setChildren(twoMenuBOS);
+        edmMenuTreeBO.setExistChild(true);
     }
 
     /**
