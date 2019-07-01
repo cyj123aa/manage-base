@@ -362,4 +362,12 @@ public interface UserService {
      */
     List<Long> getParentDeptByUserId(Long userId);
 
+    /**
+     * 缓存当前用户
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    String cacheSession(User user) throws Exception;
+
 }
