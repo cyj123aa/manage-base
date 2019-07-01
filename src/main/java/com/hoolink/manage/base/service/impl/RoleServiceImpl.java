@@ -12,10 +12,7 @@ import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.ManageRoleMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
 import com.hoolink.manage.base.dao.model.*;
-import com.hoolink.manage.base.service.ButtonService;
-import com.hoolink.manage.base.service.MenuService;
-import com.hoolink.manage.base.service.RoleService;
-import com.hoolink.manage.base.service.SessionService;
+import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.RedisUtil;
 import com.hoolink.manage.base.vo.req.MiddleRoleMenuVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
@@ -71,6 +68,8 @@ public class RoleServiceImpl implements RoleService {
     private UserMapper userMapper;
     @Autowired
     private SessionService sessionService;
+    @Autowired
+    private UserService userService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -145,6 +144,8 @@ public class RoleServiceImpl implements RoleService {
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
+        //更新当前用户信息
+        userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class));
     }
 
     /**

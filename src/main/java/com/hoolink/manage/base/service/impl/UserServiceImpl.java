@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
                 .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
-        // 检查用户密码错误
+        // 检查用户密码错误,用户是否被禁用，角色是否被禁用
         checkAccount(user);
         // 缓存当前用户
         String token = cacheSession(user);
@@ -414,9 +414,15 @@ public class UserServiceImpl implements UserService {
         if (user.getStatus() == null || !user.getStatus()) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_FORBIDDEN);
         }
+        Long roleId=user.getRoleId();
+        ManageRole role=manageRoleMapper.selectByPrimaryKey(roleId);
+        if(role!=null && !role.getRoleStatus()){
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_ROLE_DISABLED);
+        }
     }
 
-    private String cacheSession(User user) throws Exception {
+    @Override
+    public String cacheSession(User user) throws Exception {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
@@ -919,6 +925,8 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
+        //更新一下当前用户
+        cacheSession(user);
     }
 
     @Override
@@ -1101,6 +1109,7 @@ public class UserServiceImpl implements UserService {
         //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteSession(userId);
     }
 
     private String setGreeting() {
