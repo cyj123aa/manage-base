@@ -252,6 +252,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 
 				if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
 					organizationDeptBO.setCompanyName(manageDepartment.getName());
+					organizationDeptBO.setDeptId(manageDepartment.getId());
 				}
 
       }
@@ -387,6 +388,7 @@ public class DepartmentServiceImpl implements DepartmentService{
           }
           if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
               organizationDeptBO.setCompanyName(manageDepartment.getName());
+					  	organizationDeptBO.setDeptId(manageDepartment.getId());
           }
 				if(EdmDeptEnum.SYSTEM_CENTER.getKey().byteValue() == manageDepartment.getDeptType()){
 					organizationDeptBO.setSystemCenterName(manageDepartment.getName());
@@ -455,4 +457,5 @@ public class DepartmentServiceImpl implements DepartmentService{
         List<DeptVisibleCacheBO> deptVisibleCacheBOS = CopyPropertiesUtil.copyList(deptList, DeptVisibleCacheBO.class);
         return deptVisibleCacheBOS;
     }
+
 }
