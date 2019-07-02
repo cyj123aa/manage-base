@@ -69,6 +69,7 @@ import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
 import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
 import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
 import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.constants.ContextConstant;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
 import com.hoolink.sdk.enums.ManagerUserSexEnum;
@@ -102,6 +103,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
+import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -260,8 +263,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void logout() {
         CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByToken());
+        InvocationContext context = ContextUtils.getInvocationContext();
+        String token =context.getContext(ContextConstant.TOKEN);
         // 避免导致异地登录账号退出
-        if (currentUser != null && Objects.equals(currentUser.getToken(), ContextUtil.getManageCurrentUser().getToken())) {
+        if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
             sessionService.deleteSession(ContextUtil.getManageCurrentUser().getUserId());
         }
     }
