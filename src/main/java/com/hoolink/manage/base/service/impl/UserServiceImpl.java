@@ -259,7 +259,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void logout() {
-        CurrentUserBO currentUser = sessionService.getCurrentUser(ContextUtil.getManageCurrentUser().getUserId());
+        CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByToken());
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getToken(), ContextUtil.getManageCurrentUser().getToken())) {
             sessionService.deleteSession(ContextUtil.getManageCurrentUser().getUserId());
