@@ -1323,11 +1323,17 @@ public class UserServiceImpl implements UserService {
         }
         ManageDepartmentExample example=new ManageDepartmentExample();
         example.createCriteria().andParentIdEqualTo(id).andIdIn(deptId);
-        example.setOrderByClause(" dept_name asc ");
+        example.setOrderByClause(" convert(dept_name using gbk) collate gbk_chinese_ci asc ");
         List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(list)){
             return null;
         }
+        //找出该级别下级的所有
+        List<Long> ids=list.stream().map(ManageDepartment::getId).collect(Collectors.toList());
+        example.clear();
+        example.createCriteria().andParentIdIn(ids);
+        List<ManageDepartment> childList=manageDepartmentMapper.selectByExample(example);
+        Map<Long,Long> childMap=childList.stream().collect(Collectors.toMap(ManageDepartment::getParentId,ManageDepartment::getId));
         List<MobileFileBO> mobileFile=new ArrayList<>();
         list.stream().forEach(m ->{
             MobileFileBO mobileFileBO=new MobileFileBO();
@@ -1335,7 +1341,7 @@ public class UserServiceImpl implements UserService {
             mobileFileBO.setName(m.getName());
             mobileFileBO.setIfDepartment(true);
             //如果是小组类型就设置为是最下一级组织架构层级
-            if(Constant.POSITION_LEVEL.equals(m.getDeptType())){
+            if(childMap.get(m.getId())!=null){
                 mobileFileBO.setIfLastDepartment(true);
             }else{
                 mobileFileBO.setIfLastDepartment(false);
