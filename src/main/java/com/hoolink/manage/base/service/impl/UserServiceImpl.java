@@ -1333,7 +1333,7 @@ public class UserServiceImpl implements UserService {
         example.clear();
         example.createCriteria().andParentIdIn(ids);
         List<ManageDepartment> childList=manageDepartmentMapper.selectByExample(example);
-        Map<Long,Long> childMap=childList.stream().collect(Collectors.toMap(ManageDepartment::getParentId,ManageDepartment::getId));
+        Map<Long,Long> childMap=childList.stream().collect(Collectors.toMap(ManageDepartment::getParentId,ManageDepartment::getId,(key1,key2)->key2));
         List<MobileFileBO> mobileFile=new ArrayList<>();
         list.stream().forEach(m ->{
             MobileFileBO mobileFileBO=new MobileFileBO();
@@ -1342,9 +1342,9 @@ public class UserServiceImpl implements UserService {
             mobileFileBO.setIfDepartment(true);
             //如果是小组类型就设置为是最下一级组织架构层级
             if(childMap.get(m.getId())!=null){
-                mobileFileBO.setIfLastDepartment(true);
-            }else{
                 mobileFileBO.setIfLastDepartment(false);
+            }else{
+                mobileFileBO.setIfLastDepartment(true);
             }
             mobileFile.add(mobileFileBO);
         });
