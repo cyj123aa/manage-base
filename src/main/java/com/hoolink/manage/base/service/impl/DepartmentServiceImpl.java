@@ -262,14 +262,10 @@ public class DepartmentServiceImpl implements DepartmentService{
 	@Override
 	public PermissionManageDeptBO getOrgInfoList(DepartmentTreeParamBO treeParamBO) throws Exception {
 		PermissionManageDeptBO manageDeptBO = new PermissionManageDeptBO();
-		// 1.根据userId和组织架构层级type获取对应的组织架构id
-		OrganizationInfoParamBO paramBO = new OrganizationInfoParamBO();
-		paramBO.setUserId(ContextUtil.getManageCurrentUser().getUserId());
-		paramBO.setDeptType(treeParamBO.getDeptType());
-		List<Long> deptIdList = userService.getOrganizationInfo(paramBO);
-		if(CollectionUtils.isEmpty(deptIdList)){
-			throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
-		}
+		// 1.赋查询参数
+		List<Long> deptIdList = new ArrayList<>();
+		deptIdList.add(treeParamBO.getDeptId());
+
 		// 2.根据组织架构id集合获取组织架信息
 		List<ManageDepartmentTreeBO> manageDepartmentList = manageDepartmentMapperExt.getOrgInfoList(deptIdList);
 		if(CollectionUtils.isEmpty(manageDepartmentList)){
