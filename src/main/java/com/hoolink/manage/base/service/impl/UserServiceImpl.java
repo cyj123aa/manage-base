@@ -926,7 +926,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
         //更新一下当前用户
-        cacheSession(user);
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()));
     }
 
     @Override
