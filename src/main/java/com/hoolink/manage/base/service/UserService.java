@@ -343,8 +343,8 @@ public interface UserService {
      * @return
      */
     String uploadImage(MultipartFile multipartFile);
-    
-    
+
+
     /**
      * 获取用户操作日志(分页)
      * @param paramBO
@@ -375,4 +375,12 @@ public interface UserService {
      */
     String cacheSession(User user,Boolean isMobile) throws Exception;
 
+
+    /**
+     * 校验密码
+     * @param password
+     * @return
+     * @throws Exception
+     */
+    boolean checkPassword(String password) throws Exception;
 }
