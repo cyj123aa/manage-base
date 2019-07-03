@@ -48,12 +48,17 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    LoginResultBO login(LoginParamBO loginParam) throws Exception;
+    LoginResultBO login(LoginParamBO loginParam,Boolean isMobile) throws Exception;
 
     /**
      * 用户退出
      */
     void logout();
+
+    /**
+     * 移动端退出
+     */
+    void mobileLogout();
 
 
     /**
@@ -368,6 +373,6 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    String cacheSession(User user) throws Exception;
+    String cacheSession(User user,Boolean isMobile) throws Exception;
 
 }

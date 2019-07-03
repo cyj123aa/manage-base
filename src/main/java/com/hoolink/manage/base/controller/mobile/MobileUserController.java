@@ -58,7 +58,7 @@ public class MobileUserController {
         //VO转BO
         LoginParamBO paramBO = CopyPropertiesUtil.copyBean(loginParam, LoginParamBO.class);
         //BO转VO
-        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO),LoginResultVO.class);
+        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO,true),LoginResultVO.class);
         return BackVOUtil.operateAccess(loginResultVO);
     }
 
@@ -66,7 +66,7 @@ public class MobileUserController {
     @ApiOperation(value = "用户退出")
     @LogAndParam(value = "用户退出失败，请稍后重试")
     public BackVO<Void> logout() {
-        userService.logout();
+        userService.mobileLogout();
         return BackVOUtil.operateAccess();
     }
 
