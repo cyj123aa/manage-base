@@ -102,9 +102,7 @@ public class RoleController {
     public BackVO<PageInfo<RoleParamVO>> listByPage(@RequestBody SearchPageParamVO pageParamVO) throws Exception {
         SearchPageParamBO pageParamBO = CopyPropertiesUtil.copyBean(pageParamVO, SearchPageParamBO.class);
         PageInfo<RoleParamBO> roleParamBOPageInfo = roleService.listByPage(pageParamBO);
-        List<RoleParamVO> roleParamVOS = CopyPropertiesUtil.copyList(roleParamBOPageInfo.getList(), RoleParamVO.class);
         PageInfo<RoleParamVO> pageInfo = CopyPropertiesUtil.copyBean(roleParamBOPageInfo, PageInfo.class);
-        pageInfo.setList(roleParamVOS);
         return BackVOUtil.operateAccess(pageInfo);
     }
 }

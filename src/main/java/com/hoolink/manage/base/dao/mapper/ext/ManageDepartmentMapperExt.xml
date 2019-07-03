@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt">
+
+  <resultMap id="BaseResultMap" type="com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO">
+    <id column="id" jdbcType="BIGINT" property="key" />
+    <result column="dept_name" jdbcType="VARCHAR" property="title" />
+    <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="expand" jdbcType="BIT" property="expand" />
+    <collection property="children" select="getOrganizationListByParentId" column="id"></collection>
+  </resultMap>
+
+    <resultMap id="OrgResultMap" type="com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO">
+        <id column="id" jdbcType="BIGINT" property="key" />
+        <result column="dept_name" jdbcType="VARCHAR" property="title" />
+        <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="expand" jdbcType="BIT" property="expand" />
+    </resultMap>
+
+    <!-- 获取所在公司或者部门-->
+    <select id="getOrganizationList" resultMap="BaseResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            true as expand
+        FROM
+            manage_department md
+        WHERE
+            md.enabled = TRUE
+            <if test="ids != null">
+                AND md.id IN
+                <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+    </select>
+
+    <!-- 再递归查询所在公司或者部门下的所有字部门-->
+    <select id="getOrganizationListByParentId" resultMap="BaseResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            true as expand
+        FROM
+            manage_department md
+        WHERE
+            md.enabled = TRUE
+            AND md.parent_id = #{id}
+    </select>
+
+    <resultMap id="BasicBaseResultMap" type="com.hoolink.manage.base.dao.model.ManageDepartment">
+        <id column="mp.id" jdbcType="BIGINT" property="id" />
+        <result column="mc.id" jdbcType="BIGINT" property="parentId" />
+    </resultMap>
+
+    <select id="getPositionByCompany" resultMap="BasicBaseResultMap">
+        SELECT mp.id,mc.id
+        FROM manage_department mp left join manage_department md on mp.parent_id = md.id and mp.enabled=true and md.enabled=true
+        left join manage_department mc on md.parent_id = mc.id and mc.enabled=true
+        WHERE
+        mc.id IN
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <resultMap id="UserCompanyMap" type="com.hoolink.manage.base.bo.DeptPositionBO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+        <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+        <result column="parent_id_code" jdbcType="VARCHAR" property="parentIdCode"/>
+    </resultMap>
+
+    <select id="listByParentIdList" resultMap="UserCompanyMap">
+        SELECT id,dept_name,dept_type,parent_id
+        FROM manage_department
+        WHERE
+        enabled=true
+        and parent_id IN
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="listByIdList" resultMap="UserCompanyMap">
+        SELECT id,dept_name,dept_type,parent_id,parent_id_code
+        FROM manage_department
+        WHERE
+        enabled=true
+        and id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="listByParentIdCode" resultMap="UserCompanyMap">
+        SELECT id,dept_name,dept_type,parent_id,parent_id_code
+        FROM manage_department
+        WHERE
+        enabled=true
+        and
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
+          locate(concat("_",#{id},"_"),parent_id_code)>0
+        </foreach>
+        order by CONVERT( dept_name USING gbk ) COLLATE gbk_chinese_ci ASC
+    </select>
+
+    <select id="getDeptByParentIdCode" resultMap="OrgResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            parent_id_code
+        FROM
+            manage_department
+        WHERE
+            enabled=true
+            AND
+        <foreach collection="parentIds" item="id" open="(" close=")" separator=" or ">
+            locate(concat("_",#{id},"_"),parent_id_code)>0
+        </foreach>
+    </select>
+
+    <resultMap id="BaseResultMapBO" type="com.hoolink.sdk.bo.manager.ManageDepartmentBO">
+        <!--
+        @mbggenerated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dept_name" jdbcType="VARCHAR" property="name" />
+        <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="creator" jdbcType="BIGINT" property="creator" />
+        <result column="updator" jdbcType="BIGINT" property="updator" />
+        <result column="created" jdbcType="BIGINT" property="created" />
+        <result column="updated" jdbcType="BIGINT" property="updated" />
+        <result column="enabled" jdbcType="BIT" property="enabled" />
+    </resultMap>
+
+    <select id="listByIdOrder" parameterType="java.util.List" resultMap="BaseResultMapBO">
+        select id, dept_name, dept_type, parent_id, creator, updator, created, updated, enabled
+        from manage_department
+        where id in
+        <foreach collection="ids" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+        order by field(
+        id,
+        <foreach collection="ids" separator="," item="id">
+            #{id}
+        </foreach>
+        )
+    </select>
+
+    <select id="getOrgInfoList" resultMap="OrgResultMap">
+        SELECT
+        id,
+        dept_name,
+        dept_type,
+        parent_id,
+        true as expand
+        FROM
+        manage_department md
+        WHERE
+        md.enabled = TRUE
+        <if test="ids != null">
+            AND md.id IN
+            <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getAllOrgInfoList" resultMap="OrgResultMap">
+        SELECT
+            id,
+            dept_name,
+            dept_type,
+            parent_id,
+            true as expand
+        FROM
+            manage_department md
+        WHERE
+            md.enabled = TRUE
+    </select>
+
+</mapper>

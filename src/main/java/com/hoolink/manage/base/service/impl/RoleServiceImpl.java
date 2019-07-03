@@ -12,9 +12,7 @@ import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.ManageRoleMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
 import com.hoolink.manage.base.dao.model.*;
-import com.hoolink.manage.base.service.ButtonService;
-import com.hoolink.manage.base.service.MenuService;
-import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.RedisUtil;
 import com.hoolink.manage.base.vo.req.MiddleRoleMenuVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
@@ -68,12 +66,17 @@ public class RoleServiceImpl implements RoleService {
     private ManageMenuMapperExt manageMenuMapperExt;
     @Resource
     private UserMapper userMapper;
+    @Autowired
+    private SessionService sessionService;
+    @Autowired
+    private UserService userService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(RoleParamBO roleParamBO ) throws Exception {
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
-        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
+        if(CollectionUtils.isEmpty(roleMenuVOList) || StringUtils.isEmpty(roleParamBO.getRoleName())
+                || StringUtils.isEmpty(roleParamBO.getRoleDesc()) || roleParamBO.getRoleType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //role 等级
@@ -97,7 +100,7 @@ public class RoleServiceImpl implements RoleService {
         createMiddleRoleMenuList(roleMenuVOList, role.getId());
         return role.getId();
     }
-    
+
     /**
      * 获得用户角色
      * @return
@@ -111,10 +114,24 @@ public class RoleServiceImpl implements RoleService {
         return manageRoleMapperExt.getUserRole(userId);
     }
 
+    /**
+     * 获得用户角色
+     * @return
+     * @throws Exception
+     */
+    private ManageRole getUserRoleByToken() throws Exception {
+        Long userId = sessionService.getUserIdByToken();
+        if(userId==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.USER_USER_NOT_EXIST);
+        }
+        return manageRoleMapperExt.getUserRole(userId);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(RoleParamBO roleParamBO) throws Exception {
-        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())|| StringUtils.isEmpty(roleParamBO.getRoleDesc())){
+        if(roleParamBO.getId()==null||StringUtils.isEmpty(roleParamBO.getRoleName())
+                || StringUtils.isEmpty(roleParamBO.getRoleDesc()) || roleParamBO.getRoleType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
@@ -127,6 +144,8 @@ public class RoleServiceImpl implements RoleService {
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
+        //更新当前用户信息
+        userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class),false);
     }
 
     /**
@@ -149,7 +168,12 @@ public class RoleServiceImpl implements RoleService {
         if(roleParamBO.getId()==null || roleParamBO.getRoleStatus()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        updateRole(roleParamBO);
+        ManageRole role = new ManageRole();
+        role.setId(roleParamBO.getId());
+        role.setRoleStatus(roleParamBO.getRoleStatus());
+        role.setUpdated(System.currentTimeMillis());
+        role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        roleMapper.updateByPrimaryKeySelective(role);
         //禁用角色用户
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
@@ -323,7 +347,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception {
         //当前用户权限菜单
-        ManageRole userRole = getUserRole();
+        ManageRole userRole = getUserRoleByToken();
         if(userRole==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
         }
@@ -494,7 +518,7 @@ public class RoleServiceImpl implements RoleService {
 		ManageRoleExample.Criteria criteria = example.createCriteria();
         criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
         List<ManageRole> allRoleList = roleMapper.selectByExample(example);
-        
+
         List<ManageRole> roleList = new ArrayList<>();
         Optional<ManageRole> roleOpt = allRoleList.stream().filter(r -> r.getId().equals(currentRoleId)).findFirst();
         roleOpt.ifPresent(role -> {
@@ -516,7 +540,7 @@ public class RoleServiceImpl implements RoleService {
 			traverseAllChildrenRole(allRoleList, roleList, cr.getId());
 		});
 	}
-	
+
 	@Override
 	public List<RoleMenuPermissionBO> listMenuAccessByRoleId(Long roleId) {
 		MiddleRoleMenuExample example = new MiddleRoleMenuExample();
@@ -542,10 +566,6 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Set<String> listAccessUrlByRoleId(Long roleId) {
-//		String rolePermittedUrlKey = RedisConstant.ROLE_PERMITTED_URL_PREFIX + roleId;
-//		if(redisUtil.hasKey(rolePermittedUrlKey)) {
-//			return redisUtil.sGet(rolePermittedUrlKey).stream().map(u -> (String)u).collect(Collectors.toSet());
-//		}else {
 			Set<String> urlSet = new HashSet<>();
 			/* 1.查询角色权限菜单url */
 	        MiddleRoleMenuExample example = new MiddleRoleMenuExample();
@@ -558,7 +578,7 @@ public class RoleServiceImpl implements RoleService {
 	        }
 	        List<ManageMenuBO> menus = menuService.listByIdList(menuIdList);
 	        urlSet.addAll(menus.stream().map(m -> m.getUrl()).collect(Collectors.toList()));
-	        
+
 	        /* 2.获取权限按钮对应的url */
 	        List<ManageButtonBO> buttonList = buttonService.listByMenuIdList(menuIdList);
 	        roleMenuList.stream().forEach(rm -> {
@@ -569,12 +589,13 @@ public class RoleServiceImpl implements RoleService {
 	        	}else if(PermissionEnum.ALL.getKey().equals(rm.getPermissionFlag())) {
 	        		//可读写菜单的话，把所有的按钮url加进来
 	        		urlSet.addAll(buttonStream.map(b -> b.getButtonUrl()).collect(Collectors.toList()));
+	        	}else if(rm.getPermissionFlag() == null){
+	        		//如果为null(菜单顶级)，放行
+	        		urlSet.addAll(buttonStream.map(b -> b.getButtonUrl()).collect(Collectors.toList()));
 	        	}
 	        });
 	        urlSet.removeIf(u -> u==null);
-//	        redisUtil.sSet(rolePermittedUrlKey, urlSet.toArray());
 	        return urlSet;
-//		}
 	}
 
 	@Override

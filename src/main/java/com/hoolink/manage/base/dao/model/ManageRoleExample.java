@@ -842,6 +842,66 @@ public class ManageRoleExample {
             addCriterion("enabled not between", value1, value2, "enabled");
             return (Criteria) this;
         }
+
+        public Criteria andRoleTypeIsNull() {
+            addCriterion("role_type is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeIsNotNull() {
+            addCriterion("role_type is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeEqualTo(Boolean value) {
+            addCriterion("role_type =", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeNotEqualTo(Boolean value) {
+            addCriterion("role_type <>", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeGreaterThan(Boolean value) {
+            addCriterion("role_type >", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("role_type >=", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeLessThan(Boolean value) {
+            addCriterion("role_type <", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeLessThanOrEqualTo(Boolean value) {
+            addCriterion("role_type <=", value, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeIn(List<Boolean> values) {
+            addCriterion("role_type in", values, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeNotIn(List<Boolean> values) {
+            addCriterion("role_type not in", values, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeBetween(Boolean value1, Boolean value2) {
+            addCriterion("role_type between", value1, value2, "roleType");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleTypeNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("role_type not between", value1, value2, "roleType");
+            return (Criteria) this;
+        }
     }
 
     /**

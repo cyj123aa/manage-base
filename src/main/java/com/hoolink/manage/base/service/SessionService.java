@@ -15,7 +15,7 @@ public interface SessionService {
      * @param currentUserBO
      * @return
      */
-    String cacheCurrentUser(CurrentUserBO currentUserBO);
+    String cacheCurrentUser(CurrentUserBO currentUserBO,Boolean isMobile);
 
     /**
      * 根据传入token 获取用户最新的用户信息
@@ -24,7 +24,19 @@ public interface SessionService {
      * @param token
      * @return
      */
-    CurrentUserBO getCurrentUser(String token);
+    CurrentUserBO getCurrentUser(String token,boolean ismobile);
+
+    /**
+     * 根据token获取userid
+     * @return
+     */
+    Long getUserIdByToken();
+
+    /**
+     * 根据移动端token获取userid
+     * @return
+     */
+    Long getUserIdByMobileToken();
 
     /**
      * 根据用户ID查询当前用户信息
@@ -36,11 +48,11 @@ public interface SessionService {
 
     /**
      * 刷新 token 失效时间
-     *
      * @param userId
+     * @param ismobile
      * @return
      */
-    Boolean refreshSession(Long userId);
+    Boolean refreshSession(Long userId,boolean ismobile);
 
     /**
      * 删除用户及其token
@@ -48,6 +60,13 @@ public interface SessionService {
      * @return
      */
     Boolean deleteSession(Long userId);
+
+    /**
+     * 删除移动端用户及其token
+     * @param userId
+     * @return
+     */
+    Boolean deleteMobileSession(Long userId);
 
     /**
      * 通过token进行删除用户

@@ -1,8 +1,13 @@
 package com.hoolink.manage.base.service;
 
 import com.hoolink.manage.base.bo.ManageMenuBO;
+import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
+import com.hoolink.sdk.bo.edm.MenuParamBO;
+import com.hoolink.sdk.bo.edm.ResourceParamBO;
+import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.manage.base.dao.model.ManageMenu;
 import com.hoolink.sdk.bo.manager.InitMenuBO;
+import com.hoolink.sdk.bo.manager.RoleMenuBO;
 
 import java.util.List;
 
@@ -22,10 +27,27 @@ public interface MenuService {
 
     /**
      * 通过code码查询初始化菜单
-     * @param code
+     * @param paramBO
      * @return
+     * @throws Exception
      */
-    InitMenuBO listByCode(String code);
+    EdmMenuTreeBO listByCode(ResourceParamBO paramBO) throws Exception;
+
+    /**
+     *获取组织架构信息List
+     * @param paramBO
+     * @return
+     * @throws Exception
+     */
+    List<EdmMenuTreeBO> getOrganizationHead(MenuParamBO paramBO) throws Exception;
+
+    /**
+     * 根据角色获取菜单
+     * @param roleId
+     * @return
+     * @throws Exception
+     */
+    List<RoleMenuBO> listByRoleId(Long roleId) throws Exception;
 
     /**
      * 查询所有的菜单

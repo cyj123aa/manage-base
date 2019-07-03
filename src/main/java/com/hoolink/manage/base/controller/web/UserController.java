@@ -16,6 +16,7 @@ import com.hoolink.manage.base.vo.req.PhoneParamVO;
 import com.hoolink.manage.base.vo.req.UpdatePasswdParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserPageParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
+import com.hoolink.manage.base.vo.req.OperateFileLogParamVO;
 import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.req.DictParamVO;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
@@ -26,10 +27,12 @@ import com.hoolink.manage.base.vo.res.DictInfoVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
 import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
 import com.hoolink.manage.base.vo.res.ManagerUserVO;
+import com.hoolink.manage.base.vo.res.OperateFileLogVO;
 import com.hoolink.manage.base.vo.res.UserExcelDataVO;
 import com.hoolink.manage.base.vo.res.UserInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackVOUtil;
@@ -46,7 +49,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,7 +86,7 @@ public class UserController {
         //VO转BO
         LoginParamBO paramBO = CopyPropertiesUtil.copyBean(loginParam, LoginParamBO.class);
         //BO转VO
-        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO),LoginResultVO.class);
+        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO,false),LoginResultVO.class);
         return BackVOUtil.operateAccess(loginResultVO);
     }
 
@@ -195,8 +197,8 @@ public class UserController {
     @PostMapping(value = "getSessionUser")
     @ApiOperation(value = "查询Session用户", notes = "该接口主要提供网关鉴权使用，其他场景不要使用")
     @LogAndParam(value = "查询Session用户失败")
-    public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token) {
-        return userService.getSessionUser(token);
+    public CurrentUserBO getSessionUser(@RequestBody @NotNull(message = "Token不允许传入空") String token,boolean isMobile) {
+        return userService.getSessionUser(token,isMobile);
     }
     
     @PostMapping(value = "list")
@@ -340,5 +342,13 @@ public class UserController {
     	UserExcelDataBO userExcelDataBO = excelService.uploadExcel(multipartFile, deptIdList);
     	UserExcelDataVO userExcelDataVO=CopyPropertiesUtil.copyBean(userExcelDataBO,UserExcelDataVO.class);
         return BackVOUtil.operateAccess(userExcelDataVO);
+    }
+    
+    @PostMapping(value = "listOperateLog")
+    @ApiOperation(value = "获取用户操作日志带分页")
+    @LogAndParam(value = "获取用户操作日志失败", check = CheckEnum.DATA_NOT_NULL)
+    public BackVO<PageInfo<OperateFileLogVO>> listOperateLog(@RequestBody OperateFileLogParamVO paramVO) throws Exception{
+    	OperateFileLogParamBO paramBO = CopyPropertiesUtil.copyBean(paramVO, OperateFileLogParamBO.class);
+    	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyPageInfo(userService.listOperateLog(paramBO), OperateFileLogVO.class));
     }
 }

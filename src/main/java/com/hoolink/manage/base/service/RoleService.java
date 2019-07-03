@@ -54,6 +54,7 @@ public interface RoleService {
      * 获得基础菜单
      * @param menuParamBO
      * @return
+     * @throws Exception
      */
     List<ManageMenuTreeBO> getBaseMenu(MenuParamBO menuParamBO) throws Exception;
 

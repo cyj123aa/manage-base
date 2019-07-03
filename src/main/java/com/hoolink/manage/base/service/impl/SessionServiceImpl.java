@@ -5,7 +5,10 @@ import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.Base64Util;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.constants.ContextConstant;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
+import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
@@ -27,22 +30,28 @@ public class SessionServiceImpl implements SessionService {
     private static final String TOKEN_SEPARATOR = "_";
     private static final int TOKEN_SPLIT_COUNT = 2;
     private static final int SESSION_TIMEOUT_SECONDS = 60;
+    private static final int SESSION_TIMEOUT_HOURS = 24;
 
     @Override
-    public String cacheCurrentUser(CurrentUserBO currentUserBO) {
+    public String cacheCurrentUser(CurrentUserBO currentUserBO,Boolean isMobile) {
         // token 格式：userId + "_" + uuid 在进行aes128加密
         UUID uuid=UUID.randomUUID();
         log.info("currentUserBO.getUserId():{},uuid:{}",currentUserBO.getUserId(),uuid);
         //因为linux解密错误这里不进行加密
         String token = Base64Util.encode(currentUserBO.getUserId() + TOKEN_SEPARATOR + uuid);
         log.info("token:"+token);
-        currentUserBO.setToken(token);
-        sessionOperation.set(getKey(currentUserBO.getUserId()), currentUserBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+        if(isMobile){
+            currentUserBO.setMobileToken(token);
+            sessionOperation.set(getMobileKey(currentUserBO.getUserId()), currentUserBO, SESSION_TIMEOUT_HOURS, TimeUnit.HOURS);
+        }else{
+            currentUserBO.setToken(token);
+            sessionOperation.set(getKey(currentUserBO.getUserId()), currentUserBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+        }
         return token;
     }
 
     @Override
-    public CurrentUserBO getCurrentUser(String token) {
+    public CurrentUserBO getCurrentUser(String token,boolean ismobile) {
         String decrypt = Base64Util.decode(token);
         if (decrypt == null) {
             return null;
@@ -50,7 +59,38 @@ public class SessionServiceImpl implements SessionService {
         String[] split = decrypt.split(TOKEN_SEPARATOR);
         if (split.length == TOKEN_SPLIT_COUNT) {
             Long userId = Long.valueOf(split[0]);
-            return sessionOperation.get(getKey(userId));
+            if(ismobile){
+                return sessionOperation.get(getMobileKey(userId));
+            }else{
+                return sessionOperation.get(getKey(userId));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Long getUserIdByToken() {
+        InvocationContext context = ContextUtils.getInvocationContext();
+        String token =context.getContext(ContextConstant.TOKEN);
+        return getUserIdByToken(token);
+    }
+
+    @Override
+    public Long getUserIdByMobileToken() {
+        InvocationContext context = ContextUtils.getInvocationContext();
+        String token =context.getContext(ContextConstant.MOBILE_TOKEN);
+        return getUserIdByToken(token);
+    }
+
+    public Long getUserIdByToken(String token) {
+        String decrypt = Base64Util.decode(token);
+        if (decrypt == null) {
+            return null;
+        }
+        String[] split = decrypt.split(TOKEN_SEPARATOR);
+        if (split.length == TOKEN_SPLIT_COUNT) {
+            Long userId = Long.valueOf(split[0]);
+            return userId;
         }
         return null;
     }
@@ -60,14 +100,29 @@ public class SessionServiceImpl implements SessionService {
         return sessionOperation.get(getKey(userId));
     }
 
+    public CurrentUserBO getCurrentUser(String token) {
+        if(getUserIdByToken(token)==null){
+            return null;
+        }
+        return sessionOperation.get(getKey(getUserIdByToken(token)));
+    }
+
     @Override
-    public Boolean refreshSession(Long userId) {
+    public Boolean refreshSession(Long userId,boolean isMobile) {
+        if(isMobile){
+            return sessionOperation.getOperations().expire(getMobileKey(userId), SESSION_TIMEOUT_HOURS, TimeUnit.HOURS);
+        }
         return sessionOperation.getOperations().expire(getKey(userId), SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
     }
 
     @Override
     public Boolean deleteSession(Long userId) {
         return sessionOperation.getOperations().delete(getKey(userId));
+    }
+
+    @Override
+    public Boolean deleteMobileSession(Long userId) {
+        return sessionOperation.getOperations().delete(getMobileKey(userId));
     }
 
     @Override
@@ -81,5 +136,9 @@ public class SessionServiceImpl implements SessionService {
 
     private String getKey(Long userId) {
         return RedisConstant.SESSION_PREFIX + userId;
+    }
+
+    private String getMobileKey(Long userId) {
+        return RedisConstant.SESSION_MOBILE_PREFIX + userId;
     }
 }

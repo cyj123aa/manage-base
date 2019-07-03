@@ -3,28 +3,114 @@
 <mapper namespace="com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt">
 
   <insert id="batchInsert" parameterType="java.util.List">
-    insert into middle_user_department (user_id, dept_id, encry_level_dept, diff_dept_group, deduce_status
+    insert into middle_user_department (user_id, dept_id, encry_level_dept, diff_dept_group, lowest_level
       )
     values
     <foreach collection="middleUserDeptList" item="userDeptPair" separator=",">
-      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept},#{userDeptPair.diffDeptGroup}, #{userDeptPair.deduceStatus})
+      (#{userDeptPair.userId},#{userDeptPair.deptId},#{userDeptPair.encryLevelDept},#{userDeptPair.diffDeptGroup},#{userDeptPair.lowestLevel})
     </foreach>
   </insert>
 
+  <resultMap id="UserCompanyMap" type="com.hoolink.manage.base.bo.DeptPositionBO">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+    <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+    <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+    <result column="encry_level_dept" jdbcType="TINYINT" property="encryLevelDept"/>
+    <result column="lowest_level" jdbcType="TINYINT" property="lowestLevel" />
+    <result column="parent_id_code" jdbcType="VARCHAR" property="parentIdCode" />
+  </resultMap>
+
   <resultMap id="UserDeptMap" type="com.hoolink.manage.base.bo.UserDeptBO">
-    <id column="company" jdbcType="VARCHAR" property="companyName" />
-    <collection property="deptMap" resultMap="DeptMap">
+    <id column="id" jdbcType="BIGINT" property="deptId"/>
+    <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+    <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+    <result column="encry_level_dept" jdbcType="TINYINT" property="encryLevelDept"/>
+  </resultMap>
+
+  <resultMap id="UserDeptAssociationMap" type="com.hoolink.sdk.bo.manager.UserDeptAssociationBO">
+    <id column="dept_id" jdbcType="BIGINT" property="deptId"/>
+    <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+    <result column="dept_type" jdbcType="TINYINT" property="deptType"/>
+    <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
+    <result column="lowest_level" jdbcType="BIT" property="lowestLevel" />
+  </resultMap>
+
+  <select id="getDept" resultMap="UserCompanyMap">
+    select md.id,md.dept_name,md.dept_type,md.parent_id,mud.encry_level_dept,mud.lowest_level,md.parent_id_code from  middle_user_department mud
+    left join manage_department md on mud.dept_id=md.id
+    where mud.user_id=#{userId}
+    and md.enabled=true
+    order by CONVERT( md.dept_name USING gbk ) COLLATE gbk_chinese_ci ASC
+  </select>
+
+  <resultMap id="UserDeptInfoMap" type="com.hoolink.manage.base.bo.UserSecurityBO">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="encry_level_company" jdbcType="INTEGER" property="encryLevelCompany"/>
+    <collection property="list" ofType="com.hoolink.manage.base.bo.DeptSecurityBO">
+      <id column="dept_id" jdbcType="BIGINT" property="id" />
+      <result column="encry_level_dept" jdbcType="INTEGER" property="encryLevelDept" />
+      <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+      <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+      <result column="lowest_level" jdbcType="TINYINT" property="lowestLevel" />
     </collection>
   </resultMap>
 
-  <resultMap id="DeptMap" type="java.util.Map">
-    <result column="id" property="id" />
-    <result column="dept_name" property="deptName" />
-  </resultMap>
+  <select id="getUserSecurity" resultMap="UserDeptInfoMap">
+    select mu.id,mu.encry_level_company,mud.dept_id,mud.encry_level_dept,mud.lowest_level,md.dept_type,md.parent_id from manage_user mu
+    left join middle_user_department mud on mu.id=mud.user_id
+    inner join manage_department md on mud.dept_id=md.id
+    where mu.enabled=true and mu.id=#{userId}
+  </select>
 
+  <select id="getUserDept" resultMap="UserDeptMap">
+  SELECT
+	md.id,
+	md.dept_name,
+	md.dept_type,
+	mud.encry_level_dept
+FROM
+	middle_user_department mud
+	LEFT JOIN manage_department md ON mud.dept_id = md.id
+WHERE
+	mud.user_id = #{userId}
+	AND md.dept_type = #{deptType}
+	AND md.enabled = TRUE
+ORDER BY
+	md.created ASC
+  </select>
+
+  <select id="getOrganizationInfo" resultMap="UserDeptAssociationMap">
+    SELECT
+      md.id AS dept_id,
+      md.dept_name,
+      md.dept_type,
+      mud.encry_level_dept,
+      mud.lowest_level
+    FROM
+      middle_user_department mud
+      LEFT JOIN manage_department md ON mud.dept_id=md.id
+    WHERE
+      mud.user_id=#{userId}
+    AND md.enabled=true
+  </select>
   <select id="getDeptMenu" resultMap="UserDeptMap">
     select mu.company,mu.id,mu.dept_name from manage_user mu left join middle_user_department mud
     on mu.id=mud.user_id
     where mu.enabled=true and mu.id=#{user_id}
   </select>
+
+  <select id="getDeptParentIdCode" resultType="com.hoolink.manage.base.bo.DeptPositionBO">
+    select md.parent_id_code AS parentIdCode,
+     md.dept_name AS deptName,
+     md.parent_id AS parentId,
+     md.dept_type AS deptType,
+     md.id AS id
+    from  middle_user_department mud
+    left join manage_department md on mud.dept_id=md.id
+    where mud.user_id=#{userId}
+    and md.enabled=true
+    AND parent_id = 0
+  </select>
+
 </mapper>

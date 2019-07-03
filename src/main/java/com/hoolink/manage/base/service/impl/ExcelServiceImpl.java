@@ -12,17 +12,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -37,11 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONArray;
-import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.DictPairBO;
 import com.hoolink.manage.base.bo.DictPairForExcelBO;
 import com.hoolink.manage.base.bo.FormulaForExcelBO;
-import com.hoolink.manage.base.bo.ManageDepartmentBO;
+import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.manage.base.bo.ManageRoleBO;
 import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
 import com.hoolink.manage.base.bo.ManagerUserParamBO;
@@ -300,14 +294,10 @@ public class ExcelServiceImpl implements ExcelService{
 		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_SEX, Constant.EXCEL_SEX_LIST, HoolinkExceptionMassageEnum.EXCEL_SEX_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ROLENAME, Constant.EXCEL_ROLE_LIST, HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_COMPANY, Constant.EXCEL_COMPANY_LIST, HoolinkExceptionMassageEnum.EXCEL_COMPANY_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_DEPT, Constant.EXCEL_DEPT_FORMULA, HoolinkExceptionMassageEnum.EXCEL_DEPT_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_TEAM, Constant.EXCEL_TEAM_FORMULA, HoolinkExceptionMassageEnum.EXCEL_TEAM_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_TWO_MORE));
-		
+
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		//formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_VIEW_ENCRY_PERMITTED, Constant.EXCEL_VIEW_ENCRY_PERMITTED_LIST, HoolinkExceptionMassageEnum.EXCEL_VIEW_ENCRY_PERMITTED_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-		
+
 		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
 			List<String> headerList = Arrays.asList(headerArray);
 			if(headerList.contains(formulaForExcel.getKey())) {
