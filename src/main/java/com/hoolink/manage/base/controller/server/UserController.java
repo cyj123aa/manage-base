@@ -5,8 +5,6 @@ import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.*;
 
 import java.util.List;
-
-import java.util.List;
 import java.util.Map;
 
 import com.hoolink.sdk.param.BaseParam;
@@ -131,5 +129,12 @@ public class UserController {
     @LogAndParam(value = "根据用户id获取上级组织架构失败，请稍后重试")
     public BackBO<List<Long>> getParentDeptByUserId(@RequestBody Long  userId){
         return BackBOUtil.defaultBackBO(userService.getParentDeptByUserId(userId));
+    }
+
+    @PostMapping(value = "checkPassword")
+    @ApiOperation(value = "校验密码")
+    @LogAndParam(value = "校验密码失败，请稍后重试")
+    public BackBO<Boolean> checkPassword(@RequestBody String password)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.checkPassword(password));
     }
 }
