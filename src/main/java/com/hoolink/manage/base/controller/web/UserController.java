@@ -86,7 +86,7 @@ public class UserController {
         //VO转BO
         LoginParamBO paramBO = CopyPropertiesUtil.copyBean(loginParam, LoginParamBO.class);
         //BO转VO
-        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO),LoginResultVO.class);
+        LoginResultVO loginResultVO= CopyPropertiesUtil.copyBean(userService.login(paramBO,false),LoginResultVO.class);
         return BackVOUtil.operateAccess(loginResultVO);
     }
 

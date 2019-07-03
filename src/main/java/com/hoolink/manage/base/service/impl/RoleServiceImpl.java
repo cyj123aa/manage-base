@@ -145,7 +145,7 @@ public class RoleServiceImpl implements RoleService {
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
         //更新当前用户信息
-        userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class));
+        userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class),false);
     }
 
     /**

@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
     private static final long REPEAT_PERIOD = 1;
 
     @Override
-    public LoginResultBO login(LoginParamBO loginParam) throws Exception {
+    public LoginResultBO login(LoginParamBO loginParam,Boolean isMobile) throws Exception {
         /*
          * 1.校验：1).检查用户及密码能否关联到用户  2).检查客户被禁用  3).检查用户是否被禁用  4).检查用户所属角色是否被禁用
          * 2.返回Token，是否第一次登录（用于用户协议确认），密码是否被重置（用于强制修改密码），最后一次项目
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
         checkAccount(user);
         // 缓存当前用户
-        String token = cacheSession(user);
+        String token = cacheSession(user,isMobile);
 
         //设置登陆时间
         User toUpdateUser = new User();
@@ -267,14 +267,25 @@ public class UserServiceImpl implements UserService {
         String token =context.getContext(ContextConstant.TOKEN);
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
-            sessionService.deleteSession(ContextUtil.getManageCurrentUser().getUserId());
+            sessionService.deleteSession(currentUser.getUserId());
+        }
+    }
+
+    @Override
+    public void mobileLogout() {
+        CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByMobileToken());
+        InvocationContext context = ContextUtils.getInvocationContext();
+        String token =context.getContext(ContextConstant.TOKEN);
+        // 避免导致异地登录账号退出
+        if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
+            sessionService.deleteSession(currentUser.getUserId());
         }
     }
 
     @Override
     public CurrentUserBO getSessionUser(String token,boolean ismobile) {
         // 获取当前 session 中的用户
-        CurrentUserBO currentUser = sessionService.getCurrentUser(token);
+        CurrentUserBO currentUser = sessionService.getCurrentUser(token,ismobile);
         if (currentUser == null) {
             return null;
         }
@@ -427,7 +438,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String cacheSession(User user) throws Exception {
+    public String cacheSession(User user,Boolean isMobile) throws Exception {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
@@ -448,7 +459,7 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
         //设置角色类型
         currentUserBO.setRoleType(role.getRoleType());
-        return sessionService.cacheCurrentUser(currentUserBO);
+        return sessionService.cacheCurrentUser(currentUserBO,isMobile);
     }
 
     private Long getCurrentUserId() {
@@ -931,7 +942,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
         //更新一下当前用户
-        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()));
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false);
     }
 
     @Override
