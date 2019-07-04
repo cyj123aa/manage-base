@@ -45,6 +45,7 @@ public class DeptTreeToolUtils {
                         buildUserList(rootUserList, beanTree, userBOList, checkedList);
                         List<DepartmentAndUserTreeBO> root = beanTree.getChildren();
                         root.addAll(rootUserList);
+                        beanTree.setChildren(root);
                     }
                 }
             });
@@ -81,19 +82,16 @@ public class DeptTreeToolUtils {
                 .filter(c -> c.getParentId().equals(treeDto.getKey()))
                 .forEach(c -> {
                     map.put(c.getKey(), c.getParentId());
-                    getChild(c, map, hasAddUser, userMap, checkedList);
                     //子集
+                    getChild(c, map, hasAddUser, userMap, checkedList);
+                    List<DepartmentAndUserTreeBO> children = new ArrayList<>();
                     if (hasAddUser) {
                         if (CollectionUtils.isNotEmpty(userMap.get(c.getKey()))) {
-                            List<DepartmentAndUserTreeBO> children = new ArrayList<>();
                             //封装员工数据
                             buildUserList(children, c, userMap.get(c.getKey()), checkedList);
-                            if (CollectionUtils.isEmpty(c.getChildren())) {
-                                c.setChildren(children);
-                            } else {
-                                //同级
-                                childList.addAll(children);
-                            }
+                            List<DepartmentAndUserTreeBO> root = c.getChildren();
+                            root.addAll(children);
+                            c.setChildren(root);
                         }
                     }else {
                         if (CollectionUtils.isNotEmpty(checkedList)){

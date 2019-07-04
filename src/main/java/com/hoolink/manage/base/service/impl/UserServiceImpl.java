@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
+                .andPasswdEqualTo(loginParam.getPasswd());
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
@@ -1227,7 +1227,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList) {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
-        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().distinct().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
         return map;
     }
 
