@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(loginParam.getPasswd());
+                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
