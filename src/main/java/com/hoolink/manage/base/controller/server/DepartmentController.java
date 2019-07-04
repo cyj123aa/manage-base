@@ -44,7 +44,7 @@ public class DepartmentController {
     @ApiOperation(value = "查询组织架构")
     @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
     public BackBO<List<DepartmentAndUserTreeBO>> listByRole(@RequestBody TreeParamBO paramBO) throws Exception {
-        List<DepartmentAndUserTreeBO> departmentAndUserTreeBOList = departmentService.listAll(paramBO.getShowUser(), paramBO.getCheckedList());
+        List<DepartmentAndUserTreeBO> departmentAndUserTreeBOList = departmentService.listAll(paramBO);
         return BackBOUtil.defaultBackBO(departmentAndUserTreeBOList);
     }
 
