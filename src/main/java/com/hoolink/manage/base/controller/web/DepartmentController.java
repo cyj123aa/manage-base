@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.controller.web;
 
+import com.hoolink.sdk.bo.edm.TreeParamBO;
 import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.vo.req.DepartmentTreeParamVO;
@@ -52,7 +53,9 @@ public class DepartmentController {
     @ApiOperation(value = "查询组织架构")
     @LogAndParam(value = "查询组织架构失败",check = CheckEnum.DATA_NOT_NULL)
     public BackBO<List<DepartmentAndUserTreeVO>> listByRole(@RequestBody BaseParam<Boolean> baseParam) throws Exception {
-        List<DepartmentAndUserTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.listAll(baseParam.getData(), null), DepartmentAndUserTreeVO.class);
+        TreeParamBO paramBO = new TreeParamBO();
+        paramBO.setShowUser(baseParam.getData());
+        List<DepartmentAndUserTreeVO> manageDepartmentTreeVOS = CopyPropertiesUtil.copyList(departmentService.listAll(paramBO), DepartmentAndUserTreeVO.class);
         return BackBOUtil.defaultBackBO(manageDepartmentTreeVOS);
     }
 }

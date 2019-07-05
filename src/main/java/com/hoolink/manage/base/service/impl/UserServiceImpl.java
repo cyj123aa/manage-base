@@ -229,11 +229,11 @@ public class UserServiceImpl implements UserService {
         } else {
             loginResult.setAccessHoolink(false);
         }
-        addRepertory(roleMenuPermissionList,loginResult);
+        addRepertory(roleMenuPermissionList,loginResult,null);
         return loginResult;
     }
 
-    private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult){
+    private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult,UserInfoBO userInfoBO){
         List<RepertoryBO> edmRepertory=new ArrayList<>();
         List<RepertoryBO> repertory=new ArrayList<>();
         if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
@@ -256,9 +256,16 @@ public class UserServiceImpl implements UserService {
             repertory.add(repertoryBO);
             edmRepertory.add(repertoryBO);
         }
-        loginResult.setEdmRepertory(edmRepertory);
-        loginResult.setRepertoryList(repertory);
+        if(loginResult!=null) {
+            loginResult.setEdmRepertory(edmRepertory);
+            loginResult.setRepertoryList(repertory);
+        }
+        if(userInfoBO!=null){
+            userInfoBO.setEdmRepertory(edmRepertory);
+        }
     }
+
+
 
     @Override
     public void logout() {
@@ -393,11 +400,26 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NOT_EXIST_ERROR);
         }
+
         //封装结果
         UserInfoBO userInfoBO = new UserInfoBO();
         userInfoBO.setPhone(user.getPhone());
         userInfoBO.setUserName(user.getName());
-        userInfoBO.setRoleName(Constant.USER_ROLE_NAME);
+        //设置头像
+        if (user.getImgId() != null) {
+            try {
+                //如果获取头像失败，给予默认头像
+                BackBO<ObsBO> obs = abilityClient.getObs(user.getImgId());
+                userInfoBO.setImage(obs.getData().getObjectUrl());
+            } catch (Exception e) {
+            }
+        }
+        List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(user.getRoleId());
+        addRepertory(roleMenuPermissionList,null,userInfoBO);
+        //查询角色
+        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
+        userInfoBO.setRoleName(manageRole.getRoleName());
+        userInfoBO.setRoleLevel(manageRole.getRoleLevel());
         return userInfoBO;
     }
 
@@ -1240,7 +1262,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList) {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
-        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().distinct().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
         return map;
     }
 
