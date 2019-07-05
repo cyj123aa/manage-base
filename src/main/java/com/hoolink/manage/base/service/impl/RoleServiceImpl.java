@@ -517,6 +517,7 @@ public class RoleServiceImpl implements RoleService {
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
         criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
+        example.setOrderByClause(" created asc ");
         List<ManageRole> allRoleList = roleMapper.selectByExample(example);
 
         List<ManageRole> roleList = new ArrayList<>();
