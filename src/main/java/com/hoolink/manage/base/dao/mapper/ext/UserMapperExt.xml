@@ -64,6 +64,7 @@
         middle_user_department m
         LEFT JOIN manage_user u ON m.user_id = u.id
         WHERE u.enabled = TRUE
+        AND m.lowest_level = 1
         <if test="idList != null and idList.size() > 0">
             AND
             m.dept_id in

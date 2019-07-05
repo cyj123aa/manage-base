@@ -32,6 +32,7 @@ import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
@@ -102,13 +103,15 @@ public class DepartmentServiceImpl implements DepartmentService{
 	}
 
 	@Override
-	public List<DepartmentAndUserTreeBO> listAll(Boolean flag, List<CheckedParamBO> checkedList) {
-		List<DeptPositionBO> positionBOList = middleUserDepartmentMapperExt.getDept(ContextUtil.getManageCurrentUser().getUserId());
-		if (CollectionUtils.isEmpty(positionBOList)){
+	public List<DepartmentAndUserTreeBO> listAll(TreeParamBO paramBO) {
+		boolean belongJR = false;
+		boolean belongHL = false;
+		if (Objects.nonNull(paramBO.getBelongId())){
+			belongJR = Constant.JR_PARENT_ID_CODE.indexOf(String.valueOf(paramBO.getBelongId())) > 0;
+			belongHL = Constant.HL_PARENT_ID_CODE.indexOf(String.valueOf(paramBO.getBelongId())) > 0;
+		}else {
 			return new ArrayList<>(0);
 		}
-		boolean belongJR = positionBOList.stream().anyMatch(p -> p.getParentIdCode().indexOf(Constant.JR_PARENT_ID_CODE) == 0);
-		boolean belongHL = positionBOList.stream().anyMatch(p -> p.getParentIdCode().indexOf(Constant.HL_PARENT_ID_CODE) == 0);
 		List<ManageDepartment> departmentList =  getDepartmentByCompany(belongJR, belongHL);
 		//拿到父节点
 		List<ManageDepartment> allParentList = departmentList.stream().filter(d -> Objects.isNull(d.getParentId()) || d.getParentId() == 0).collect(Collectors.toList());
@@ -118,10 +121,10 @@ public class DepartmentServiceImpl implements DepartmentService{
 		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(convertToDepartmentAndUserTree(parentList), convertToDepartmentAndUserTree(childList));
 		//组织架构用户map
 		Map<Long, List<SimpleDeptUserBO>> userMap = null;
-		if (flag){
+		if (paramBO.getShowUser()){
 			userMap = userService.mapUserByDeptIds(null);
 		}
-		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(flag, userMap, checkedList);
+		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(paramBO.getShowUser(), userMap, paramBO.getCheckedList());
 		return treeBOList;
 	}
 

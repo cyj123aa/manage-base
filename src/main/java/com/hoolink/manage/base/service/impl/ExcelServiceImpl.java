@@ -276,8 +276,7 @@ public class ExcelServiceImpl implements ExcelService{
 	 */
 	private Workbook buildUserWorkbook() {
 		XSSFWorkbook wb = new XSSFWorkbook();
-		setHidenSheet(wb);
-		
+
 		//设置表头
 		//用户编号、用户姓名、用户性别、所属角色、部门密保等级、部门职位、资源库密保等级、账号
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_SEX, Constant.EXCEL_USER_ROLENAME, 
@@ -288,7 +287,8 @@ public class ExcelServiceImpl implements ExcelService{
 		for(int i=0; i<headerArray.length; i++) {
 			row0.createCell(i).setCellValue(headerArray[i]);
 		}
-		
+
+		setHidenSheet(wb);
 		
 		//设置公式
 		List<FormulaForExcelBO> formulaForExcelList = new ArrayList<>();

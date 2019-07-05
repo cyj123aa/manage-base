@@ -1262,7 +1262,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<Long, List<SimpleDeptUserBO>> mapUserByDeptIds(List<Long> deptIdList) {
         List<SimpleDeptUserBO> userBOList = userMapperExt.selectAllByDeptIds(deptIdList);
-        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+        Map<Long, List<SimpleDeptUserBO>> map = userBOList.stream().distinct().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
         return map;
     }
 

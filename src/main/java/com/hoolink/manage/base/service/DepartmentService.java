@@ -52,11 +52,12 @@ public interface DepartmentService {
 
 	/**
 	 * 组织架构树形结构
-	 * @param flag 是否查询组织架构下的员工 true:查询 false:只查询组织架构
-	 * @param checkedList 所勾选的员工列表 如果 flag == false && checkedList != null 就勾选组织架构，flag == true && checkedList != null勾选组织架构下员工
+	 * @param paramBO
+	 * 1 .flag 是否查询组织架构下的员工 true:查询 false:只查询组织架构
+	 * 2 .checkedList 所勾选的员工列表 如果 flag == false && checkedList != null 就勾选组织架构，flag == true && checkedList != null勾选组织架构下员工
 	 * @return
 	 */
-	List<DepartmentAndUserTreeBO> listAll(Boolean flag, List<CheckedParamBO> checkedList);
+	List<DepartmentAndUserTreeBO> listAll(TreeParamBO paramBO);
 
 	/**
 	 * 获取组织机构树（人员）
