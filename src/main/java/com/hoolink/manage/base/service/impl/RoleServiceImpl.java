@@ -525,7 +525,8 @@ public class RoleServiceImpl implements RoleService {
         roleOpt.ifPresent(role -> {
         	traverseAllChildrenRole(allRoleList, roleList, role.getId());
         });
-		return CopyPropertiesUtil.copyList(roleList, ManageRoleBO.class);
+        List<ManageRole> roles = roleList.stream().sorted(Comparator.comparing(ManageRole::getCreated)).collect(Collectors.toList());
+		return CopyPropertiesUtil.copyList(roles, ManageRoleBO.class);
 	}
 
 	/**
