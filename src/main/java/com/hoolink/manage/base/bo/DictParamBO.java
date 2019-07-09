@@ -14,4 +14,7 @@ public class DictParamBO {
 	 * 如果为部门字典值，需传入公司码
 	 */
 	private Integer companyCode;
+
+	/** true 启用 false 禁用 */
+	private Boolean status;
 }

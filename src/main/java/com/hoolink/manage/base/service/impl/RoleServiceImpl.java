@@ -177,11 +177,15 @@ public class RoleServiceImpl implements RoleService {
         //禁用角色用户
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
+        List<User> users = userMapper.selectByExample(example);
         User user = new User();
         user.setStatus(roleParamBO.getRoleStatus());
         user.setUpdated(System.currentTimeMillis());
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         userMapper.updateByExampleSelective(user,example);
+        if(!roleParamBO.getRoleStatus() && CollectionUtils.isNotEmpty(users) ){
+            sessionService.deleteRedisUser(users.stream().map(user1 -> user1.getId()).collect(Collectors.toList()));
+        }
     }
 
     /**
@@ -513,10 +517,13 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId){
+	public List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId, Boolean status){
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
-        criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
+        criteria.andEnabledEqualTo(true);
+        if (Objects.nonNull(status)){
+            criteria.andRoleStatusEqualTo(status);
+        }
         example.setOrderByClause(" created asc ");
         List<ManageRole> allRoleList = roleMapper.selectByExample(example);
 

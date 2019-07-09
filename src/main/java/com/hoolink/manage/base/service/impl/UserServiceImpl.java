@@ -546,7 +546,7 @@ public class UserServiceImpl implements UserService {
         }
         
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
@@ -574,7 +574,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return Collections.emptyList();
 		}
@@ -704,7 +704,7 @@ public class UserServiceImpl implements UserService {
 			criteria.andStatusEqualTo(userPageParamBO.getStatus());
 		}
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
 
 		criteria.andEnabledEqualTo(true);
@@ -1009,7 +1009,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception {
         String key = dictParamBO.getKey();
-        Object param = null;
+        Object param = dictParamBO.getStatus();
         AbstractDict dict = SpringUtils.getBean(key + Constant.DICT, AbstractDict.class);
         return dict.getDictInfo(param);
     }
@@ -1079,14 +1079,22 @@ public class UserServiceImpl implements UserService {
     public boolean removeUser(Long id) {
         User user = buildUserToUpdate(id);
         user.setEnabled(false);
-        return userMapper.updateByPrimaryKeySelective(user) == 1;
+        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
+        List<Long> list = Arrays.asList(id);
+        sessionService.deleteRedisUser(list);
+        return flag;
     }
 
     @Override
     public boolean enableOrDisableUser(EnableOrDisableUserParamVO param) {
         User user = buildUserToUpdate(param.getId());
         user.setStatus(param.getStatus());
-        return userMapper.updateByPrimaryKeySelective(user) == 1;
+        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
+        if(!param.getStatus()){
+            List<Long> list = Arrays.asList(param.getId());
+            sessionService.deleteRedisUser(list);
+        }
+        return flag;
     }
 
     /**

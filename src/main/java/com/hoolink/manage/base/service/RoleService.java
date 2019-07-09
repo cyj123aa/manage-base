@@ -85,9 +85,10 @@ public interface RoleService {
     /**
      * 根据当前用户角色获取其所有子角色
      * @param currentRoleId
+     * @param status true 启用 | false 禁用
      * @return
      */
-    List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId);
+    List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId, Boolean status);
     
     /**
      * 根据roleId获取菜单的权限类别
