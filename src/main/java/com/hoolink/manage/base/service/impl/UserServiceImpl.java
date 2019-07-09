@@ -96,6 +96,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -305,6 +307,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void resetPassword(LoginParamBO loginParam) throws Exception {
+        verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
         //重置密码,并且设置不是首次登录
         user.setId(user.getId());
@@ -313,6 +316,30 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    private void verifyOldPasswdOrCode(LoginParamBO loginParam){
+        String oldPassword=loginParam.getOldPasswd();
+        String code=loginParam.getCode();
+        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
+        User user=null;
+        if(userBO.getUserId()!=null){
+            user=userMapper.selectByPrimaryKey(userBO.getUserId());
+        }
+        if(StringUtils.isNotBlank(oldPassword)){
+            if(!Objects.equals(MD5Util.MD5(oldPassword),user.getPasswd())){
+                throw new BusinessException(HoolinkExceptionMassageEnum.RESET_PASSWORD_ERROR);
+            }
+        }
+        if(StringUtils.isNotBlank(code)){
+            PhoneParamBO phoneParamBO=new PhoneParamBO();
+            phoneParamBO.setCode(code);
+            phoneParamBO.setPhone(user.getPhone());
+            checkPhoneCode(phoneParamBO);
+        }
+        if(StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+        }
     }
 
     @Override
@@ -379,8 +406,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(code) || !Objects.equals(code, phoneParamBO.getCode())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
         }
-        //校验完了后删除验证码缓存信息，一个验证码只能用一次
-        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX + phoneParamBO.getPhone());
+        //校验完了不删除验证码，通过过期机智删除
         return code;
     }
 
