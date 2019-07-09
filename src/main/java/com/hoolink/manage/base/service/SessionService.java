@@ -2,6 +2,8 @@ package com.hoolink.manage.base.service;
 
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 
+import java.util.List;
+
 /**
  * token 相关接口
  *
@@ -31,6 +33,13 @@ public interface SessionService {
      * @return
      */
     Long getUserIdByToken();
+
+    /**
+     * 根据用户idlist删除用户缓存信息
+     * @param userIds
+     * @return
+     */
+    Boolean deleteRedisUser(List<Long> userIds);
 
     /**
      * 根据移动端token获取userid
