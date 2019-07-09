@@ -1053,14 +1053,22 @@ public class UserServiceImpl implements UserService {
     public boolean removeUser(Long id) {
         User user = buildUserToUpdate(id);
         user.setEnabled(false);
-        return userMapper.updateByPrimaryKeySelective(user) == 1;
+        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
+        List<Long> list = Arrays.asList(id);
+        sessionService.deleteRedisUser(list);
+        return flag;
     }
 
     @Override
     public boolean enableOrDisableUser(EnableOrDisableUserParamVO param) {
         User user = buildUserToUpdate(param.getId());
         user.setStatus(param.getStatus());
-        return userMapper.updateByPrimaryKeySelective(user) == 1;
+        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
+        if(!param.getStatus()){
+            List<Long> list = Arrays.asList(param.getId());
+            sessionService.deleteRedisUser(list);
+        }
+        return flag;
     }
 
     /**

@@ -7,14 +7,18 @@ import com.hoolink.manage.base.util.Base64Util;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.constants.ContextConstant;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
 import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangxin
@@ -67,6 +71,28 @@ public class SessionServiceImpl implements SessionService {
         }
         return null;
     }
+
+    @Override
+    public Boolean deleteRedisUser(List<Long> userIds){
+        if(CollectionUtils.isEmpty(userIds)){
+            return true;
+        }
+        List<String> key=new ArrayList<>();
+        List<String> mobileKey=new ArrayList<>();
+        for(Long id:userIds){
+            key.add(getKey(id));
+            mobileKey.add(getMobileKey(id));
+        }
+        try{
+            sessionOperation.getOperations().delete(key);
+            sessionOperation.getOperations().delete(mobileKey);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     @Override
     public Long getUserIdByToken() {
