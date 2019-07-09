@@ -517,10 +517,13 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId){
+	public List<ManageRoleBO> listChildrenRoleByRoleId(Long currentRoleId, Boolean status){
 		ManageRoleExample example = new ManageRoleExample();
 		ManageRoleExample.Criteria criteria = example.createCriteria();
-        criteria.andEnabledEqualTo(true).andRoleStatusEqualTo(true);
+        criteria.andEnabledEqualTo(true);
+        if (Objects.nonNull(status)){
+            criteria.andRoleStatusEqualTo(status);
+        }
         example.setOrderByClause(" created asc ");
         List<ManageRole> allRoleList = roleMapper.selectByExample(example);
 

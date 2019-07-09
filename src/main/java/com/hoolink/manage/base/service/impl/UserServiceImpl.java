@@ -520,7 +520,7 @@ public class UserServiceImpl implements UserService {
         }
         
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
@@ -548,7 +548,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return Collections.emptyList();
 		}
@@ -678,7 +678,7 @@ public class UserServiceImpl implements UserService {
 			criteria.andStatusEqualTo(userPageParamBO.getStatus());
 		}
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
 
 		criteria.andEnabledEqualTo(true);
@@ -983,7 +983,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception {
         String key = dictParamBO.getKey();
-        Object param = null;
+        Object param = dictParamBO.getStatus();
         AbstractDict dict = SpringUtils.getBean(key + Constant.DICT, AbstractDict.class);
         return dict.getDictInfo(param);
     }
