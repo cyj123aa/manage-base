@@ -321,24 +321,24 @@ public class UserServiceImpl implements UserService {
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){
         String oldPassword=loginParam.getOldPasswd();
         String code=loginParam.getCode();
-        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
-        User user=null;
-        if(userBO.getUserId()!=null){
-            user=userMapper.selectByPrimaryKey(userBO.getUserId());
-        }
-        if(StringUtils.isNotBlank(oldPassword)){
-            if(!Objects.equals(MD5Util.MD5(oldPassword),user.getPasswd())){
-                throw new BusinessException(HoolinkExceptionMassageEnum.RESET_PASSWORD_ERROR);
+        UserExample example=new UserExample();
+        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount());
+        User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if(user!=null){
+            if(StringUtils.isNotBlank(oldPassword)){
+                if(!Objects.equals(MD5Util.MD5(oldPassword),user.getPasswd())){
+                    throw new BusinessException(HoolinkExceptionMassageEnum.RESET_PASSWORD_ERROR);
+                }
             }
-        }
-        if(StringUtils.isNotBlank(code)){
-            PhoneParamBO phoneParamBO=new PhoneParamBO();
-            phoneParamBO.setCode(code);
-            phoneParamBO.setPhone(user.getPhone());
-            checkPhoneCode(phoneParamBO);
-        }
-        if(StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)){
-            throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+            if(StringUtils.isNotBlank(code)){
+                PhoneParamBO phoneParamBO=new PhoneParamBO();
+                phoneParamBO.setCode(code);
+                phoneParamBO.setPhone(user.getPhone());
+                checkPhoneCode(phoneParamBO);
+            }
+            if(StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)){
+                throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+            }
         }
     }
 
