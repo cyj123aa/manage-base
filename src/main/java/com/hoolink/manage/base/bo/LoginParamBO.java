@@ -19,4 +19,14 @@ public class LoginParamBO {
      */
     private String passwd;
 
+    /**
+     * 旧密码
+     */
+    private String oldPasswd;
+
+    /**
+     * 手机验证码
+     */
+    private String code;
+
 }

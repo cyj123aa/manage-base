@@ -444,7 +444,7 @@ public class ExcelServiceImpl implements ExcelService{
 		List<DictPairBO<Long, String>> childrenRolePairList = new ArrayList<>();
 		rolePairForExcel.setChildrenDictPairList(childrenRolePairList);
 		CurrentUserBO user = ContextUtil.getManageCurrentUser();
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId(), null);
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> childRolePair = new DictPairBO<>();
 			childRolePair.setKey(r.getId());
