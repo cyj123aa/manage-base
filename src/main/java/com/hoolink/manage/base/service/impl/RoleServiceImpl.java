@@ -366,9 +366,6 @@ public class RoleServiceImpl implements RoleService {
         }
         String code = menuParamBO.getCode();
         Integer level = menuParamBO.getLevel();
-        if(StringUtils.isEmpty(code)){
-            code=Constant.MANAGE_CENTER;
-        }
         //查询当前menu
         ManageMenu byCode = menuService.getByCode(code);
         //组合所有子集列表
