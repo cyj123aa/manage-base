@@ -96,6 +96,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -305,6 +307,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void resetPassword(LoginParamBO loginParam) throws Exception {
+        verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
         //重置密码,并且设置不是首次登录
         user.setId(user.getId());
@@ -313,6 +316,30 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    private void verifyOldPasswdOrCode(LoginParamBO loginParam){
+        String oldPassword=loginParam.getOldPasswd();
+        String code=loginParam.getCode();
+        UserExample example=new UserExample();
+        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount());
+        User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if(user!=null){
+            if(StringUtils.isNotBlank(oldPassword)){
+                if(!Objects.equals(MD5Util.MD5(oldPassword),user.getPasswd())){
+                    throw new BusinessException(HoolinkExceptionMassageEnum.RESET_PASSWORD_ERROR);
+                }
+            }
+            if(StringUtils.isNotBlank(code)){
+                PhoneParamBO phoneParamBO=new PhoneParamBO();
+                phoneParamBO.setCode(code);
+                phoneParamBO.setPhone(user.getPhone());
+                checkPhoneCode(phoneParamBO);
+            }
+            if(StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)){
+                throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
+            }
+        }
     }
 
     @Override
@@ -379,8 +406,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(code) || !Objects.equals(code, phoneParamBO.getCode())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
         }
-        //校验完了后删除验证码缓存信息，一个验证码只能用一次
-        stringRedisTemplate.opsForValue().getOperations().delete(Constant.PHONE_CODE_PREFIX + phoneParamBO.getPhone());
+        //校验完了不删除验证码，通过过期机智删除
         return code;
     }
 
@@ -520,7 +546,7 @@ public class UserServiceImpl implements UserService {
         }
         
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
@@ -548,7 +574,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		if(CollectionUtils.isEmpty(roleList)) {
 			return Collections.emptyList();
 		}
@@ -678,7 +704,7 @@ public class UserServiceImpl implements UserService {
 			criteria.andStatusEqualTo(userPageParamBO.getStatus());
 		}
 		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId());
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
 		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
 
 		criteria.andEnabledEqualTo(true);
@@ -983,7 +1009,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public DictInfoBO getDictInfo(DictParamBO dictParamBO) throws Exception {
         String key = dictParamBO.getKey();
-        Object param = null;
+        Object param = dictParamBO.getStatus();
         AbstractDict dict = SpringUtils.getBean(key + Constant.DICT, AbstractDict.class);
         return dict.getDictInfo(param);
     }
