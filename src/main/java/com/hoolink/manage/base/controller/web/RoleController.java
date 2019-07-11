@@ -2,6 +2,7 @@ package com.hoolink.manage.base.controller.web;
 
 import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.vo.req.MenuParamVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
@@ -80,11 +81,12 @@ public class RoleController {
     @PostMapping(value = "getBaseMenu")
     @ApiOperation(value = "获得管理基础动态菜单")
     @LogAndParam(value = "获得管理基础菜单失败")
-    public BackBO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO) throws Exception {
+    public BackVO<List<ManageMenuTreeVO>> getBaseMenu(@RequestBody MenuParamVO menuParamVO) throws Exception {
         MenuParamBO menuParamBO = CopyPropertiesUtil.copyBean(menuParamVO, MenuParamBO.class);
+        menuParamBO.setCode(Constant.MANAGE_CENTER);
         List<ManageMenuTreeBO> baseMenu = roleService.getBaseMenu(menuParamBO);
         List<ManageMenuTreeVO> manageMenuTreeVOS = CopyPropertiesUtil.copyList(baseMenu, ManageMenuTreeVO.class);
-        return BackBOUtil.defaultBackBO(manageMenuTreeVOS);
+        return BackVOUtil.operateAccess(manageMenuTreeVOS);
     }
 
     @PostMapping(value = "getCurrentRoleMenu")
@@ -104,5 +106,16 @@ public class RoleController {
         PageInfo<RoleParamBO> roleParamBOPageInfo = roleService.listByPage(pageParamBO);
         PageInfo<RoleParamVO> pageInfo = CopyPropertiesUtil.copyBean(roleParamBOPageInfo, PageInfo.class);
         return BackVOUtil.operateAccess(pageInfo);
+    }
+
+    @PostMapping(value = "getSupportBaseMenu")
+    @ApiOperation(value = "获得支撑管理平台基础动态菜单")
+    @LogAndParam(value = "获得管理平台基础动态菜单失败")
+    public BackVO<List<ManageMenuTreeVO>> getSupportBaseMenu(@RequestBody MenuParamVO menuParamVO) throws Exception {
+        MenuParamBO menuParamBO = CopyPropertiesUtil.copyBean(menuParamVO, MenuParamBO.class);
+        menuParamBO.setCode(Constant.HOOLINK);
+        List<ManageMenuTreeBO> baseMenu = roleService.getBaseMenu(menuParamBO);
+        List<ManageMenuTreeVO> manageMenuTreeVOS = CopyPropertiesUtil.copyList(baseMenu, ManageMenuTreeVO.class);
+        return BackVOUtil.operateAccess(manageMenuTreeVOS);
     }
 }
