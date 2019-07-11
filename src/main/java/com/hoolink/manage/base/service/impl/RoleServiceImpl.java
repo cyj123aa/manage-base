@@ -184,7 +184,7 @@ public class RoleServiceImpl implements RoleService {
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         userMapper.updateByExampleSelective(user,example);
         if(!roleParamBO.getRoleStatus() && CollectionUtils.isNotEmpty(users) ){
-            sessionService.deleteRedisUser(users.stream().map(user1 -> user1.getId()).collect(Collectors.toList()));
+            sessionService.deleteRedisUser(users.stream().map(User::getId).collect(Collectors.toList()));
         }
     }
 
@@ -207,8 +207,7 @@ public class RoleServiceImpl implements RoleService {
         if(CollectionUtils.isEmpty(roles)){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
         }
-        ManageRoleBO roleParamBO = CopyPropertiesUtil.copyBean(roles.get(0), ManageRoleBO.class);
-        return roleParamBO;
+        return CopyPropertiesUtil.copyBean(roles.get(0), ManageRoleBO.class);
     }
 
     @Override
@@ -487,7 +486,7 @@ public class RoleServiceImpl implements RoleService {
         if(userRole!=null){
             Byte roleLevel = userRole.getRoleLevel();
             if(Constant.LEVEL_THREE.equals(roleLevel)){
-                roles=null;
+                return new PageInfo<>();
             }else if (Constant.LEVEL_TWO.equals(roleLevel)){
                 roles = manageRoleMapperExt.getRoleByTwo(userRole.getId(),pageParamBO.getSearchValue(),pageParamBO.getStatus());
             }else if (Constant.LEVEL_ONE.equals(roleLevel)){
@@ -541,7 +540,7 @@ public class RoleServiceImpl implements RoleService {
 	 */
 	private void traverseAllChildrenRole(List<ManageRole> allRoleList, List<ManageRole> roleList, Long currentRoleId) {
 		List<ManageRole> childrenRoleList = allRoleList.stream().filter(r -> r.getParentId()!=null && r.getParentId().equals(currentRoleId)).collect(Collectors.toList());
-		childrenRoleList.stream().forEach(cr -> {
+		childrenRoleList.forEach(cr -> {
 			roleList.add(cr);
 			traverseAllChildrenRole(allRoleList, roleList, cr.getId());
 		});

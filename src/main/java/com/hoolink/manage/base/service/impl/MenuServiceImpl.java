@@ -10,17 +10,11 @@ import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleRoleMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.model.*;
-import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MenuService;
-import com.hoolink.manage.base.service.UserService;
-import com.hoolink.manage.base.util.DeptTreeToolUtils;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
-import com.hoolink.sdk.bo.manager.*;
-import com.hoolink.sdk.bo.manager.EdmMenuBO;
-import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
 import com.hoolink.sdk.constants.Constants;
@@ -28,14 +22,10 @@ import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.enums.edm.EdmResourceRepertory;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
-import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -185,13 +175,10 @@ public class MenuServiceImpl implements MenuService {
         }
         deptAllList = removeDuplict(deptAllList);
         //Collections工具类的sort()方法对list集合元素排序　
-        Collections.sort(deptAllList, new Comparator<DeptPositionBO>() {
-            @Override
-            public int compare(DeptPositionBO info1, DeptPositionBO info2) {
-                //获取中文环境
-                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
-                return com.compare(info1.getDeptName(), info2.getDeptName());
-            }
+        deptAllList.sort((info1, info2) -> {
+            //获取中文环境
+            Comparator<Object> com = Collator.getInstance(Locale.CHINA);
+            return com.compare(info1.getDeptName(), info2.getDeptName());
         });
         return deptAllList;
     }
@@ -202,7 +189,7 @@ public class MenuServiceImpl implements MenuService {
      * @return
      */
     private List<DeptPositionBO> removeDuplict(List<DeptPositionBO> list) {
-        Set<DeptPositionBO> set = new TreeSet<>((o1, o2) -> o1.getId().compareTo(o2.getId()));
+        Set<DeptPositionBO> set = new TreeSet<>(Comparator.comparing(DeptPositionBO::getId));
         set.addAll(list);
         return new ArrayList<>(set);
     }
@@ -375,11 +362,11 @@ public class MenuServiceImpl implements MenuService {
             String[] split1 = new String[split.length-1];
             System.arraycopy(split, 1, split1, 0, split1.length);
             List<String> ids = Arrays.asList(split1);
-            List<Long> collect = ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
+            List<Long> collect = ids.stream().map(Long::parseLong).collect(Collectors.toList());
             List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
             if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
                 manageDepartmentBOS.forEach(manageDepartmentBO -> {
-                    if(manageDepartmentBO.getId().equals(paramBO.getBelongId())){
+                    if(manageDepartmentBO.getId().toString().equals(paramBO.getBelongId())){
                         edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),enableUpdate));
                     }else{
                         edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),false));
@@ -398,8 +385,7 @@ public class MenuServiceImpl implements MenuService {
     private List<MiddleRoleMenu> listByRole(Long roleId){
         MiddleRoleMenuExample example = new MiddleRoleMenuExample();
         example.createCriteria().andRoleIdEqualTo(roleId);
-        List<MiddleRoleMenu> middleRoleMenus = middleRoleMenuMapper.selectByExample(example);
-        return middleRoleMenus;
+        return middleRoleMenuMapper.selectByExample(example);
     }
 
     @Override
@@ -419,7 +405,6 @@ public class MenuServiceImpl implements MenuService {
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
         //当前menu
-        ManageMenu menu = menus.get(0);
-        return menu;
+        return menus.get(0);
     }
 }

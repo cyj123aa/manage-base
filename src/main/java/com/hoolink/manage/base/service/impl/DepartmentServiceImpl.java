@@ -1,7 +1,5 @@
 package com.hoolink.manage.base.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.hoolink.sdk.bo.edm.*;
@@ -32,8 +30,6 @@ import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
 import com.hoolink.manage.base.dao.model.ManageDepartment;
@@ -73,15 +69,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 		criteria.andEnabledEqualTo(true);
 		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
 		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
-	}
-
-	@Override
-	public List<DeptPositionBO> listByParentIdList(List<Long> idList) {
-		if(CollectionUtils.isEmpty(idList)) {
-			return new ArrayList<>();
-		}
-		List<DeptPositionBO> deptPositionBOS =manageDepartmentMapperExt.listByParentIdList(idList);
-		return deptPositionBOS;
 	}
 
 	@Override
@@ -435,19 +422,6 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}
 		return getTopDepartByDepartId(departmentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()));
 	}
-
-	@Override
-	public List<ManageDepartment> listByParentList(List<Long> companyList) {
-		if (CollectionUtils.isEmpty(companyList)){
-			return null;
-		}
-		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
-		criteria.andParentIdIn(companyList).andEnabledEqualTo(true);
-		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(departmentExample);
-		return deptList;
-	}
-
 
     @Override
     public List<DeptVisibleCacheBO> getDeptListByUserId() {
