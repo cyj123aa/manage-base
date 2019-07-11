@@ -406,7 +406,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(code) || !Objects.equals(code, phoneParamBO.getCode())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
         }
-        //校验完了不删除验证码，通过过期机智删除
+        //校验完了不删除验证码，通过过期机制删除
         return code;
     }
 
@@ -1189,10 +1189,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPasswd(Long userId) {
         User user = buildUserToUpdate(userId);
         //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
+        user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
         sessionService.deleteSession(userId);
     }
