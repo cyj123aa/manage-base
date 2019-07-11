@@ -446,6 +446,7 @@ public class UserServiceImpl implements UserService {
         ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
         userInfoBO.setRoleName(manageRole.getRoleName());
         userInfoBO.setRoleLevel(manageRole.getRoleLevel());
+        userInfoBO.setUserId(userId);
         return userInfoBO;
     }
 

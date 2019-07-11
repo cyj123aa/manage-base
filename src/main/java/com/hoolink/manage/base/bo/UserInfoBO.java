@@ -38,4 +38,6 @@ public class UserInfoBO {
     private List<RepertoryBO> edmRepertory;
 
     private Byte roleLevel;
+
+    private Long userId;
 }
