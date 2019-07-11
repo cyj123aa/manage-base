@@ -22,13 +22,6 @@ public interface ManageDepartmentMapperExt {
     List<ManageDepartmentTreeBO> getOrganizationList (@Param("ids")List<Long> ids);
 
     /**
-     * 根据公司查询小组
-     * @param ids
-     * @return
-     */
-    List<ManageDepartment> getPositionByCompany(@Param("ids")List<Long> ids);
-
-    /**
      * 根据父节点查询下一级
      * @param parentIds
      * @return

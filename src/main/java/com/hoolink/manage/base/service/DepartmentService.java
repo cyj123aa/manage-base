@@ -25,13 +25,6 @@ public interface DepartmentService {
 	List<ManageDepartmentBO> listByIdList(List<Long> idList);
 
 	/**
-	 * 根据父节点集合获取部门信息
-	 * @param idList
-	 * @return
-	 */
-	List<DeptPositionBO> listByParentIdList(List<Long> idList);
-
-	/**
 	 *  获取组织架构树
 	 * @return
 	 */
@@ -42,13 +35,6 @@ public interface DepartmentService {
 	 * @return
 	 */
 	List<ManageDepartmentBO> listByDeptType(Byte deptType);
-
-	/**
-	 * 父级查询组织类型
-	 * @param parentList
-	 * @return
-	 */
-	List<ManageDepartment> listByParentList(List<Long> parentList);
 
 	/**
 	 * 组织架构树形结构

@@ -34,42 +34,6 @@
     where mm.enabled=true and me.enabled=true and mm.menu_code=#{code} and me.menu_code=#{currentCode}
   </select>
 
-  <resultMap id="UserCompanyMap" type="com.hoolink.manage.base.bo.TemporaryDeptBO">
-    <association property="company" javaType="com.hoolink.manage.base.bo.DeptPositionBO">
-      <id column="mc.id" jdbcType="BIGINT" property="id" />
-      <result column="mc.dept_name" jdbcType="VARCHAR" property="deptName" />
-      <result column="mc.dept_type" jdbcType="TINYINT" property="deptType" />
-      <result column="mc.parent_id" jdbcType="BIGINT" property="parentId" />
-    </association>
-    <association property="dept" javaType="com.hoolink.manage.base.bo.DeptPositionBO">
-      <id column="md.id" jdbcType="BIGINT" property="id" />
-      <result column="md.dept_name" jdbcType="VARCHAR" property="deptName" />
-      <result column="md.dept_type" jdbcType="TINYINT" property="deptType" />
-      <result column="md.parent_id" jdbcType="BIGINT" property="parentId" />
-    </association>
-    <association property="position" javaType="com.hoolink.manage.base.bo.DeptPositionBO">
-      <id column="mp.id" jdbcType="BIGINT" property="id" />
-      <result column="mp.dept_name" jdbcType="VARCHAR" property="deptName" />
-      <result column="mp.dept_type" jdbcType="TINYINT" property="deptType" />
-      <result column="mp.parent_id" jdbcType="BIGINT" property="parentId" />
-    </association>
-  </resultMap>
-
-  <select id="getTemporaryDept" parameterType="java.lang.Long" resultMap="UserCompanyMap">
-    select mp.id,mp.dept_name,mp.dept_type,mp.parent_id,
-    md.id,md.dept_name,md.dept_type,md.parent_id,
-    mc.id,mc.dept_name,mc.dept_type,mc.parent_id from  manage_department mp
-    left join manage_department md on mp.parent_id=md.id
-    left join manage_department mc on md.parent_id=mc.id
-    where mp.enabled=true
-    and md.enabled=true
-    and mc.enabled=true
-    and mp.id in
-    <foreach collection="positions" separator="," open="(" close=")" item="id">
-      #{id}
-    </foreach>
-  </select>
-
   <resultMap id="ResultMap" type="com.hoolink.manage.base.bo.MiddleRoleMenuBO">
     <id column="id" jdbcType="BIGINT" property="menuId" />
     <result column="parent_id" jdbcType="BIGINT" property="parentId" />
