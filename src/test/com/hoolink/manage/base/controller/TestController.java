@@ -10,10 +10,15 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -39,7 +44,7 @@ public abstract class TestController {
         mockResources();
     }
 
-    /**
+     /**
      * 业务中需要用到用户信息
      */
     public void mockResources(){
@@ -49,6 +54,24 @@ public abstract class TestController {
         baseUserBO.setAccount("admin");
         ContextUtils.setInvocationContext(invocationContext);
         invocationContext.addContext("manageCurrentUser", JSONUtils.toJSONString(baseUserBO));
+    }
+
+    /**
+     * post请求
+     * @param param
+     * @param txId
+     * @return
+     * @throws Exception
+     */
+    protected String postRequestMethod(String param, String txId) throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(txId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(param)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+        return mvcResult.getResponse().getContentAsString();
     }
 
 }
