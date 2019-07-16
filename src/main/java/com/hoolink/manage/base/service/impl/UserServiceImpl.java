@@ -1151,18 +1151,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
 		List<DeptPairBO> deptPairList = new ArrayList<>();
-		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
-			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
-			DeptPairBO deptPair = new DeptPairBO();
-			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
-				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
-				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
-			}
-			deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
-			deptPairList.add(deptPair);
-		}
+		fillDeptPairList(byDiffDeptGroupMap,deptPairList);
 		personalInfo.setUserDeptPairList(deptPairList);
 		return personalInfo;
 	}
@@ -1523,6 +1512,12 @@ public class UserServiceImpl implements UserService {
         Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
         List<DeptPairBO> deptPairList = new ArrayList<>();
+        fillDeptPairList(byDiffDeptGroupMap,deptPairList);
+        personalInfo.setUserDeptPairList(deptPairList);
+        return personalInfo;
+    }
+
+    private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList){
         for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
             List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
             DeptPairBO deptPair = new DeptPairBO();
@@ -1535,7 +1530,5 @@ public class UserServiceImpl implements UserService {
             deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
             deptPairList.add(deptPair);
         }
-        personalInfo.setUserDeptPairList(deptPairList);
-        return personalInfo;
     }
 }
