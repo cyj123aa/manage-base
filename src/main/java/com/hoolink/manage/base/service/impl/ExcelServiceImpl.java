@@ -113,12 +113,7 @@ public class ExcelServiceImpl implements ExcelService{
 				}
 			});
             for(ManagerUserParamBO userParam : userExcelList) {
-            	try {
-            		userService.createUser(userParam);
-            	}catch(Exception e) {
-            		log.error("import excel failed ..., exception:{}", e);
-            		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
-            	}
+				userService.createUser(userParam);
             }
             userExcelData.setTotal(userExcelList.size());
             return userExcelData;
