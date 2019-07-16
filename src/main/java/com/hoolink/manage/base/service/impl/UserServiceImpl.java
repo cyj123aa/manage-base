@@ -1029,13 +1029,15 @@ public class UserServiceImpl implements UserService {
             manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
             manageUserInfoBO.setCompanyId(userCompany.stream().map(UserDeptBO::getDeptId).collect(Collectors.toList()));
         }
-
-        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.POSITION.getKey().longValue());
         if(CollectionUtils.isEmpty(userDept)){
-           userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
-           if(CollectionUtils.isEmpty(userDept)){
-               userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
-           }
+            userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+            if(CollectionUtils.isEmpty(userDept)){
+                userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
+                if(CollectionUtils.isEmpty(userDept)){
+                    userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
+                }
+            }
         }
         manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
         return manageUserInfoBO;
