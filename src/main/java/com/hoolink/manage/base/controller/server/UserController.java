@@ -1,9 +1,13 @@
 package com.hoolink.manage.base.controller.server;
 
+import com.hoolink.manage.base.bo.PersonalInfoBO;
 import com.hoolink.manage.base.dao.model.User;
+import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
+import com.hoolink.manage.base.vo.res.PersonalInfoVO;
 import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.*;
 
+import com.hoolink.sdk.utils.BackVOUtil;
 import java.util.List;
 import java.util.Map;
 
@@ -136,5 +140,11 @@ public class UserController {
     @LogAndParam(value = "校验密码失败，请稍后重试")
     public BackBO<Boolean> checkPassword(@RequestBody String password)throws Exception{
         return BackBOUtil.defaultBackBO(userService.checkPassword(password));
+    }
+    @PostMapping(value = "getManagerUserInfo")
+    @ApiOperation(value = "获取个人基础信息")
+    @LogAndParam(value = "获取个人基础信息失败")
+    public BackBO<ManagerUserBO> getManagerUserInfo(@RequestBody Long  userId) throws Exception{
+        return BackBOUtil.defaultBackBO(userService.getPeopleInfo(userId));
     }
 }
