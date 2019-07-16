@@ -11,11 +11,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
@@ -55,8 +50,8 @@ public class MenuControllerTest extends TestController {
 
     @Test
     public void getOrganizationHead() throws Exception {
-        List<String> list = Arrays.asList("{\"belongId\": \"19\",\"repertoryType\": 1}", "{\"belongId\": \"1\",\"repertoryType\": 1}",
-                "{\"belongId\": \"1\",\"repertoryType\": 1}");
+        List<String> list = Arrays.asList("{\"belongId\": \"1\",\"repertoryType\": 1}", "{\"belongId\": \"1\",\"repertoryType\": 2}",
+                "{\"belongId\": \"1\",\"repertoryType\": 3}");
         for (String param:list) {
             logger.info("url:{},参数param:{}", "/menu/getOrganizationHead", param);
             String contentAsString = postRequestMethod(param, "/menu/getOrganizationHead");
