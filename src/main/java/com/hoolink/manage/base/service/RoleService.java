@@ -109,4 +109,11 @@ public interface RoleService {
      * @return
      */
     ManageRoleBO selectById(Long roleId);
+
+    /**
+     * 根据角色名查询（慎用，该方法用于excel录入用户信息）
+     * @param roleName
+     * @return
+     */
+    ManageRoleBO selectByName(String roleName);
 }
