@@ -607,4 +607,16 @@ public class RoleServiceImpl implements RoleService {
 	public ManageRoleBO selectById(Long roleId) {
 		return CopyPropertiesUtil.copyBean(roleMapper.selectByPrimaryKey(roleId), ManageRoleBO.class);
 	}
+
+    @Override
+    public ManageRoleBO selectByName(String roleName) {
+	    ManageRoleExample roleExample = new ManageRoleExample();
+        ManageRoleExample.Criteria criteria = roleExample.createCriteria();
+        criteria.andRoleNameEqualTo(roleName.trim());
+        List<ManageRole> roleList = roleMapper.selectByExample(roleExample);
+        if (CollectionUtils.isEmpty(roleList)){
+            return null;
+        }
+        return CopyPropertiesUtil.copyBean(roleList.get(0), ManageRoleBO.class);
+    }
 }
