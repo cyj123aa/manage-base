@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -102,16 +99,21 @@ public class ExcelServiceImpl implements ExcelService{
             if(CollectionUtils.isEmpty(userExcelList)) {
             	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
             }
-        	userExcelList.stream().forEach(ue -> 
-    			ue.getUserDeptPairParamList().stream().forEach(udp -> udp.setDeptIdList(deptIdList))
-        	);
+			userExcelList.forEach(u ->{
+				if (CollectionUtils.isEmpty(u.getUserDeptPairParamList())){
+					List<UserDeptPairParamBO> deptPairParamList = new ArrayList<>();
+					UserDeptPairParamBO pairParamBO = new UserDeptPairParamBO();
+					pairParamBO.setDeptIdList(deptIdList);
+					deptPairParamList.add(pairParamBO);
+					u.setUserDeptPairParamList(deptPairParamList);
+				}else {
+					u.getUserDeptPairParamList().forEach(dept -> {
+						dept.setDeptIdList(deptIdList);
+					});
+				}
+			});
             for(ManagerUserParamBO userParam : userExcelList) {
-            	try {
-            		userService.createUser(userParam);
-            	}catch(Exception e) {
-            		log.error("import excel failed ..., exception:{}", e);
-            		throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_IMPORTED_FAILED);
-            	}
+				userService.createUser(userParam);
             }
             userExcelData.setTotal(userExcelList.size());
             return userExcelData;
@@ -174,6 +176,9 @@ public class ExcelServiceImpl implements ExcelService{
         boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
         	XSSFRow row = sheet.getRow(rowNum);
+        	if (Objects.isNull(row)){
+        		continue;
+			}
         	ManagerUserParamBO managerUserParam = new ManagerUserParamBO();
             //列 获取所有单元格的数据
             for (int j = 0; j < row.getLastCellNum(); j++) {
@@ -220,12 +225,34 @@ public class ExcelServiceImpl implements ExcelService{
 	            break;
 	        case 2:
 	        	//用户性别
+				for (ManagerUserSexEnum sexEnum: ManagerUserSexEnum.values()){
+					if (sexEnum.getValue().equals(value.trim())){
+						managerUserParam.setSex(sexEnum.getKey());
+					}
+				}
 	            break;
 	        case 3:
 	        	//所属角色
+				ManageRoleBO roleBO = roleService.selectByName(value);
+				if (Objects.nonNull(roleBO)){
+					managerUserParam.setRoleId(roleBO.getId());
+				}
 	            break;
 	        case 4:
 	        	//部门密保等级
+				//部门密保等级id
+				Integer encryLevelDept = null;
+				for (EncryLevelEnum levelEnum : EncryLevelEnum.values()){
+					if (levelEnum.getValue().equals(value.trim())){
+						encryLevelDept = levelEnum.getKey();
+					}
+				}
+				List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
+				UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
+				userDeptPairParam.setEncryLevelDept(encryLevelDept);
+				userDeptPairParam.setDeptIdList(null);
+				userDeptPairParamList.add(userDeptPairParam);
+				managerUserParam.setUserDeptPairParamList(userDeptPairParamList);
 	            break;
 	        case 5:
 	        	//职位
@@ -233,6 +260,13 @@ public class ExcelServiceImpl implements ExcelService{
 	            break;
 	        case 6:
 	        	//资源库密保等级
+				Integer encryLevelCompany = null;
+				for (EncryLevelEnum levelEnum : EncryLevelEnum.values()){
+					if (levelEnum.getValue().equals(value.trim())){
+						encryLevelCompany = levelEnum.getKey();
+					}
+				}
+				managerUserParam.setEncryLevelCompany(encryLevelCompany);
 	            break;
 	        case 7:
 	        	//登录账号
@@ -248,16 +282,9 @@ public class ExcelServiceImpl implements ExcelService{
 	        	break;
 	        case 10:
 	        	//部门密保等级id
-	        	List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
-	        	UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
-	        	userDeptPairParam.setEncryLevelDept(Integer.parseInt(value));
-	        	userDeptPairParam.setDeptIdList(null);
-	        	userDeptPairParamList.add(userDeptPairParam);
-	        	managerUserParam.setUserDeptPairParamList(userDeptPairParamList);
 	        	break;
 	        case 11:
 	        	//资源库密保等级id
-	        	managerUserParam.setEncryLevelCompany(Integer.parseInt(value));
 	        	break;
 	        default:
 	            break;

@@ -79,6 +79,7 @@ public class RoleServiceImpl implements RoleService {
                 || roleParamBO.getRoleType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        checkName(null,roleParamBO.getRoleName());
         //role 等级
         ManageRole role = CopyPropertiesUtil.copyBean(roleParamBO, ManageRole.class);
         role.setEnabled(true);
@@ -99,6 +100,26 @@ public class RoleServiceImpl implements RoleService {
         //權限  打钩的菜单绑定(包括父节点)
         createMiddleRoleMenuList(roleMenuVOList, role.getId());
         return role.getId();
+    }
+
+    /**
+     * 校验角色名称
+     * @param id
+     * @param name
+     */
+    private void checkName(Long id,String name){
+        ManageRoleExample example=new ManageRoleExample();
+        example.createCriteria().andEnabledEqualTo(true).andRoleNameEqualTo(name);
+        List<ManageRole> manageRoles = roleMapper.selectByExample(example);
+        if(CollectionUtils.isNotEmpty(manageRoles)){
+            if(id!=null){
+                if(manageRoles.size()>Constant.LEVEL_ONE || !id.equals(manageRoles.get(0).getId())){
+                    throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_NAME_EXIST);
+                }
+            }else{
+                throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_NAME_EXIST);
+            }
+        }
     }
 
     /**
@@ -134,6 +155,8 @@ public class RoleServiceImpl implements RoleService {
                 || roleParamBO.getRoleType()==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
+        //校验角色名称
+        checkName(roleParamBO.getId(),roleParamBO.getRoleName());
         List<MiddleRoleMenuBO> roleMenuVOList = roleParamBO.getRoleMenuVOList();
         if(CollectionUtils.isEmpty(roleMenuVOList)){
             throw new BusinessException(HoolinkExceptionMassageEnum.PLEASE_MENU_CONFIG);
@@ -607,4 +630,16 @@ public class RoleServiceImpl implements RoleService {
 	public ManageRoleBO selectById(Long roleId) {
 		return CopyPropertiesUtil.copyBean(roleMapper.selectByPrimaryKey(roleId), ManageRoleBO.class);
 	}
+
+    @Override
+    public ManageRoleBO selectByName(String roleName) {
+	    ManageRoleExample roleExample = new ManageRoleExample();
+        ManageRoleExample.Criteria criteria = roleExample.createCriteria();
+        criteria.andRoleNameEqualTo(roleName.trim());
+        List<ManageRole> roleList = roleMapper.selectByExample(roleExample);
+        if (CollectionUtils.isEmpty(roleList)){
+            return null;
+        }
+        return CopyPropertiesUtil.copyBean(roleList.get(0), ManageRoleBO.class);
+    }
 }
