@@ -216,6 +216,13 @@ public interface UserService {
     PersonalInfoBO getPersonalInfo() throws Exception;
 
     /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    ManagerUserBO getPeopleInfo(Long userId) throws Exception;
+    /**
      * 修改密码
      * @param updatePasswdParam
      */

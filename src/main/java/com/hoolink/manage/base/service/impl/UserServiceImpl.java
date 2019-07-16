@@ -1499,4 +1499,43 @@ public class UserServiceImpl implements UserService {
         }
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
     }
+
+    @Override
+    public ManagerUserBO getPeopleInfo(Long userId) throws Exception{
+        User user = userMapper.selectByPrimaryKey(userId);
+        if(user == null) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+        }
+
+        ManagerUserBO personalInfo = new ManagerUserBO();
+        BeanUtils.copyProperties(user, personalInfo);
+
+
+        // 获取组织树
+        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
+            .listWithMoreByUserIdList(Arrays.asList(user.getId()));
+        Set<String> companySet = new HashSet<>();
+        userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
+            companySet.add(ud.getDeptName());
+        });
+        personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
+        // 用户组织关系
+        Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+
+        List<DeptPairBO> deptPairList = new ArrayList<>();
+        for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+            List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+            DeptPairBO deptPair = new DeptPairBO();
+            deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+            deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+            if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+                deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+                deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+            }
+            deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
+            deptPairList.add(deptPair);
+        }
+        personalInfo.setUserDeptPairList(deptPairList);
+        return personalInfo;
+    }
 }
