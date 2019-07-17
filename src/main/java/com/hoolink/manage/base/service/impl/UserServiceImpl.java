@@ -42,6 +42,7 @@ import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
 import com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.UserExample.Criteria;
 import com.hoolink.manage.base.dict.AbstractDict;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MiddleUserDepartmentService;
@@ -1490,30 +1491,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ManagerUserBO getPeopleInfo(Long userId) throws Exception{
-        User user = userMapper.selectByPrimaryKey(userId);
-        if(user == null) {
+    public List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception{
+        UserExample example = new UserExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andEnabledEqualTo(true).andIdIn(userId);
+        List<User> users = userMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(users)) {
             throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
         }
-
-        ManagerUserBO managerUserBO = new ManagerUserBO();
-        BeanUtils.copyProperties(user, managerUserBO);
-
-
         // 获取组织树
-        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService.listWithMoreByUserIdList(Arrays.asList(user.getId()));
-        Set<String> companySet = new HashSet<>();
-        userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
-            companySet.add(ud.getDeptName());
-        });
-        managerUserBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
-        // 用户组织关系
-        Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+        List<MiddleUserDeptWithMoreBO> middleUserDepartmentBOList = middleUserDepartmentService.listWithMoreByUserIdList(userId);
+        Map<Long, List<MiddleUserDeptWithMoreBO>> middleUserDepartmentMap = middleUserDepartmentBOList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getUserId));
 
-        List<DeptPairBO> deptPairList = new ArrayList<>();
-        fillDeptPairList(byDiffDeptGroupMap,deptPairList);
-        managerUserBO.setUserDeptPairList(deptPairList);
-        return managerUserBO;
+        List<ManagerUserBO> userBoList = new ArrayList<>();
+        users.stream().forEach(user -> {
+            //封装结果
+            ManagerUserBO userBO = new ManagerUserBO();
+            userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+            userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+            List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
+
+            if(CollectionUtils.isNotEmpty(userDepartmentList)) {
+                // 用户组织关系
+                Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+                List<DeptPairBO> deptPairList = new ArrayList<>();
+                fillDeptPairList(byDiffDeptGroupMap,deptPairList);
+                userBO.setUserDeptPairList(deptPairList);
+            }
+            BeanUtils.copyProperties(user, userBO);
+            userBoList.add(userBO);
+        });
+        return userBoList;
     }
 
     private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList){

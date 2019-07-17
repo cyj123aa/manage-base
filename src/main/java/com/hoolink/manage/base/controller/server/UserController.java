@@ -144,7 +144,7 @@ public class UserController {
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取个人基础信息")
     @LogAndParam(value = "获取个人基础信息失败")
-    public BackBO<ManagerUserBO> getManagerUserInfo(@RequestBody Long  userId) throws Exception{
+    public BackBO<List<ManagerUserBO>> getManagerUserInfo(@RequestBody List<Long>  userId) throws Exception{
         return BackBOUtil.defaultBackBO(userService.getPeopleInfo(userId));
     }
 }

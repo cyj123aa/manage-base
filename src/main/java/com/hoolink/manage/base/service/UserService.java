@@ -221,7 +221,7 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    ManagerUserBO getPeopleInfo(Long userId) throws Exception;
+    List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception;
     /**
      * 修改密码
      * @param updatePasswdParam
