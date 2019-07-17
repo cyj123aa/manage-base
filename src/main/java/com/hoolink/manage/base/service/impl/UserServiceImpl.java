@@ -1496,25 +1496,24 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
         }
 
-        ManagerUserBO personalInfo = new ManagerUserBO();
-        BeanUtils.copyProperties(user, personalInfo);
+        ManagerUserBO managerUserBO = new ManagerUserBO();
+        BeanUtils.copyProperties(user, managerUserBO);
 
 
         // 获取组织树
-        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
-            .listWithMoreByUserIdList(Arrays.asList(user.getId()));
+        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService.listWithMoreByUserIdList(Arrays.asList(user.getId()));
         Set<String> companySet = new HashSet<>();
         userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
             companySet.add(ud.getDeptName());
         });
-        personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
+        managerUserBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
         // 用户组织关系
         Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
         List<DeptPairBO> deptPairList = new ArrayList<>();
         fillDeptPairList(byDiffDeptGroupMap,deptPairList);
-        personalInfo.setUserDeptPairList(deptPairList);
-        return personalInfo;
+        managerUserBO.setUserDeptPairList(deptPairList);
+        return managerUserBO;
     }
 
     private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList){
