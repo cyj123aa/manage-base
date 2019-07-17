@@ -49,7 +49,7 @@ public abstract class TestController {
      */
     public void mockResources(){
         CurrentUserBO baseUserBO = new CurrentUserBO();
-        baseUserBO.setUserId(1L);
+        baseUserBO.setUserId(9L);
         baseUserBO.setRoleId(1L);
         baseUserBO.setAccount("admin");
         ContextUtils.setInvocationContext(invocationContext);
@@ -59,12 +59,12 @@ public abstract class TestController {
     /**
      * post请求
      * @param param
-     * @param txId
+     * @param url
      * @return
      * @throws Exception
      */
-    protected String postRequestMethod(String param, String txId) throws Exception {
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(txId)
+    protected String postRequestMethod(String param, String url) throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(url)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(param)
                 .accept(MediaType.APPLICATION_JSON))
