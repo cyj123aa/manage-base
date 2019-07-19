@@ -36,7 +36,7 @@ public abstract class TestController {
     protected MockMvc mockMvc;
 
     @SpyBean
-    private InvocationContext invocationContext;
+    protected InvocationContext invocationContext;
 
     @Before
     public void setUp(){
