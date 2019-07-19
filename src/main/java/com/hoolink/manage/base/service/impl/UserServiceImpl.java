@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService {
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
         checkAccount(user);
         // 缓存当前用户
-        String token = cacheSession(user,isMobile);
+        String token = cacheSession(user,isMobile,true);
 
         //设置登陆时间
         User toUpdateUser = new User();
@@ -488,7 +488,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String cacheSession(User user,Boolean isMobile) throws Exception {
+    public String cacheSession(User user,Boolean isMobile,Boolean resetToken) throws Exception {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
@@ -509,7 +509,13 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
         //设置角色类型
         currentUserBO.setRoleType(role.getRoleType());
-        return sessionService.cacheCurrentUser(currentUserBO,isMobile);
+        if(resetToken){
+            //更新token
+            return sessionService.cacheCurrentUser(currentUserBO,isMobile);
+        }else{
+            //维持用户原token
+            return sessionService.cacheCurrentUserInfo(currentUserBO,isMobile);
+        }
     }
 
     private Long getCurrentUserId() {
@@ -1005,7 +1011,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
         //更新一下当前用户
-        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false);
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false,false);
     }
 
     @Override

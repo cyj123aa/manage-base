@@ -20,6 +20,14 @@ public interface SessionService {
     String cacheCurrentUser(CurrentUserBO currentUserBO,Boolean isMobile);
 
     /**
+     * 缓存当前用户信息 不更新token
+     * @param currentUserBO
+     * @param isMobile
+     * @return
+     */
+    String cacheCurrentUserInfo(CurrentUserBO currentUserBO,Boolean isMobile);
+
+    /**
      * 根据传入token 获取用户最新的用户信息
      * 对于异地登录场景，传入的token会和user中的token不一致
      *

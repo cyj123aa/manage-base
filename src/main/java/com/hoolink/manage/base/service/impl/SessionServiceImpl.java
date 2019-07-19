@@ -55,6 +55,29 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public String cacheCurrentUserInfo(CurrentUserBO currentUserBO,Boolean isMobile) {
+        String token;
+        if(isMobile){
+            CurrentUserBO userBO = sessionOperation.get(getMobileKey(currentUserBO.getUserId()));
+            if(userBO==null){
+                return null;
+            }
+            token=userBO.getToken();
+            currentUserBO.setMobileToken(token);
+            sessionOperation.set(getMobileKey(currentUserBO.getUserId()), currentUserBO, SESSION_TIMEOUT_HOURS, TimeUnit.HOURS);
+        }else{
+            CurrentUserBO userBO = sessionOperation.get(getKey(currentUserBO.getUserId()));
+            if(userBO==null){
+                return null;
+            }
+            token=userBO.getToken();
+            currentUserBO.setToken(token);
+            sessionOperation.set(getKey(currentUserBO.getUserId()), currentUserBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+        }
+        return token;
+    }
+
+    @Override
     public CurrentUserBO getCurrentUser(String token,boolean ismobile) {
         String decrypt = Base64Util.decode(token);
         if (decrypt == null) {
