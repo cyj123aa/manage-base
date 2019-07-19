@@ -214,14 +214,6 @@ public interface UserService {
      * @throws Exception
      */
     PersonalInfoBO getPersonalInfo() throws Exception;
-
-    /**
-     * 获取用户信息
-     * @param userId
-     * @return
-     * @throws Exception
-     */
-    ManagerUserBO getPeopleInfo(Long userId) throws Exception;
     /**
      * 修改密码
      * @param updatePasswdParam
@@ -390,4 +382,12 @@ public interface UserService {
      * @throws Exception
      */
     boolean checkPassword(String password) throws Exception;
+
+    /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception;
 }
