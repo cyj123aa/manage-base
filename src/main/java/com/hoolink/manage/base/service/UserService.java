@@ -369,10 +369,12 @@ public interface UserService {
     /**
      * 缓存当前用户
      * @param user
+     * @param isMobile
+     * @param resetToken 是否需要重置token
      * @return
      * @throws Exception
      */
-    String cacheSession(User user,Boolean isMobile) throws Exception;
+    String cacheSession(User user,Boolean isMobile,Boolean resetToken) throws Exception;
 
 
     /**
