@@ -1484,18 +1484,6 @@ public class UserServiceImpl implements UserService {
         SimpleDeptUserBO userBO = CopyPropertiesUtil.copyBean(userList.get(0), SimpleDeptUserBO.class);
         return userBO;
     }
-
-    @Override
-    public List<Long> getParentDeptByUserId(Long userId) {
-        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
-        example.createCriteria().andUserIdEqualTo(userId);
-        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(list)){
-            return null;
-        }
-        return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
-    }
-
     @Override
     public List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception{
         UserExample example = new UserExample();
@@ -1544,4 +1532,17 @@ public class UserServiceImpl implements UserService {
             deptPairList.add(deptPair);
         }
     }
+
+    @Override
+    public List<Long> getParentDeptByUserId(Long userId) {
+        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
+        example.createCriteria().andUserIdEqualTo(userId);
+        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
+    }
+
+
 }

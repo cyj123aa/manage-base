@@ -135,16 +135,17 @@ public class UserController {
         return BackBOUtil.defaultBackBO(userService.getParentDeptByUserId(userId));
     }
 
-    @PostMapping(value = "checkPassword")
-    @ApiOperation(value = "校验密码")
-    @LogAndParam(value = "校验密码失败，请稍后重试")
-    public BackBO<Boolean> checkPassword(@RequestBody String password)throws Exception{
-        return BackBOUtil.defaultBackBO(userService.checkPassword(password));
-    }
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取个人基础信息")
     @LogAndParam(value = "获取个人基础信息失败")
     public BackBO<List<ManagerUserBO>> getManagerUserInfo(@RequestBody List<Long>  userId) throws Exception{
         return BackBOUtil.defaultBackBO(userService.getPeopleInfo(userId));
+    }
+
+    @PostMapping(value = "checkPassword")
+    @ApiOperation(value = "校验密码")
+    @LogAndParam(value = "校验密码失败，请稍后重试")
+    public BackBO<Boolean> checkPassword(@RequestBody String password)throws Exception{
+        return BackBOUtil.defaultBackBO(userService.checkPassword(password));
     }
 }
