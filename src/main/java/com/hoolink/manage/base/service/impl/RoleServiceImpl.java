@@ -167,8 +167,6 @@ public class RoleServiceImpl implements RoleService {
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
-        //更新当前用户信息  todo
-        //userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class),false,true);
     }
 
     /**
@@ -220,6 +218,7 @@ public class RoleServiceImpl implements RoleService {
         role.setUpdated(System.currentTimeMillis());
         role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         roleMapper.updateByPrimaryKeySelective(role);
+
     }
 
     @Override
