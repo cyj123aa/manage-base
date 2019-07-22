@@ -134,6 +134,7 @@ public class MenuServiceImpl implements MenuService {
     private void fillDept(EdmResourceRepertory byType, EdmMenuTreeBO edmMenuTreeBO, List<DeptPositionBO> deptAllList) {
         List<DeptPositionBO> companyList = null;
         if(CollectionUtils.isNotEmpty(deptAllList)){
+            deptAllList=removeDuplict(deptAllList);
             companyList = deptAllList.stream().filter(deptPositionBO -> EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()))
                     .collect(Collectors.toList());
         }
