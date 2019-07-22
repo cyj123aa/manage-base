@@ -167,8 +167,7 @@ public class RoleServiceImpl implements RoleService {
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
-        //更新当前用户信息  todo
-        //userService.cacheSession(CopyPropertiesUtil.copyBean(ContextUtil.getManageCurrentUser(),User.class),false,true);
+        //更新当前用户信息
     }
 
     /**
@@ -220,6 +219,16 @@ public class RoleServiceImpl implements RoleService {
         role.setUpdated(System.currentTimeMillis());
         role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         roleMapper.updateByPrimaryKeySelective(role);
+        //如果角色被禁用或者被删除，就删除对应人的session信息
+        if(!role.getRoleStatus() || !role.getEnabled()){
+            UserExample userExample=new UserExample();
+            userExample.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(role.getId());
+            List<User> list=userMapper.selectByExample(userExample);
+            if(CollectionUtils.isNotEmpty(list)){
+                List<Long> userIds=list.stream().map(User::getId).collect(Collectors.toList());
+                sessionService.deleteRedisUser(userIds);
+            }
+        }
     }
 
     @Override
