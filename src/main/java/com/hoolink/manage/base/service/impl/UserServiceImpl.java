@@ -283,11 +283,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void mobileLogout() {
-        CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByMobileToken());
+        CurrentUserBO currentUser = sessionService.getMobileCurrentUser(sessionService.getUserIdByMobileToken());
         InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.TOKEN);
+        String token =context.getContext(ContextConstant.MOBILE_TOKEN);
         // 避免导致异地登录账号退出
-        if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
+        if (currentUser != null && Objects.equals(currentUser.getMobileToken(), token)) {
             sessionService.deleteMobileSession(currentUser.getUserId());
         }
     }
@@ -1196,7 +1196,9 @@ public class UserServiceImpl implements UserService {
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
-        sessionService.deleteSession(userId);
+        List<Long> list=new ArrayList<>();
+        list.add(userId);
+        sessionService.deleteRedisUser(list);
     }
 
     private String setGreeting() {
