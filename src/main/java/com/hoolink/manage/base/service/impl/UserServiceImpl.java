@@ -288,7 +288,7 @@ public class UserServiceImpl implements UserService {
         String token =context.getContext(ContextConstant.TOKEN);
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
-            sessionService.deleteSession(currentUser.getUserId());
+            sessionService.deleteMobileSession(currentUser.getUserId());
         }
     }
 
