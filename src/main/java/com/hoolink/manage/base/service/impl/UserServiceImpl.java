@@ -1012,6 +1012,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateByPrimaryKeySelective(user);
         //更新一下当前用户
         cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false,false);
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),true,false);
     }
 
     @Override
