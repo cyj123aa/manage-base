@@ -3,6 +3,10 @@ package com.hoolink.manage.base.controller.web;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.hoolink.manage.base.controller.TestController;
+import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
+import com.hoolink.manage.base.dao.mapper.UserMapper;
+import com.hoolink.manage.base.dao.model.ManageRole;
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
 import com.hoolink.manage.base.vo.req.PhoneParamVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
@@ -15,7 +19,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * @Author: xuli
@@ -27,6 +38,12 @@ public class UserControllerTest extends TestController {
 
     @Autowired
     private UserController userController;
+
+    @MockBean
+    private UserMapper userMapper;
+
+    @MockBean
+    private ManageRoleMapper manageRoleMapper;
 
     @Before
     public void setUp(){
@@ -43,6 +60,24 @@ public class UserControllerTest extends TestController {
         LoginParamVO loginParam=new LoginParamVO();
         loginParam.setAccount("admin");
         loginParam.setPasswd("36d5c979160b44d9549f09c76638cab8");
+
+        User user=new User();
+        user.setId(1L);
+        user.setUserAccount("1");
+        user.setFirstLogin(false);
+        user.setPhone("18596898523");
+        user.setStatus(true);
+        user.setRoleId(1L);
+        user.setImgId(1L);
+        List<User> list=new ArrayList<>();
+        list.add(user);
+        when(userMapper.selectByExample(any())).thenReturn(list);
+
+        ManageRole role=new ManageRole();
+        role.setId(1L);
+        when(manageRoleMapper.selectByPrimaryKey(any())).thenReturn(role);
+
+
         String param=JSONObject.toJSONString(loginParam);
         String contentAsString = postRequestMethod(param, "/web/user/login");
         BackVO backVO= JSONUtils.parse(contentAsString,new TypeReference<BackVO<LoginResultVO>>(){});
