@@ -14,17 +14,18 @@
     <result column="passwd" jdbcType="VARCHAR" property="passwd" />
     <result column="img_id" jdbcType="BIGINT" property="imgId" />
     <result column="phone" jdbcType="VARCHAR" property="phone" />
-    <result column="company" jdbcType="VARCHAR" property="company" />
     <result column="position" jdbcType="VARCHAR" property="position" />
     <result column="encry_level_company" jdbcType="INTEGER" property="encryLevelCompany" />
     <result column="first_login" jdbcType="BIT" property="firstLogin" />
     <result column="last_time" jdbcType="BIGINT" property="lastTime" />
     <result column="user_status" jdbcType="BIT" property="status" />
+    <result column="view_encry_level_permitted" jdbcType="BIT" property="viewEncryLevelPermitted" />
     <result column="creator" jdbcType="BIGINT" property="creator" />
     <result column="updator" jdbcType="BIGINT" property="updator" />
     <result column="created" jdbcType="BIGINT" property="created" />
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -94,9 +95,9 @@
     <!--
     @mbggenerated
     -->
-    id, user_no, user_account, user_name, sex, role_id, passwd, img_id, phone, company, 
-    position, encry_level_company, first_login, last_time, user_status, creator, updator, 
-    created, updated, enabled
+    id, user_no, user_account, user_name, sex, role_id, passwd, img_id, phone, position, 
+    encry_level_company, first_login, last_time, user_status, view_encry_level_permitted, 
+    creator, updator, created, updated, enabled, device_code
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.UserExample" resultMap="BaseResultMap">
     <!--
@@ -146,18 +147,18 @@
     -->
     insert into manage_user (user_no, user_account, user_name, 
       sex, role_id, passwd, img_id, 
-      phone, company, position, 
-      encry_level_company, first_login, last_time, 
-      user_status, creator, updator, 
-      created, updated, enabled
-      )
+      phone, position, encry_level_company, 
+      first_login, last_time, user_status, 
+      view_encry_level_permitted, creator, updator, 
+      created, updated, enabled, 
+      device_code)
     values (#{userNo,jdbcType=VARCHAR}, #{userAccount,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{sex,jdbcType=BIT}, #{roleId,jdbcType=BIGINT}, #{passwd,jdbcType=VARCHAR}, #{imgId,jdbcType=BIGINT}, 
-      #{phone,jdbcType=VARCHAR}, #{company,jdbcType=VARCHAR}, #{position,jdbcType=VARCHAR}, 
-      #{encryLevelCompany,jdbcType=INTEGER}, #{firstLogin,jdbcType=BIT}, #{lastTime,jdbcType=BIGINT}, 
-      #{status,jdbcType=BIT}, #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, 
-      #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}
-      )
+      #{phone,jdbcType=VARCHAR}, #{position,jdbcType=VARCHAR}, #{encryLevelCompany,jdbcType=INTEGER}, 
+      #{firstLogin,jdbcType=BIT}, #{lastTime,jdbcType=BIGINT}, #{status,jdbcType=BIT}, 
+      #{viewEncryLevelPermitted,jdbcType=BIT}, #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, 
+      #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}, 
+      #{deviceCode,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.User" useGeneratedKeys="true">
     <!--
@@ -189,9 +190,6 @@
       <if test="phone != null">
         phone,
       </if>
-      <if test="company != null">
-        company,
-      </if>
       <if test="position != null">
         position,
       </if>
@@ -207,6 +205,9 @@
       <if test="status != null">
         user_status,
       </if>
+      <if test="viewEncryLevelPermitted != null">
+        view_encry_level_permitted,
+      </if>
       <if test="creator != null">
         creator,
       </if>
@@ -221,6 +222,9 @@
       </if>
       <if test="enabled != null">
         enabled,
+      </if>
+      <if test="deviceCode != null">
+        device_code,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -248,9 +252,6 @@
       <if test="phone != null">
         #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        #{company,jdbcType=VARCHAR},
-      </if>
       <if test="position != null">
         #{position,jdbcType=VARCHAR},
       </if>
@@ -266,6 +267,9 @@
       <if test="status != null">
         #{status,jdbcType=BIT},
       </if>
+      <if test="viewEncryLevelPermitted != null">
+        #{viewEncryLevelPermitted,jdbcType=BIT},
+      </if>
       <if test="creator != null">
         #{creator,jdbcType=BIGINT},
       </if>
@@ -280,6 +284,9 @@
       </if>
       <if test="enabled != null">
         #{enabled,jdbcType=BIT},
+      </if>
+      <if test="deviceCode != null">
+        #{deviceCode,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -325,9 +332,6 @@
       <if test="record.phone != null">
         phone = #{record.phone,jdbcType=VARCHAR},
       </if>
-      <if test="record.company != null">
-        company = #{record.company,jdbcType=VARCHAR},
-      </if>
       <if test="record.position != null">
         position = #{record.position,jdbcType=VARCHAR},
       </if>
@@ -343,6 +347,9 @@
       <if test="record.status != null">
         user_status = #{record.status,jdbcType=BIT},
       </if>
+      <if test="record.viewEncryLevelPermitted != null">
+        view_encry_level_permitted = #{record.viewEncryLevelPermitted,jdbcType=BIT},
+      </if>
       <if test="record.creator != null">
         creator = #{record.creator,jdbcType=BIGINT},
       </if>
@@ -357,6 +364,9 @@
       </if>
       <if test="record.enabled != null">
         enabled = #{record.enabled,jdbcType=BIT},
+      </if>
+      <if test="record.deviceCode != null">
+        device_code = #{record.deviceCode,jdbcType=VARCHAR},
       </if>
     </set>
     <if test="_parameter != null">
@@ -377,17 +387,18 @@
       passwd = #{record.passwd,jdbcType=VARCHAR},
       img_id = #{record.imgId,jdbcType=BIGINT},
       phone = #{record.phone,jdbcType=VARCHAR},
-      company = #{record.company,jdbcType=VARCHAR},
       position = #{record.position,jdbcType=VARCHAR},
       encry_level_company = #{record.encryLevelCompany,jdbcType=INTEGER},
       first_login = #{record.firstLogin,jdbcType=BIT},
       last_time = #{record.lastTime,jdbcType=BIGINT},
       user_status = #{record.status,jdbcType=BIT},
+      view_encry_level_permitted = #{record.viewEncryLevelPermitted,jdbcType=BIT},
       creator = #{record.creator,jdbcType=BIGINT},
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
       updated = #{record.updated,jdbcType=BIGINT},
-      enabled = #{record.enabled,jdbcType=BIT}
+      enabled = #{record.enabled,jdbcType=BIT},
+      device_code = #{record.deviceCode,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -422,9 +433,6 @@
       <if test="phone != null">
         phone = #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        company = #{company,jdbcType=VARCHAR},
-      </if>
       <if test="position != null">
         position = #{position,jdbcType=VARCHAR},
       </if>
@@ -440,6 +448,9 @@
       <if test="status != null">
         user_status = #{status,jdbcType=BIT},
       </if>
+      <if test="viewEncryLevelPermitted != null">
+        view_encry_level_permitted = #{viewEncryLevelPermitted,jdbcType=BIT},
+      </if>
       <if test="creator != null">
         creator = #{creator,jdbcType=BIGINT},
       </if>
@@ -454,6 +465,9 @@
       </if>
       <if test="enabled != null">
         enabled = #{enabled,jdbcType=BIT},
+      </if>
+      <if test="deviceCode != null">
+        device_code = #{deviceCode,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -471,17 +485,18 @@
       passwd = #{passwd,jdbcType=VARCHAR},
       img_id = #{imgId,jdbcType=BIGINT},
       phone = #{phone,jdbcType=VARCHAR},
-      company = #{company,jdbcType=VARCHAR},
       position = #{position,jdbcType=VARCHAR},
       encry_level_company = #{encryLevelCompany,jdbcType=INTEGER},
       first_login = #{firstLogin,jdbcType=BIT},
       last_time = #{lastTime,jdbcType=BIGINT},
       user_status = #{status,jdbcType=BIT},
+      view_encry_level_permitted = #{viewEncryLevelPermitted,jdbcType=BIT},
       creator = #{creator,jdbcType=BIGINT},
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},
       updated = #{updated,jdbcType=BIGINT},
-      enabled = #{enabled,jdbcType=BIT}
+      enabled = #{enabled,jdbcType=BIT},
+      device_code = #{deviceCode,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

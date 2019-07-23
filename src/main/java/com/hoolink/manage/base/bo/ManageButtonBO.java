@@ -4,25 +4,45 @@ import lombok.Data;
 
 /**
  * @author lijunling
- * @description
- * @date 2019/05/15 18:59
+ *
+ * @date 2019/05/22 11:49
  */
 @Data
-public class ManageDepartmentBO {
+public class ManageButtonBO {
     /**
      * 主键
      */
     private Long id;
 
     /**
-     * 名称
+     * 菜单表外键
      */
-    private String name;
+    private Long menuId;
 
     /**
-     * 所属公司
+     * 按钮编码
      */
-    private String company;
+    private String buttonCode;
+
+    /**
+     * 按钮名称
+     */
+    private String buttonName;
+
+    /**
+     * 按钮url
+     */
+    private String buttonUrl;
+
+    /**
+     * 按钮描述
+     */
+    private String buttonDesc;
+
+    /**
+     * 按钮级别 1-查询类 2-操作类
+     */
+    private Byte buttonType;
 
     /**
      * 创建人
@@ -48,4 +68,5 @@ public class ManageDepartmentBO {
      * 数据有效性
      */
     private Boolean enabled;
+
 }

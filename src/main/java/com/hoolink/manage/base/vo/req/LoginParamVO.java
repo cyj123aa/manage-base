@@ -3,6 +3,7 @@ package com.hoolink.manage.base.vo.req;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
 import lombok.Data;
 
+import javax.annotation.RegEx;
 import javax.validation.constraints.NotBlank;
 
 /**
@@ -29,4 +30,15 @@ public class LoginParamVO {
             groups = {ManagerBaseGroup.UserLogin.class}
     )
     private String passwd;
+
+    /**
+     * 旧密码
+     */
+    private String oldPasswd;
+
+    /**
+     * 手机验证码
+     */
+    private String code;
+
 }

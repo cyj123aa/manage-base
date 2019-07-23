@@ -1,8 +1,10 @@
 package com.hoolink.manage.base.bo;
 
+import com.hoolink.sdk.bo.edm.RepertoryBO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author: xuli
@@ -24,4 +26,43 @@ public class LoginResultBO implements Serializable {
      * 手机号
      */
     private String phone;
+
+    /**
+     * EDM系统权限
+     */
+    private Boolean accessEDM;
+    /**
+     * hoolink系统权限
+     */
+    private Boolean accessHoolink;
+
+    /**
+     * 问候语
+     */
+    private String greetings;
+
+    /**
+     * 用户名
+     */
+    private String name;
+
+    /**
+     * 图像url
+     */
+    private String image;
+
+    /**
+     * edm库的权限，1 部门资源，2 缓存库，3 资源库
+     */
+    private List<RepertoryBO> edmRepertory;
+
+
+    private List<RepertoryBO> repertoryList;
+
+    /**
+     * 角色名称
+     */
+    private String roleName;
+
+    private Byte roleLevel;
 }

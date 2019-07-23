@@ -7,12 +7,14 @@
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="dept_name" jdbcType="VARCHAR" property="name" />
-    <result column="company" jdbcType="VARCHAR" property="company" />
+    <result column="dept_type" jdbcType="TINYINT" property="deptType" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
     <result column="creator" jdbcType="BIGINT" property="creator" />
     <result column="updator" jdbcType="BIGINT" property="updator" />
     <result column="created" jdbcType="BIGINT" property="created" />
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="parent_id_code" jdbcType="VARCHAR" property="parentIdCode" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -82,7 +84,8 @@
     <!--
     @mbggenerated
     -->
-    id, dept_name, company, creator, updator, created, updated, enabled
+    id, dept_name, dept_type, parent_id, creator, updator, created, updated, enabled, 
+    parent_id_code
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.ManageDepartmentExample" resultMap="BaseResultMap">
     <!--
@@ -130,12 +133,14 @@
     <!--
     @mbggenerated
     -->
-    insert into manage_department (dept_name, company, creator, 
-      updator, created, updated, 
-      enabled)
-    values (#{name,jdbcType=VARCHAR}, #{company,jdbcType=VARCHAR}, #{creator,jdbcType=BIGINT}, 
-      #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, 
-      #{enabled,jdbcType=BIT})
+    insert into manage_department (dept_name, dept_type, parent_id, 
+      creator, updator, created, 
+      updated, enabled, parent_id_code
+      )
+    values (#{name,jdbcType=VARCHAR}, #{deptType,jdbcType=TINYINT}, #{parentId,jdbcType=BIGINT}, 
+      #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, #{created,jdbcType=BIGINT}, 
+      #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}, #{parentIdCode,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.ManageDepartment" useGeneratedKeys="true">
     <!--
@@ -146,8 +151,11 @@
       <if test="name != null">
         dept_name,
       </if>
-      <if test="company != null">
-        company,
+      <if test="deptType != null">
+        dept_type,
+      </if>
+      <if test="parentId != null">
+        parent_id,
       </if>
       <if test="creator != null">
         creator,
@@ -164,13 +172,19 @@
       <if test="enabled != null">
         enabled,
       </if>
+      <if test="parentIdCode != null">
+        parent_id_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="name != null">
         #{name,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        #{company,jdbcType=VARCHAR},
+      <if test="deptType != null">
+        #{deptType,jdbcType=TINYINT},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
       </if>
       <if test="creator != null">
         #{creator,jdbcType=BIGINT},
@@ -186,6 +200,9 @@
       </if>
       <if test="enabled != null">
         #{enabled,jdbcType=BIT},
+      </if>
+      <if test="parentIdCode != null">
+        #{parentIdCode,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -210,8 +227,11 @@
       <if test="record.name != null">
         dept_name = #{record.name,jdbcType=VARCHAR},
       </if>
-      <if test="record.company != null">
-        company = #{record.company,jdbcType=VARCHAR},
+      <if test="record.deptType != null">
+        dept_type = #{record.deptType,jdbcType=TINYINT},
+      </if>
+      <if test="record.parentId != null">
+        parent_id = #{record.parentId,jdbcType=BIGINT},
       </if>
       <if test="record.creator != null">
         creator = #{record.creator,jdbcType=BIGINT},
@@ -228,6 +248,9 @@
       <if test="record.enabled != null">
         enabled = #{record.enabled,jdbcType=BIT},
       </if>
+      <if test="record.parentIdCode != null">
+        parent_id_code = #{record.parentIdCode,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -240,12 +263,14 @@
     update manage_department
     set id = #{record.id,jdbcType=BIGINT},
       dept_name = #{record.name,jdbcType=VARCHAR},
-      company = #{record.company,jdbcType=VARCHAR},
+      dept_type = #{record.deptType,jdbcType=TINYINT},
+      parent_id = #{record.parentId,jdbcType=BIGINT},
       creator = #{record.creator,jdbcType=BIGINT},
       updator = #{record.updator,jdbcType=BIGINT},
       created = #{record.created,jdbcType=BIGINT},
       updated = #{record.updated,jdbcType=BIGINT},
-      enabled = #{record.enabled,jdbcType=BIT}
+      enabled = #{record.enabled,jdbcType=BIT},
+      parent_id_code = #{record.parentIdCode,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -259,8 +284,11 @@
       <if test="name != null">
         dept_name = #{name,jdbcType=VARCHAR},
       </if>
-      <if test="company != null">
-        company = #{company,jdbcType=VARCHAR},
+      <if test="deptType != null">
+        dept_type = #{deptType,jdbcType=TINYINT},
+      </if>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
       </if>
       <if test="creator != null">
         creator = #{creator,jdbcType=BIGINT},
@@ -277,6 +305,9 @@
       <if test="enabled != null">
         enabled = #{enabled,jdbcType=BIT},
       </if>
+      <if test="parentIdCode != null">
+        parent_id_code = #{parentIdCode,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -286,12 +317,14 @@
     -->
     update manage_department
     set dept_name = #{name,jdbcType=VARCHAR},
-      company = #{company,jdbcType=VARCHAR},
+      dept_type = #{deptType,jdbcType=TINYINT},
+      parent_id = #{parentId,jdbcType=BIGINT},
       creator = #{creator,jdbcType=BIGINT},
       updator = #{updator,jdbcType=BIGINT},
       created = #{created,jdbcType=BIGINT},
       updated = #{updated,jdbcType=BIGINT},
-      enabled = #{enabled,jdbcType=BIT}
+      enabled = #{enabled,jdbcType=BIT},
+      parent_id_code = #{parentIdCode,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

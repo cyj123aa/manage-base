@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.hoolink.manage.base.bo.DictPairBO;
 import com.hoolink.manage.base.bo.ManageRoleBO;
 import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.utils.ContextUtil;
 
 /**
  * 角色字典值
@@ -25,7 +27,8 @@ public class RoleDict extends AbstractDict<Long, String>{
 	@Override
 	public List<DictPairBO<Long, String>> getDictPairInfo(Object param) {
 		List<DictPairBO<Long, String>> dictPairList = new ArrayList<>();
-		List<ManageRoleBO> roleList = roleService.list();
+		CurrentUserBO user = ContextUtil.getManageCurrentUser();
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId(), (Boolean) param);
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> dictPair = new DictPairBO<>();
 			dictPair.setKey(r.getId());
