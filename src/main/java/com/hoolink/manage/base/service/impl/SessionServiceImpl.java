@@ -149,6 +149,11 @@ public class SessionServiceImpl implements SessionService {
         return sessionOperation.get(getKey(userId));
     }
 
+    @Override
+    public CurrentUserBO getMobileCurrentUser(Long userId) {
+        return sessionOperation.get(getMobileKey(userId));
+    }
+
     public CurrentUserBO getCurrentUser(String token) {
         if(getUserIdByToken(token)==null){
             return null;

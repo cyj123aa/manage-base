@@ -64,6 +64,13 @@ public interface SessionService {
     CurrentUserBO getCurrentUser(Long userId);
 
     /**
+     * 根据用户id查询移动端的用户信息
+     * @param userId
+     * @return
+     */
+    CurrentUserBO getMobileCurrentUser(Long userId);
+
+    /**
      * 刷新 token 失效时间
      * @param userId
      * @param ismobile
