@@ -353,8 +353,7 @@ public class UserServiceImpl implements UserService {
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //调用ability发送验证码
         SmsBO smsBO = new SmsBO();
-        String content = messageSource.getMessage("sms.captcha", new Object[]{code}, Locale.getDefault());
-        smsBO.setContent(content);
+        smsBO.setContent(code);
         smsBO.setPhone(phone);
         abilityClient.sendMsg(smsBO);
         // 缓存剩余时间
