@@ -812,7 +812,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkAccountExist(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_EXISTS);
@@ -826,7 +826,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkUserNoExist(String userNo) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserNoEqualTo(userNo);
+        example.createCriteria().andUserNoEqualTo(userNo).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_EXISTS);
