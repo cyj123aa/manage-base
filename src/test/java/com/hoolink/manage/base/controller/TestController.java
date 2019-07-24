@@ -8,6 +8,7 @@ import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 //配置事务的回滚,对数据库的增删改都会回滚,便于测试用例的循环利用
 @Rollback
 @Transactional
+@AutoConfigureMockMvc
 public abstract class TestController {
 
     protected MockMvc mockMvc;
