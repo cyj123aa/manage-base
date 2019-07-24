@@ -7,6 +7,7 @@ import com.github.pagehelper.PageInfo;
 import com.hoolink.manage.base.bo.ManageRoleBO;
 import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
+import com.hoolink.manage.base.consumer.edm.EdmClient;
 import com.hoolink.manage.base.controller.TestController;
 import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
@@ -24,10 +25,13 @@ import com.hoolink.manage.base.vo.res.LoginResultVO;
 import com.hoolink.manage.base.vo.res.ManagerUserVO;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.ability.ObsBO;
+import com.hoolink.sdk.bo.edm.OperateFileLogBO;
 import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
 import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.JSONUtils;
 import com.hoolink.sdk.vo.BackVO;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +82,9 @@ public class UserControllerTest extends TestController {
 
     @MockBean
     private ManageDepartmentMapper departmentMapper;
+
+    @MockBean
+    private EdmClient edmClient;
 
     @Before
     public void setUp(){
@@ -342,6 +349,43 @@ public class UserControllerTest extends TestController {
     @Test
     public void exportList() throws Exception{
         String resultContent = postRequestMethod("{\"status\":\"\",\"pageSize\":10,\"pageNo\":1}", "/web/user/exportList");
-        System.out.println(resultContent);
+        Assert.assertEquals(true, StringUtils.isNotBlank(resultContent));
+    }
+
+    @Test
+    public void downloadTemplate() throws Exception{
+        String resultContent = postRequestMethod("", "/web/user/downloadTemplate");
+        Assert.assertEquals(true, StringUtils.isNotBlank(resultContent));
+    }
+
+    @Test
+    public void updatePassword() throws Exception{
+        Mockito.when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
+        String resultContent = postRequestMethod("{\"passwd\":\"123456\",\"phoneParam\":{\"phone\":\"13924651051\",\"code\":\"hoolink2019\"}}", "/web/user/updatePassword");
+        Assert.assertEquals(true, BackVOUtil.operateAccess().getStatus());
+    }
+
+    @Test
+    public void resetPhone() throws Exception{
+        Mockito.when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
+        String resultContent = postRequestMethod("{\"data\": 1}", "/web/user/resetPhone");
+        Assert.assertEquals(true, BackVOUtil.operateAccess().getStatus());
+    }
+
+    @Test
+    public void resetPasswd() throws Exception{
+        Mockito.when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
+        Mockito.when(sessionService.deleteSession(1L)).thenReturn(true);
+        String resultContent = postRequestMethod("{\"data\": 1}", "/web/user/resetPasswd");
+        Assert.assertEquals(true, BackVOUtil.operateAccess().getStatus());
+    }
+
+    @Test
+    public void listOperateLog() throws Exception{
+        String edmResultData = "{\"status\":true,\"data\":{\"pageNum\":1,\"pageSize\":10,\"size\":10,\"startRow\":1,\"endRow\":10,\"total\":34,\"pages\":4,\"list\":[{\"created\":1562217905943,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"12344\",\"operateResult\":\"成功\"},{\"created\":1562217878746,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"12344\",\"operateResult\":\"成功\"},{\"created\":1562217850101,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"12344\",\"operateResult\":\"成功\"},{\"created\":1562217808559,\"operateName\":\"tong\",\"operateContent\":\"添加收藏\",\"targetResouceName\":\"12344.MP4\",\"operateResult\":\"成功\"},{\"created\":1562217768651,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"acadiso_5\",\"operateResult\":\"成功\"},{\"created\":1562217763724,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"12344\",\"operateResult\":\"成功\"},{\"created\":1562217760209,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"a\",\"operateResult\":\"成功\"},{\"created\":1562217751838,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"12344\",\"operateResult\":\"成功\"},{\"created\":1562204400709,\"operateName\":\"tong\",\"operateContent\":\"查看文件\",\"targetResouceName\":\"a\",\"operateResult\":\"成功\"},{\"created\":1562204400573,\"operateName\":\"tong\",\"operateContent\":\"编辑文件\",\"targetResouceName\":\"a\",\"operateResult\":\"成功\"}],\"prePage\":0,\"nextPage\":2,\"isFirstPage\":true,\"isLastPage\":false,\"hasPreviousPage\":false,\"hasNextPage\":true,\"navigatePages\":8,\"navigatepageNums\":[1,2,3,4],\"navigateFirstPage\":1,\"navigateLastPage\":4,\"firstPage\":1,\"lastPage\":4},\"message\":null}";
+        Mockito.when(edmClient.listOperateLog(any())).thenReturn(JSONUtils.parse(edmResultData, new TypeReference<BackBO<PageInfo<OperateFileLogBO>>>(){}));
+        String resultContent = postRequestMethod("{\"operateStart\":null,\"operateEnd\":null,\"operatorId\":265,\"pageNo\":1,\"pageSize\":10,\"searchValue\":\"\"}", "/web/user/listOperateLog");
+        BackVO backVO= JSONUtils.parse(resultContent, new TypeReference<BackVO>(){});
+        Assert.assertEquals(true, backVO.getStatus());
     }
 }
