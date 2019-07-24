@@ -338,4 +338,10 @@ public class UserControllerTest extends TestController {
         BackVO backVO= JSONUtils.parse(resultContent, new TypeReference<BackVO>(){});
         Assert.assertEquals(true, backVO.getStatus());
     }
+
+    @Test
+    public void exportList() throws Exception{
+        String resultContent = postRequestMethod("{\"status\":\"\",\"pageSize\":10,\"pageNo\":1}", "/web/user/exportList");
+        System.out.println(resultContent);
+    }
 }
