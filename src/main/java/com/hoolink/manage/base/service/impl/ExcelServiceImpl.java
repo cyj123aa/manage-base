@@ -101,7 +101,7 @@ public class ExcelServiceImpl implements ExcelService{
             }
             List<Long> roleIdList = userExcelList.stream().map(ManagerUserParamBO::getRoleId).distinct().collect(Collectors.toList());
             if (!userService.checkHasRoleList(roleIdList)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR);
+                throw new BusinessException(HoolinkExceptionMassageEnum.UPLOAD_FILE_ERROR);
             }
 			userExcelList.forEach(u ->{
 				if (CollectionUtils.isEmpty(u.getUserDeptPairParamList())){
