@@ -2,11 +2,17 @@ package com.hoolink.manage.base.controller.web;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.hoolink.manage.base.bo.ManageRoleBO;
+import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.controller.TestController;
 import com.hoolink.manage.base.dao.mapper.ManageRoleMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.model.ManageRole;
 import com.hoolink.manage.base.dao.model.User;
+import com.hoolink.manage.base.service.MiddleUserDepartmentService;
+import com.hoolink.manage.base.service.RoleService;
+import com.hoolink.manage.base.service.SessionService;
+import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.vo.req.LoginParamVO;
 import com.hoolink.manage.base.vo.req.PhoneParamVO;
 import com.hoolink.manage.base.vo.res.LoginResultVO;
@@ -23,7 +29,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -44,6 +52,15 @@ public class UserControllerTest extends TestController {
 
     @MockBean
     private ManageRoleMapper manageRoleMapper;
+
+    @MockBean
+    private RoleService roleService;
+
+    @MockBean
+    private MiddleUserDepartmentService middleUserDepartmentService;
+
+    @MockBean
+    private SessionService sessionService;
 
     @Before
     public void setUp(){
@@ -77,6 +94,24 @@ public class UserControllerTest extends TestController {
         role.setId(1L);
         when(manageRoleMapper.selectByPrimaryKey(any())).thenReturn(role);
 
+        ManageRoleBO manageRoleBO=new ManageRoleBO();
+        manageRoleBO.setId(1L);
+        manageRoleBO.setRoleStatus(true);
+        manageRoleBO.setRoleLevel((byte)1);
+        when(roleService.selectById(any())).thenReturn(manageRoleBO);
+
+        List<MiddleUserDeptWithMoreBO> moreBOS=new ArrayList<>();
+        MiddleUserDeptWithMoreBO moreBO=new MiddleUserDeptWithMoreBO();
+        moreBO.setDeptType((byte)1);
+        moreBO.setDeptId(1L);
+        moreBOS.add(moreBO);
+        when(middleUserDepartmentService.listWithMoreByUserIdList(any())).thenReturn(moreBOS);
+
+        Set<String> set=new HashSet<>();
+        set.add("/manage-base/user/bindPhone");
+        when(roleService.listAccessUrlByRoleId(any())).thenReturn(set);
+
+        when(sessionService.cacheCurrentUser(any(),any())).thenReturn("");
 
         String param=JSONObject.toJSONString(loginParam);
         String contentAsString = postRequestMethod(param, "/web/user/login");
