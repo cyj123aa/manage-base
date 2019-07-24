@@ -811,7 +811,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkAccountExist(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_EXISTS);
@@ -825,7 +825,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkUserNoExist(String userNo) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserNoEqualTo(userNo);
+        example.createCriteria().andUserNoEqualTo(userNo).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_EXISTS);
@@ -1546,5 +1546,14 @@ public class UserServiceImpl implements UserService {
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
     }
 
-
+    @Override
+    public boolean checkHasRoleList(List<Long> roleIdList) throws Exception {
+        //拿到当前用户下的所有角色对比
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)){
+            return false;
+        }
+        List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
+        return myRoleIdList.containsAll(roleIdList);
+    }
 }
