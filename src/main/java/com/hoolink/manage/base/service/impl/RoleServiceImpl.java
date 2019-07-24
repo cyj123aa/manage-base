@@ -167,6 +167,28 @@ public class RoleServiceImpl implements RoleService {
         example.createCriteria().andRoleIdEqualTo(roleParamBO.getId());
         roleMenuMapper.deleteByExample(example);
         createMiddleRoleMenuList(roleMenuVOList, roleParamBO.getId());
+        //更新该角色用户的权限
+        updateAuth(roleParamBO.getId());
+    }
+
+    private void updateAuth(Long roleId){
+        if(roleId==null){
+            return;
+        }
+        UserExample example=new UserExample();
+        example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleId);
+        List<User> list=userMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(list)){
+            return;
+        }
+        for(User user:list){
+            try {
+                userService.cacheSession(user,true,false);
+                userService.cacheSession(user,false,false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
