@@ -42,6 +42,7 @@ import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
 import com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.UserExample.Criteria;
 import com.hoolink.manage.base.dict.AbstractDict;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.MiddleUserDepartmentService;
@@ -188,7 +189,7 @@ public class UserServiceImpl implements UserService {
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
         checkAccount(user);
         // 缓存当前用户
-        String token = cacheSession(user,isMobile);
+        String token = cacheSession(user,isMobile,true);
 
         //设置登陆时间
         User toUpdateUser = new User();
@@ -282,12 +283,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void mobileLogout() {
-        CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByMobileToken());
+        CurrentUserBO currentUser = sessionService.getMobileCurrentUser(sessionService.getUserIdByMobileToken());
         InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.TOKEN);
+        String token =context.getContext(ContextConstant.MOBILE_TOKEN);
         // 避免导致异地登录账号退出
-        if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
-            sessionService.deleteSession(currentUser.getUserId());
+        if (currentUser != null && Objects.equals(currentUser.getMobileToken(), token)) {
+            sessionService.deleteMobileSession(currentUser.getUserId());
         }
     }
 
@@ -352,8 +353,7 @@ public class UserServiceImpl implements UserService {
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //调用ability发送验证码
         SmsBO smsBO = new SmsBO();
-        String content = messageSource.getMessage("sms.captcha", new Object[]{code}, Locale.getDefault());
-        smsBO.setContent(content);
+        smsBO.setContent(code);
         smsBO.setPhone(phone);
         abilityClient.sendMsg(smsBO);
         // 缓存剩余时间
@@ -487,7 +487,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String cacheSession(User user,Boolean isMobile) throws Exception {
+    public String cacheSession(User user,Boolean isMobile,Boolean resetToken) throws Exception {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
@@ -508,7 +508,13 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
         //设置角色类型
         currentUserBO.setRoleType(role.getRoleType());
-        return sessionService.cacheCurrentUser(currentUserBO,isMobile);
+        if(resetToken){
+            //更新token
+            return sessionService.cacheCurrentUser(currentUserBO,isMobile);
+        }else{
+            //维持用户原token
+            return sessionService.cacheCurrentUserInfo(currentUserBO,isMobile);
+        }
     }
 
     private Long getCurrentUserId() {
@@ -805,7 +811,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkAccountExist(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_EXISTS);
@@ -819,7 +825,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkUserNoExist(String userNo) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserNoEqualTo(userNo);
+        example.createCriteria().andUserNoEqualTo(userNo).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_EXISTS);
@@ -1004,7 +1010,8 @@ public class UserServiceImpl implements UserService {
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
         //更新一下当前用户
-        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false);
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false,false);
+        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),true,false);
     }
 
     @Override
@@ -1029,13 +1036,15 @@ public class UserServiceImpl implements UserService {
             manageUserInfoBO.setCompany(userCompany.get(0).getDeptName());
             manageUserInfoBO.setCompanyId(userCompany.stream().map(UserDeptBO::getDeptId).collect(Collectors.toList()));
         }
-
-        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+        List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.POSITION.getKey().longValue());
         if(CollectionUtils.isEmpty(userDept)){
-           userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
-           if(CollectionUtils.isEmpty(userDept)){
-               userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
-           }
+            userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
+            if(CollectionUtils.isEmpty(userDept)){
+                userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
+                if(CollectionUtils.isEmpty(userDept)){
+                    userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
+                }
+            }
         }
         manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
         return manageUserInfoBO;
@@ -1149,18 +1158,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
 		List<DeptPairBO> deptPairList = new ArrayList<>();
-		for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
-			List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
-			DeptPairBO deptPair = new DeptPairBO();
-			deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-			deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-			if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
-				deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
-				deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
-			}
-			deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
-			deptPairList.add(deptPair);
-		}
+		fillDeptPairList(byDiffDeptGroupMap,deptPairList);
 		personalInfo.setUserDeptPairList(deptPairList);
 		return personalInfo;
 	}
@@ -1197,7 +1195,9 @@ public class UserServiceImpl implements UserService {
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
-        sessionService.deleteSession(userId);
+        List<Long> list=new ArrayList<>();
+        list.add(userId);
+        sessionService.deleteRedisUser(list);
     }
 
     private String setGreeting() {
@@ -1486,6 +1486,54 @@ public class UserServiceImpl implements UserService {
         SimpleDeptUserBO userBO = CopyPropertiesUtil.copyBean(userList.get(0), SimpleDeptUserBO.class);
         return userBO;
     }
+    @Override
+    public List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception{
+        UserExample example = new UserExample();
+        Criteria criteria = example.createCriteria();
+        criteria.andEnabledEqualTo(true).andIdIn(userId);
+        List<User> users = userMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(users)) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+        }
+        // 获取组织树
+        List<MiddleUserDeptWithMoreBO> middleUserDepartmentBOList = middleUserDepartmentService.listWithMoreByUserIdList(userId);
+        Map<Long, List<MiddleUserDeptWithMoreBO>> middleUserDepartmentMap = middleUserDepartmentBOList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getUserId));
+
+        List<ManagerUserBO> userBoList = new ArrayList<>();
+        users.stream().forEach(user -> {
+            //封装结果
+            ManagerUserBO userBO = new ManagerUserBO();
+            userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+            userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+            List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
+
+            if(CollectionUtils.isNotEmpty(userDepartmentList)) {
+                // 用户组织关系
+                Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+                List<DeptPairBO> deptPairList = new ArrayList<>();
+                fillDeptPairList(byDiffDeptGroupMap,deptPairList);
+                userBO.setUserDeptPairList(deptPairList);
+            }
+            BeanUtils.copyProperties(user, userBO);
+            userBoList.add(userBO);
+        });
+        return userBoList;
+    }
+
+    private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList){
+        for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+            List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+            DeptPairBO deptPair = new DeptPairBO();
+            deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+            deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+            if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+                deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+                deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+            }
+            deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.BACKSLASH)).toString());
+            deptPairList.add(deptPair);
+        }
+    }
 
     @Override
     public List<Long> getParentDeptByUserId(Long userId) {
@@ -1496,5 +1544,16 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean checkHasRoleList(List<Long> roleIdList) throws Exception {
+        //拿到当前用户下的所有角色对比
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)){
+            return false;
+        }
+        List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
+        return myRoleIdList.containsAll(roleIdList);
     }
 }
