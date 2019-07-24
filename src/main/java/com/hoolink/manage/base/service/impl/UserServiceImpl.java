@@ -1547,5 +1547,14 @@ public class UserServiceImpl implements UserService {
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
     }
 
-
+    @Override
+    public boolean checkHasRoleList(List<Long> roleIdList) throws Exception {
+        //拿到当前用户下的所有角色对比
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)){
+            return false;
+        }
+        List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
+        return myRoleIdList.containsAll(roleIdList);
+    }
 }

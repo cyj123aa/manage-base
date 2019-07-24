@@ -99,6 +99,10 @@ public class ExcelServiceImpl implements ExcelService{
             if(CollectionUtils.isEmpty(userExcelList)) {
             	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
             }
+            List<Long> roleIdList = userExcelList.stream().map(ManagerUserParamBO::getRoleId).distinct().collect(Collectors.toList());
+            if (!userService.checkHasRoleList(roleIdList)){
+                throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR);
+            }
 			userExcelList.forEach(u ->{
 				if (CollectionUtils.isEmpty(u.getUserDeptPairParamList())){
 					List<UserDeptPairParamBO> deptPairParamList = new ArrayList<>();
