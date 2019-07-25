@@ -542,16 +542,15 @@ public class UserServiceImpl implements UserService {
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
-		
+        PageHelper.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize());
+
         UserExample example = buildUserCriteria(userPageParamBO);
-        PageInfo<User> userPageInfo = PageHelper
-                .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
-                .doSelectPageInfo(() -> userMapper.selectByExample(example));
-        List<User> userList = userPageInfo.getList();
+        List<User> userList = userMapper.selectByExample(example);
+        PageInfo pageInfo = new PageInfo<>(userList);
 
         //组装用户数据
         List<ManagerUserBO> userBoList = buildUserBOList(userList);
-        PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(userPageInfo, ManagerUserBO.class);
+        PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(pageInfo, ManagerUserBO.class);
         userBOPageInfo.setList(userBoList);
         return userBOPageInfo;
     }
