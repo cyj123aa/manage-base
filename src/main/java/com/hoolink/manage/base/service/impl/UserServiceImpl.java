@@ -311,6 +311,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
@@ -321,6 +322,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(user.getId());
     }
 
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){

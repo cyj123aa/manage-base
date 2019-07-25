@@ -111,6 +111,23 @@ public class SessionServiceImpl implements SessionService {
             sessionOperation.getOperations().delete(mobileKey);
             return true;
         }catch (Exception e){
+            log.error("删除用户缓存信息异常，userIds为：{}",userIds);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean deleteRedisUser(Long userId){
+        if(userId==null){
+            return true;
+        }
+        try{
+            sessionOperation.getOperations().delete(getKey(userId));
+            sessionOperation.getOperations().delete(getMobileKey(userId));
+            return true;
+        }catch (Exception e){
+            log.error("删除用户缓存信息异常，userid为：{}",userId);
             e.printStackTrace();
         }
         return false;
