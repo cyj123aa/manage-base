@@ -300,6 +300,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(user.getId());
     }
 
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){
@@ -542,15 +543,15 @@ public class UserServiceImpl implements UserService {
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
-        PageHelper.startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize());
-
         UserExample example = buildUserCriteria(userPageParamBO);
-        List<User> userList = userMapper.selectByExample(example);
-        PageInfo pageInfo = new PageInfo<>(userList);
+        PageInfo<User> userPageInfo = PageHelper
+                .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
+                .doSelectPageInfo(() -> userMapper.selectByExample(example));
+        List<User> userList = userPageInfo.getList();
 
         //组装用户数据
         List<ManagerUserBO> userBoList = buildUserBOList(userList);
-        PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(pageInfo, ManagerUserBO.class);
+        PageInfo<ManagerUserBO> userBOPageInfo = CopyPropertiesUtil.copyPageInfo(userPageInfo, ManagerUserBO.class);
         userBOPageInfo.setList(userBoList);
         return userBOPageInfo;
     }
@@ -1402,7 +1403,14 @@ public class UserServiceImpl implements UserService {
         //查询下层的时候需要通过人的权限进行过滤
         CurrentUserBO currentUserBO=ContextUtil.getManageCurrentUser();
         List<DeptSecurityRepertoryBO> userList=userMapperExt.getDeptByUser(currentUserBO.getUserId());
+        //查询所选组织架构最底层的父级
+        MiddleUserDepartmentExample departmentExample=new MiddleUserDepartmentExample();
+        departmentExample.createCriteria().andUserIdEqualTo(currentUserBO.getUserId());
+        List<MiddleUserDepartment> middleUserDepartments=middleUserDepartmentMapper.selectByExample(departmentExample);
         List<Long> deptId=new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(middleUserDepartments)){
+            deptId.addAll(middleUserDepartments.stream().map(MiddleUserDepartment::getDeptId).collect(Collectors.toList()));
+        }
         for(DeptSecurityRepertoryBO deptSecurity:userList){
             deptId.add(deptSecurity.getDeptId());
             List<DeptSecurityRepertoryBO> childs=deptSecurity.getChilds();

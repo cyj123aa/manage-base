@@ -102,8 +102,8 @@ public class UserController {
     }
 
     @PostMapping(value = "resetPassword")
-    @ApiOperation(value = "重置密码")
-    @LogAndParam(value = "重置密码失败，请稍后重试")
+    @ApiOperation(value = "修改密码")
+    @LogAndParam(value = "修改密码失败，请稍后重试")
     public BackVO<Void> resetPassword(@RequestBody LoginParamVO loginParam)throws Exception  {
         BackVO validateParameter = ValidatorUtil.validateParameter(loginParam, ManagerBaseGroup.UserLogin.class);
         if (validateParameter != null) {
@@ -334,6 +334,7 @@ public class UserController {
     @ApiOperation(value = "重置密码")
     @LogAndParam(value = "重置密码失败，请稍后重试", check = CheckEnum.DATA_NOT_NULL)
     public BackVO<Void> resetPasswd(@RequestBody BaseParam<Long> userIdParam)throws Exception  {
+        //管理员重置密码
         userService.resetPasswd(userIdParam.getData());
         return BackVOUtil.operateAccess();
     }
