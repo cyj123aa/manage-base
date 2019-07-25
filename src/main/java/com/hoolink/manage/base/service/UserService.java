@@ -395,8 +395,11 @@ public interface UserService {
 
     /**
      * excel录入的时候检查所录入的角色列表是否是当前用户下的角色
+     * @param roleIdList 角色列表
      * @return
      * @throws Exception
      */
     boolean checkHasRoleList(List<Long> roleIdList) throws Exception;
+
+
 }
