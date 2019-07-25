@@ -311,6 +311,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
@@ -1169,6 +1170,7 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePasswd(UpdatePasswdParamBO updatePasswdParam) {
         //校验手机验证码
         checkPhoneCode(updatePasswdParam.getPhoneParam());
@@ -1176,6 +1178,7 @@ public class UserServiceImpl implements UserService {
         User user = buildUserToUpdate(userId);
         user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(userId);
     }
 
     @Override
