@@ -221,6 +221,12 @@ public interface UserService {
     void updatePasswd(UpdatePasswdParamBO updatePasswdParam);
 
     /**
+     * 修改手机端密码
+     * @param mobileUpdateParamBO
+     */
+    void updateMobilePassword(MobileUpdateParamBO mobileUpdateParamBO);
+
+    /**
      * 重置手机号
      * @param userId
      */
@@ -395,8 +401,11 @@ public interface UserService {
 
     /**
      * excel录入的时候检查所录入的角色列表是否是当前用户下的角色
+     * @param roleIdList 角色列表
      * @return
      * @throws Exception
      */
     boolean checkHasRoleList(List<Long> roleIdList) throws Exception;
+
+
 }
