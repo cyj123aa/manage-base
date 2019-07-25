@@ -100,8 +100,9 @@ public class ExcelServiceImpl implements ExcelService{
             	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
             }
             List<Long> roleIdList = userExcelList.stream().map(ManagerUserParamBO::getRoleId).distinct().collect(Collectors.toList());
+            //校验所属角色
             if (!userService.checkHasRoleList(roleIdList)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_ROLE_ERROR);
+                throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_SELECT_ERROR);
             }
 			userExcelList.forEach(u ->{
 				if (CollectionUtils.isEmpty(u.getUserDeptPairParamList())){
@@ -136,6 +137,9 @@ public class ExcelServiceImpl implements ExcelService{
         DecimalFormat decimalFormat = new DecimalFormat("#");
         SimpleDateFormat sFormat = new SimpleDateFormat("MM/dd/yyyy");
         String value = "";
+        if (Objects.isNull(cell)){
+        	return value;
+		}
         //目前只是支持业务判断了string类型和布尔类型以及错误和为空的值，
         switch (cell.getCellTypeEnum()) {
             case STRING:
@@ -177,7 +181,6 @@ public class ExcelServiceImpl implements ExcelService{
         XSSFWorkbook wb = new XSSFWorkbook(inp);
         XSSFSheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
         
-        boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
         	XSSFRow row = sheet.getRow(rowNum);
         	if (Objects.isNull(row)){
@@ -187,26 +190,10 @@ public class ExcelServiceImpl implements ExcelService{
             //列 获取所有单元格的数据
             for (int j = 0; j < row.getLastCellNum(); j++) {
             	XSSFCell rowCell = row.getCell(j);
-                
-                if(!sheet.isColumnHidden(j) && rowCell == null) {
-                	flag = true;
-                	break;
-                };
-                
-                if (rowCell != null) {
-                    String value = getValue(rowCell);
-                    if(StringUtils.isBlank(value)) {
-                    	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
-                    }
-                    buildManagerUserParam(managerUserParam, j, value);
-                }
+				String value = getValue(rowCell);
+				buildManagerUserParam(managerUserParam, j, value);
             }
-            
-            if(flag) {
-            	break;
-            }else {
-            	userExcelList.add(managerUserParam);	
-            }
+			userExcelList.add(managerUserParam);
         }
         return userExcelList;
 	}
@@ -217,22 +204,33 @@ public class ExcelServiceImpl implements ExcelService{
 	 * @param j
 	 * @param value
 	 */
-	private void buildManagerUserParam(ManagerUserParamBO managerUserParam, int j, String value) {
+	private void buildManagerUserParam(ManagerUserParamBO managerUserParam, int j, String value) throws Exception{
         switch (j) {
 	        case 0:
 	        	//用户编号
+				if (StringUtils.isBlank(value)){
+					throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_NOT_NULL);
+				}
 	        	managerUserParam.setUserNo(value);
 	            break;
 	        case 1:
 	        	//用户姓名
+				if (StringUtils.isBlank(value)){
+					throw new BusinessException(HoolinkExceptionMassageEnum.USER_NAME_NOT_NULL);
+				}
 	        	managerUserParam.setName(value);
 	            break;
 	        case 2:
 	        	//用户性别
+				boolean correct = false;
 				for (ManagerUserSexEnum sexEnum: ManagerUserSexEnum.values()){
 					if (sexEnum.getValue().equals(value.trim())){
+						correct = true;
 						managerUserParam.setSex(sexEnum.getKey());
 					}
+				}
+				if (!correct){
+					throw new BusinessException(HoolinkExceptionMassageEnum.USER_SEX_SELECT_NULL);
 				}
 	            break;
 	        case 3:
@@ -251,6 +249,9 @@ public class ExcelServiceImpl implements ExcelService{
 						encryLevelDept = levelEnum.getKey();
 					}
 				}
+				if (Objects.isNull(encryLevelDept)){
+                    throw new BusinessException(HoolinkExceptionMassageEnum.ENCRYPTED_LEVEL_SELECT_ERROR);
+                }
 				List<UserDeptPairParamBO> userDeptPairParamList = new ArrayList<>();
 				UserDeptPairParamBO userDeptPairParam = new UserDeptPairParamBO();
 				userDeptPairParam.setEncryLevelDept(encryLevelDept);
@@ -260,6 +261,9 @@ public class ExcelServiceImpl implements ExcelService{
 	            break;
 	        case 5:
 	        	//职位
+				if (StringUtils.isBlank(value)){
+					throw new BusinessException(HoolinkExceptionMassageEnum.USER_POSITION_NOT_NULL);
+				}
 	        	managerUserParam.setPosition(value);
 	            break;
 	        case 6:
@@ -270,26 +274,32 @@ public class ExcelServiceImpl implements ExcelService{
 						encryLevelCompany = levelEnum.getKey();
 					}
 				}
+                if (Objects.isNull(encryLevelCompany)){
+                    throw new BusinessException(HoolinkExceptionMassageEnum.COMPANY_ENCRYPTED_LEVEL_SELECT_ERROR);
+                }
 				managerUserParam.setEncryLevelCompany(encryLevelCompany);
 	            break;
 	        case 7:
 	        	//登录账号
+				if (StringUtils.isBlank(value)){
+					throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_NOT_NULL);
+				}
 	        	managerUserParam.setUserAccount(value);
 	            break;
-	        case 8:
-	        	//用户性别id
-	        	managerUserParam.setSex("1".equals(value) ? true:false);
-	        	break;
-	        case 9:
-	        	//所属角色id
-	        	managerUserParam.setRoleId(Long.parseLong(value));
-	        	break;
-	        case 10:
-	        	//部门密保等级id
-	        	break;
-	        case 11:
-	        	//资源库密保等级id
-	        	break;
+			case 8:
+				//用户性别id
+				managerUserParam.setSex("1".equals(value) ? true:false);
+				break;
+			case 9:
+				//所属角色id
+				managerUserParam.setRoleId(Long.parseLong(value));
+				break;
+			case 10:
+				//部门密保等级id
+				break;
+			case 11:
+				//资源库密保等级id
+				break;
 	        default:
 	            break;
 	    }

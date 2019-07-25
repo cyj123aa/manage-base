@@ -50,6 +50,13 @@ public interface SessionService {
     Boolean deleteRedisUser(List<Long> userIds);
 
     /**
+     * 根据用户id删除缓存信息
+     * @param userId
+     * @return
+     */
+    Boolean deleteRedisUser(Long userId);
+
+    /**
      * 根据移动端token获取userid
      * @return
      */
