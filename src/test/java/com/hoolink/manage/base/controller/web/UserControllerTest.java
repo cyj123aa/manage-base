@@ -113,6 +113,8 @@ public class UserControllerTest extends TestController {
 
         when(sessionService.cacheCurrentUser(any(),any())).thenReturn("");
 
+        when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
+
         String param=JSONObject.toJSONString(loginParam);
         String contentAsString = postRequestMethod(param, "/web/user/login");
         BackVO backVO= JSONUtils.parse(contentAsString,new TypeReference<BackVO<LoginResultVO>>(){});
