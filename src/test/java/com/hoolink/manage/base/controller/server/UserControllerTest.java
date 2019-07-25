@@ -7,18 +7,13 @@ import com.alibaba.fastjson.TypeReference;
 import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
 import com.hoolink.manage.base.bo.UserDeptBO;
 import com.hoolink.manage.base.controller.TestController;
-import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.UserMapper;
-import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
-import com.hoolink.manage.base.dao.mapper.ext.ManageMenuMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
-import com.hoolink.manage.base.dao.model.ManageDepartment;
 import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.manage.base.service.MiddleUserDepartmentService;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.manager.ManageUserInfoBO;
 import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.utils.JSONUtils;
 import java.util.List;
 import org.junit.Assert;
@@ -40,17 +35,9 @@ public class UserControllerTest extends TestController {
     @Autowired
     private UserController userController;
 
-    @MockBean
-    private ManageMenuMapperExt manageMenuMapperExt;
 
     @MockBean
     private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
-
-    @MockBean
-    private ManageDepartmentMapperExt manageDepartmentMapperExt;
-
-    @MockBean
-    private ManageDepartmentMapper manageDepartmentMapper;
 
     @MockBean
     private UserMapper userMapper;
