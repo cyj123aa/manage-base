@@ -49,6 +49,7 @@ import com.hoolink.manage.base.service.MiddleUserDepartmentService;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.util.RegexUtil;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.BackBO;
@@ -167,6 +168,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private EdmClient edmClient;
+
+    @Autowired
+    private RegexUtil regexUtil;
 
 
     /*** 验证码超时时间，10分钟 */
@@ -307,6 +311,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
@@ -537,6 +542,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkPhoneExist(String phone) {
+        //校验手机号格式
+        matchPhone(phone);
         //查看手机号是否已经存在
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andPhoneEqualTo(phone);
@@ -1164,6 +1171,7 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePasswd(UpdatePasswdParamBO updatePasswdParam) {
         //校验手机验证码
         checkPhoneCode(updatePasswdParam.getPhoneParam());
@@ -1171,6 +1179,7 @@ public class UserServiceImpl implements UserService {
         User user = buildUserToUpdate(userId);
         user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(userId);
     }
 
     @Override
@@ -1555,5 +1564,11 @@ public class UserServiceImpl implements UserService {
         }
         List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
         return myRoleIdList.containsAll(roleIdList);
+    }
+
+    private void matchPhone(String phone){
+        if(!regexUtil.matchPhone(phone)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_FORMAT_ERROR);
+        }
     }
 }
