@@ -221,6 +221,12 @@ public interface UserService {
     void updatePasswd(UpdatePasswdParamBO updatePasswdParam);
 
     /**
+     * 修改手机端密码
+     * @param mobileUpdateParamBO
+     */
+    void updateMobilePassword(MobileUpdateParamBO mobileUpdateParamBO);
+
+    /**
      * 重置手机号
      * @param userId
      */
