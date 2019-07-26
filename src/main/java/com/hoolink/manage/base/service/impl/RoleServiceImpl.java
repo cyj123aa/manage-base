@@ -17,6 +17,7 @@ import com.hoolink.manage.base.util.RedisUtil;
 import com.hoolink.manage.base.vo.req.MiddleRoleMenuVO;
 import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
+import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.enums.ButtonTypeEnum;
 import com.hoolink.sdk.enums.PermissionEnum;
 import com.hoolink.sdk.exception.BusinessException;
@@ -238,7 +239,10 @@ public class RoleServiceImpl implements RoleService {
     private void updateRole(RoleParamBO roleParamBO) {
         ManageRole role = CopyPropertiesUtil.copyBean(roleParamBO, ManageRole.class);
         role.setUpdated(System.currentTimeMillis());
-        role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        CurrentUserBO currentUserBO = ContextUtil.getManageCurrentUser();
+        if(currentUserBO!=null){
+            role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        }
         roleMapper.updateByPrimaryKeySelective(role);
 
     }

@@ -2,29 +2,7 @@ package com.hoolink.manage.base.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DeptPositionBO;
-import com.hoolink.manage.base.bo.DeptSecurityBO;
-import com.hoolink.manage.base.bo.DeptTreeBO;
-import com.hoolink.manage.base.bo.DictInfoBO;
-import com.hoolink.manage.base.bo.DictParamBO;
-import com.hoolink.manage.base.bo.LoginParamBO;
-import com.hoolink.manage.base.bo.LoginResultBO;
-import com.hoolink.manage.base.bo.ManageRoleBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
-import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
-import com.hoolink.manage.base.bo.ManagerUserParamBO;
-import com.hoolink.manage.base.bo.MiddleUserDepartmentBO;
-import com.hoolink.manage.base.bo.MiddleUserDeptWithMoreBO;
-import com.hoolink.manage.base.bo.PersonalInfoBO;
-import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.RoleMenuPermissionBO;
-import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
-import com.hoolink.manage.base.bo.UserDeptBO;
-import com.hoolink.manage.base.bo.UserDeptPairBO;
-import com.hoolink.manage.base.bo.UserDeptPairParamBO;
-import com.hoolink.manage.base.bo.UserInfoBO;
-import com.hoolink.manage.base.bo.UserSecurityBO;
+import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
 import com.hoolink.manage.base.consumer.edm.EdmClient;
@@ -49,6 +27,7 @@ import com.hoolink.manage.base.service.MiddleUserDepartmentService;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.util.RegexUtil;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.BackBO;
@@ -167,6 +146,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private EdmClient edmClient;
+
+    @Autowired
+    private RegexUtil regexUtil;
 
 
     /*** 验证码超时时间，10分钟 */
@@ -307,6 +289,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
         User user = getUserByAccount(loginParam.getAccount());
@@ -317,6 +300,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(user.getId());
     }
 
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){
@@ -353,8 +337,7 @@ public class UserServiceImpl implements UserService {
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //调用ability发送验证码
         SmsBO smsBO = new SmsBO();
-        String content = messageSource.getMessage("sms.captcha", new Object[]{code}, Locale.getDefault());
-        smsBO.setContent(content);
+        smsBO.setContent(code);
         smsBO.setPhone(phone);
         abilityClient.sendMsg(smsBO);
         // 缓存剩余时间
@@ -538,6 +521,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkPhoneExist(String phone) {
+        //校验手机号格式
+        matchPhone(phone);
         //查看手机号是否已经存在
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true).andPhoneEqualTo(phone);
@@ -558,7 +543,6 @@ public class UserServiceImpl implements UserService {
 		if(CollectionUtils.isEmpty(roleList)) {
 			return new PageInfo<ManagerUserBO>();
 		}
-		
         UserExample example = buildUserCriteria(userPageParamBO);
         PageInfo<User> userPageInfo = PageHelper
                 .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
@@ -812,7 +796,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkAccountExist(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_EXISTS);
@@ -826,7 +810,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkUserNoExist(String userNo) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserNoEqualTo(userNo);
+        example.createCriteria().andUserNoEqualTo(userNo).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user != null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_EXISTS);
@@ -1165,6 +1149,7 @@ public class UserServiceImpl implements UserService {
 	}
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePasswd(UpdatePasswdParamBO updatePasswdParam) {
         //校验手机验证码
         checkPhoneCode(updatePasswdParam.getPhoneParam());
@@ -1172,6 +1157,22 @@ public class UserServiceImpl implements UserService {
         User user = buildUserToUpdate(userId);
         user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
         userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateMobilePassword(MobileUpdateParamBO mobileUpdateParamBO) {
+        Long userId = getCurrentUserId();
+        User user=userMapper.selectByPrimaryKey(userId);
+        if(!Objects.equals(MD5Util.MD5(mobileUpdateParamBO.getOldPassword()),user.getPasswd())){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PASSWORD_ERROR);
+        }
+        user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+        user.setUpdated(System.currentTimeMillis());
+        user.setPasswd(MD5Util.MD5(mobileUpdateParamBO.getNewPassword()));
+        userMapper.updateByPrimaryKeySelective(user);
+        sessionService.deleteRedisUser(userId);
     }
 
     @Override
@@ -1402,7 +1403,14 @@ public class UserServiceImpl implements UserService {
         //查询下层的时候需要通过人的权限进行过滤
         CurrentUserBO currentUserBO=ContextUtil.getManageCurrentUser();
         List<DeptSecurityRepertoryBO> userList=userMapperExt.getDeptByUser(currentUserBO.getUserId());
+        //查询所选组织架构最底层的父级
+        MiddleUserDepartmentExample departmentExample=new MiddleUserDepartmentExample();
+        departmentExample.createCriteria().andUserIdEqualTo(currentUserBO.getUserId());
+        List<MiddleUserDepartment> middleUserDepartments=middleUserDepartmentMapper.selectByExample(departmentExample);
         List<Long> deptId=new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(middleUserDepartments)){
+            deptId.addAll(middleUserDepartments.stream().map(MiddleUserDepartment::getDeptId).collect(Collectors.toList()));
+        }
         for(DeptSecurityRepertoryBO deptSecurity:userList){
             deptId.add(deptSecurity.getDeptId());
             List<DeptSecurityRepertoryBO> childs=deptSecurity.getChilds();
@@ -1547,5 +1555,20 @@ public class UserServiceImpl implements UserService {
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
     }
 
+    @Override
+    public boolean checkHasRoleList(List<Long> roleIdList) throws Exception {
+        //拿到当前用户下的所有角色对比
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)){
+            return false;
+        }
+        List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
+        return myRoleIdList.containsAll(roleIdList);
+    }
 
+    private void matchPhone(String phone){
+        if(!regexUtil.matchPhone(phone)){
+            throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_FORMAT_ERROR);
+        }
+    }
 }
