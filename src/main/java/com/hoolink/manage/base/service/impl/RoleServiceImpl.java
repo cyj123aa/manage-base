@@ -217,23 +217,25 @@ public class RoleServiceImpl implements RoleService {
         role.setUpdated(System.currentTimeMillis());
         role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         roleMapper.updateByPrimaryKeySelective(role);
-        //禁用角色用户
-        UserExample example = new UserExample();
-        example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
-        List<User> users = userMapper.selectByExample(example);
-        User user = new User();
-        user.setStatus(roleParamBO.getRoleStatus());
-        user.setUpdated(System.currentTimeMillis());
-        user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
-        userMapper.updateByExampleSelective(user,example);
-        //更新该角色下面用户的角色状态
-        if(CollectionUtils.isNotEmpty(users) ){
-            List<Long> list=users.stream().map(User::getId).collect(Collectors.toList());
-            for(Long id:list){
-                CurrentUserBO currentUser=new CurrentUserBO();
-                currentUser.setUserId(id);
-                currentUser.setRoleStatus(roleParamBO.getRoleStatus());
-                sessionService.cacheCurrentUserInfo(currentUser);
+        if (Boolean.FALSE.equals(roleParamBO.getRoleStatus())) {
+            //禁用角色用户
+            UserExample example = new UserExample();
+            example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
+            List<User> users = userMapper.selectByExample(example);
+            User user = new User();
+            user.setStatus(roleParamBO.getRoleStatus());
+            user.setUpdated(System.currentTimeMillis());
+            user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+            userMapper.updateByExampleSelective(user,example);
+            //更新该角色下面用户的角色状态
+            if(CollectionUtils.isNotEmpty(users) ){
+                List<Long> list=users.stream().map(User::getId).collect(Collectors.toList());
+                for(Long id:list){
+                    CurrentUserBO currentUser=new CurrentUserBO();
+                    currentUser.setUserId(id);
+                    currentUser.setRoleStatus(roleParamBO.getRoleStatus());
+                    sessionService.cacheCurrentUserInfo(currentUser);
+                }
             }
         }
     }
