@@ -1075,8 +1075,10 @@ public class UserServiceImpl implements UserService {
         User user = buildUserToUpdate(id);
         user.setEnabled(false);
         boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        List<Long> list = Arrays.asList(id);
-        sessionService.deleteRedisUser(list);
+        CurrentUserBO currentUser=new CurrentUserBO();
+        currentUser.setUserId(user.getId());
+        currentUser.setEnabled(false);
+        sessionService.cacheCurrentUserInfo(currentUser);
         return flag;
     }
 
@@ -1086,8 +1088,10 @@ public class UserServiceImpl implements UserService {
         user.setStatus(param.getStatus());
         boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
         if(!param.getStatus()){
-            List<Long> list = Arrays.asList(param.getId());
-            sessionService.deleteRedisUser(list);
+            CurrentUserBO currentUser=new CurrentUserBO();
+            currentUser.setUserId(user.getId());
+            currentUser.setStatus(param.getStatus());
+            sessionService.cacheCurrentUserInfo(currentUser);
         }
         return flag;
     }

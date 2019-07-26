@@ -183,12 +183,11 @@ public class RoleServiceImpl implements RoleService {
             return;
         }
         for(User user:list){
-            try {
-                userService.cacheSession(user,true,false);
-                userService.cacheSession(user,false,false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            CurrentUserBO currentUser=new CurrentUserBO();
+            currentUser.setUserId(user.getId());
+            //设置权限url
+            currentUser.setAccessUrlSet(listAccessUrlByRoleId(user.getRoleId()));
+            sessionService.cacheCurrentUserInfo(currentUser);
         }
     }
 
@@ -228,7 +227,13 @@ public class RoleServiceImpl implements RoleService {
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         userMapper.updateByExampleSelective(user,example);
         if(!roleParamBO.getRoleStatus() && CollectionUtils.isNotEmpty(users) ){
-            sessionService.deleteRedisUser(users.stream().map(User::getId).collect(Collectors.toList()));
+            List<Long> list=users.stream().map(User::getId).collect(Collectors.toList());
+            for(Long id:list){
+                CurrentUserBO currentUser=new CurrentUserBO();
+                currentUser.setUserId(id);
+                currentUser.setRoleStatus(false);
+                sessionService.cacheCurrentUserInfo(currentUser);
+            }
         }
     }
 

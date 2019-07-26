@@ -78,6 +78,40 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public void cacheCurrentUserInfo(CurrentUserBO currentUserBO) {
+        try{
+            CurrentUserBO userBO = sessionOperation.get(getKey(currentUserBO.getUserId()));
+            if(userBO!=null) {
+                regroupUser(currentUserBO, userBO);
+                sessionOperation.set(getKey(currentUserBO.getUserId()), userBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+            }
+            CurrentUserBO mobileUserBO = sessionOperation.get(getMobileKey(currentUserBO.getUserId()));
+            if(mobileUserBO!=null) {
+                regroupUser(currentUserBO, mobileUserBO);
+                sessionOperation.set(getMobileKey(currentUserBO.getUserId()), mobileUserBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+            }
+        }catch (Exception e){
+            //redis异常
+            e.printStackTrace();
+        }
+    }
+
+    private void regroupUser(CurrentUserBO currentUserBO,CurrentUserBO userBO){
+        if(currentUserBO.getEnabled()!=null && !currentUserBO.getEnabled()){
+            userBO.setEnabled(currentUserBO.getEnabled());
+        }
+        if(currentUserBO.getStatus()!=null && !currentUserBO.getStatus()){
+            userBO.setStatus(currentUserBO.getStatus());
+        }
+        if(currentUserBO.getRoleStatus()!=null && !currentUserBO.getRoleStatus()){
+            userBO.setRoleStatus(currentUserBO.getRoleStatus());
+        }
+        if(CollectionUtils.isNotEmpty(currentUserBO.getAccessUrlSet())){
+            userBO.setAccessUrlSet(currentUserBO.getAccessUrlSet());
+        }
+    }
+
+    @Override
     public CurrentUserBO getCurrentUser(String token,boolean ismobile) {
         String decrypt = Base64Util.decode(token);
         if (decrypt == null) {
