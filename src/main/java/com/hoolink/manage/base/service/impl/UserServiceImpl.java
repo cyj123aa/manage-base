@@ -1111,7 +1111,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PersonalInfoBO getPersonalInfo() throws Exception{
-		User user = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
+		User user = userMapper.selectByPrimaryKey(sessionService.getUserIdByToken());
 		if(user == null) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
 		}

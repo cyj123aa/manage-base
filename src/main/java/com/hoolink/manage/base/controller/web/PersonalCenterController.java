@@ -33,7 +33,7 @@ public class PersonalCenterController {
     @PostMapping(value = "getManagerUserInfo")
     @ApiOperation(value = "获取个人中心基础信息")
     @LogAndParam(value = "获取个人中心基础信息失败")
-    public BackVO<PersonalInfoVO> getManagerUserInfo(ManagerUserInfoParamVO userParamVO) throws Exception{
+    public BackVO<PersonalInfoVO> getManagerUserInfo() throws Exception{
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyBean(userService.getPersonalInfo(), PersonalInfoVO.class));
     }
     
