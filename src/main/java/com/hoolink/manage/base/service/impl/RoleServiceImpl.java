@@ -275,7 +275,11 @@ public class RoleServiceImpl implements RoleService {
         roleParamBO.setStatus(baseRole.getRoleStatus());
         roleParamBO.setDescription(baseRole.getRoleDesc());
         //查询当前用户的全部菜单权限
-        RoleMenuBO currentRoleMenu = getCurrentRoleMenu();
+        Boolean levelThree=Boolean.FALSE;
+        if(Constant.LEVEL_THREE.equals(baseRole.getRoleLevel())){
+            levelThree=true;
+        }
+        RoleMenuBO currentRoleMenu = getCurrentRoleMenu(levelThree);
         if(currentRoleMenu==null || CollectionUtils.isEmpty(currentRoleMenu.getChooseMenu())){
             return roleParamBO;
         }
@@ -469,7 +473,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleMenuBO getCurrentRoleMenu() throws Exception {
+    public RoleMenuBO getCurrentRoleMenu(Boolean levelThree) throws Exception {
         ManageRole userRole = getUserRole();
         if(userRole==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
@@ -479,7 +483,7 @@ public class RoleServiceImpl implements RoleService {
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
             RoleMenuBO roleMenuBO = new RoleMenuBO();
             getCurrentMenu(roleMenu, roleMenuBO);
-            if(Constant.LEVEL_TWO.equals(userRole.getRoleLevel())){
+            if(Constant.LEVEL_TWO.equals(userRole.getRoleLevel()) || levelThree){
                 List<ManageMenuTreeBO> chooseMenu = roleMenuBO.getChooseMenu();
                 if(CollectionUtils.isNotEmpty(chooseMenu)){
                     for (ManageMenuTreeBO treeBO:chooseMenu) {
