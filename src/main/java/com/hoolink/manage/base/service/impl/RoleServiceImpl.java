@@ -226,12 +226,13 @@ public class RoleServiceImpl implements RoleService {
         user.setUpdated(System.currentTimeMillis());
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         userMapper.updateByExampleSelective(user,example);
-        if(!roleParamBO.getRoleStatus() && CollectionUtils.isNotEmpty(users) ){
+        //更新该角色下面用户的角色状态
+        if(CollectionUtils.isNotEmpty(users) ){
             List<Long> list=users.stream().map(User::getId).collect(Collectors.toList());
             for(Long id:list){
                 CurrentUserBO currentUser=new CurrentUserBO();
                 currentUser.setUserId(id);
-                currentUser.setRoleStatus(false);
+                currentUser.setRoleStatus(roleParamBO.getRoleStatus());
                 sessionService.cacheCurrentUserInfo(currentUser);
             }
         }
