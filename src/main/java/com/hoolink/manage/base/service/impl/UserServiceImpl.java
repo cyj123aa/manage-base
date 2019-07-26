@@ -1083,16 +1083,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean enableOrDisableUser(EnableOrDisableUserParamVO param) {
         User user = buildUserToUpdate(param.getId());
         user.setStatus(param.getStatus());
         boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        if(!param.getStatus()){
-            CurrentUserBO currentUser=new CurrentUserBO();
-            currentUser.setUserId(user.getId());
-            currentUser.setStatus(param.getStatus());
-            sessionService.cacheCurrentUserInfo(currentUser);
-        }
+        CurrentUserBO currentUser=new CurrentUserBO();
+        currentUser.setUserId(user.getId());
+        currentUser.setStatus(param.getStatus());
+        sessionService.cacheCurrentUserInfo(currentUser);
         return flag;
     }
 
