@@ -300,7 +300,6 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
-        sessionService.deleteRedisUser(user.getId());
     }
 
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){
@@ -1200,9 +1199,7 @@ public class UserServiceImpl implements UserService {
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
-        List<Long> list=new ArrayList<>();
-        list.add(userId);
-        sessionService.deleteRedisUser(list);
+        sessionService.deleteRedisUser(userId);
     }
 
     private String setGreeting() {
