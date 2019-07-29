@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.service;
 
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 
 import java.util.List;
@@ -26,6 +27,13 @@ public interface SessionService {
      * @return
      */
     String cacheCurrentUserInfo(CurrentUserBO currentUserBO,Boolean isMobile);
+
+    /**
+     * 缓存当前用户web端和手机端，不更新token
+     * @param currentUserBO
+     * @return
+     */
+    void cacheCurrentUserInfo(CurrentUserBO currentUserBO);
 
     /**
      * 根据传入token 获取用户最新的用户信息

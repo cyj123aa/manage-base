@@ -300,7 +300,6 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(user.getId());
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
-        sessionService.deleteRedisUser(user.getId());
     }
 
     private void verifyOldPasswdOrCode(LoginParamBO loginParam){
@@ -1075,20 +1074,23 @@ public class UserServiceImpl implements UserService {
         User user = buildUserToUpdate(id);
         user.setEnabled(false);
         boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        List<Long> list = Arrays.asList(id);
-        sessionService.deleteRedisUser(list);
+        CurrentUserBO currentUser=new CurrentUserBO();
+        currentUser.setUserId(user.getId());
+        currentUser.setEnabled(false);
+        sessionService.cacheCurrentUserInfo(currentUser);
         return flag;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean enableOrDisableUser(EnableOrDisableUserParamVO param) {
         User user = buildUserToUpdate(param.getId());
         user.setStatus(param.getStatus());
         boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        if(!param.getStatus()){
-            List<Long> list = Arrays.asList(param.getId());
-            sessionService.deleteRedisUser(list);
-        }
+        CurrentUserBO currentUser=new CurrentUserBO();
+        currentUser.setUserId(user.getId());
+        currentUser.setStatus(param.getStatus());
+        sessionService.cacheCurrentUserInfo(currentUser);
         return flag;
     }
 
@@ -1108,7 +1110,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PersonalInfoBO getPersonalInfo() throws Exception{
-		User user = userMapper.selectByPrimaryKey(ContextUtil.getManageCurrentUser().getUserId());
+		User user = userMapper.selectByPrimaryKey(sessionService.getUserIdByToken());
 		if(user == null) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
 		}
@@ -1197,9 +1199,7 @@ public class UserServiceImpl implements UserService {
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
-        List<Long> list=new ArrayList<>();
-        list.add(userId);
-        sessionService.deleteRedisUser(list);
+        sessionService.deleteRedisUser(userId);
     }
 
     private String setGreeting() {

@@ -183,12 +183,11 @@ public class RoleServiceImpl implements RoleService {
             return;
         }
         for(User user:list){
-            try {
-                userService.cacheSession(user,true,false);
-                userService.cacheSession(user,false,false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            CurrentUserBO currentUser=new CurrentUserBO();
+            currentUser.setUserId(user.getId());
+            //设置权限url
+            currentUser.setAccessUrlSet(listAccessUrlByRoleId(user.getRoleId()));
+            sessionService.cacheCurrentUserInfo(currentUser);
         }
     }
 
@@ -218,17 +217,26 @@ public class RoleServiceImpl implements RoleService {
         role.setUpdated(System.currentTimeMillis());
         role.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         roleMapper.updateByPrimaryKeySelective(role);
-        //禁用角色用户
-        UserExample example = new UserExample();
-        example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
-        List<User> users = userMapper.selectByExample(example);
-        User user = new User();
-        user.setStatus(roleParamBO.getRoleStatus());
-        user.setUpdated(System.currentTimeMillis());
-        user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
-        userMapper.updateByExampleSelective(user,example);
-        if(!roleParamBO.getRoleStatus() && CollectionUtils.isNotEmpty(users) ){
-            sessionService.deleteRedisUser(users.stream().map(User::getId).collect(Collectors.toList()));
+        if (Boolean.FALSE.equals(roleParamBO.getRoleStatus())) {
+            //禁用角色用户
+            UserExample example = new UserExample();
+            example.createCriteria().andEnabledEqualTo(true).andRoleIdEqualTo(roleParamBO.getId());
+            List<User> users = userMapper.selectByExample(example);
+            User user = new User();
+            user.setStatus(roleParamBO.getRoleStatus());
+            user.setUpdated(System.currentTimeMillis());
+            user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
+            userMapper.updateByExampleSelective(user,example);
+            //更新该角色下面用户的角色状态
+            if(CollectionUtils.isNotEmpty(users) ){
+                List<Long> list=users.stream().map(User::getId).collect(Collectors.toList());
+                for(Long id:list){
+                    CurrentUserBO currentUser=new CurrentUserBO();
+                    currentUser.setUserId(id);
+                    currentUser.setRoleStatus(roleParamBO.getRoleStatus());
+                    sessionService.cacheCurrentUserInfo(currentUser);
+                }
+            }
         }
     }
 
@@ -267,7 +275,11 @@ public class RoleServiceImpl implements RoleService {
         roleParamBO.setStatus(baseRole.getRoleStatus());
         roleParamBO.setDescription(baseRole.getRoleDesc());
         //查询当前用户的全部菜单权限
-        RoleMenuBO currentRoleMenu = getCurrentRoleMenu();
+        Boolean levelThree=Boolean.FALSE;
+        if(Constant.LEVEL_THREE.equals(baseRole.getRoleLevel())){
+            levelThree=true;
+        }
+        RoleMenuBO currentRoleMenu = getCurrentRoleMenu(levelThree);
         if(currentRoleMenu==null || CollectionUtils.isEmpty(currentRoleMenu.getChooseMenu())){
             return roleParamBO;
         }
@@ -461,7 +473,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleMenuBO getCurrentRoleMenu() throws Exception {
+    public RoleMenuBO getCurrentRoleMenu(Boolean levelThree) throws Exception {
         ManageRole userRole = getUserRole();
         if(userRole==null){
             throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_USER_NOT_EXIST);
@@ -471,7 +483,7 @@ public class RoleServiceImpl implements RoleService {
         if (!org.springframework.util.CollectionUtils.isEmpty(roleMenu)) {
             RoleMenuBO roleMenuBO = new RoleMenuBO();
             getCurrentMenu(roleMenu, roleMenuBO);
-            if(Constant.LEVEL_TWO.equals(userRole.getRoleLevel())){
+            if(Constant.LEVEL_TWO.equals(userRole.getRoleLevel()) || levelThree){
                 List<ManageMenuTreeBO> chooseMenu = roleMenuBO.getChooseMenu();
                 if(CollectionUtils.isNotEmpty(chooseMenu)){
                     for (ManageMenuTreeBO treeBO:chooseMenu) {
