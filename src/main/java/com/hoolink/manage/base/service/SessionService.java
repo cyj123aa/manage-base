@@ -1,5 +1,6 @@
 package com.hoolink.manage.base.service;
 
+import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 
 import java.util.List;
@@ -28,6 +29,13 @@ public interface SessionService {
     String cacheCurrentUserInfo(CurrentUserBO currentUserBO,Boolean isMobile);
 
     /**
+     * 缓存当前用户web端和手机端，不更新token
+     * @param currentUserBO
+     * @return
+     */
+    void cacheCurrentUserInfo(CurrentUserBO currentUserBO);
+
+    /**
      * 根据传入token 获取用户最新的用户信息
      * 对于异地登录场景，传入的token会和user中的token不一致
      *
@@ -48,6 +56,13 @@ public interface SessionService {
      * @return
      */
     Boolean deleteRedisUser(List<Long> userIds);
+
+    /**
+     * 根据用户id删除缓存信息
+     * @param userId
+     * @return
+     */
+    Boolean deleteRedisUser(Long userId);
 
     /**
      * 根据移动端token获取userid
