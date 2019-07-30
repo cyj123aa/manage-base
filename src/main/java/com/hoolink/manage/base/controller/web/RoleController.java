@@ -93,7 +93,7 @@ public class RoleController {
     @ApiOperation(value = "获取当前角色权限")
     @LogAndParam(value = "获取当前角色权限失败")
     public BackVO<RoleMenuVO> getCurrentRoleMenu() throws Exception {
-        RoleMenuBO roleMenuBO = roleService.getCurrentRoleMenu();
+        RoleMenuBO roleMenuBO = roleService.getCurrentRoleMenu(Boolean.FALSE);
         RoleMenuVO roleMenuVO = CopyPropertiesUtil.copyBean(roleMenuBO, RoleMenuVO.class);
         return BackVOUtil.operateAccess(roleMenuVO);
     }

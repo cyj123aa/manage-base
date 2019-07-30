@@ -44,11 +44,12 @@ public interface RoleService {
     BackRoleBO getById(Long roleId) throws Exception;
 
     /**
-     *获取当前角色权限
+     * 获取当前角色权限
+     * @param levelThree
      * @return
      * @throws Exception
      */
-    RoleMenuBO getCurrentRoleMenu() throws Exception;
+    RoleMenuBO getCurrentRoleMenu(Boolean levelThree) throws Exception;
 
     /**
      * 获得基础菜单
