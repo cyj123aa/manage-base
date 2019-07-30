@@ -16,6 +16,7 @@
     <result column="created" jdbcType="BIGINT" property="created" />
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="role_type" jdbcType="TINYINT" property="roleType" />
   </resultMap>
 
    <sql id="Base_Column_List">
@@ -32,14 +33,14 @@
     -->
     select 
         manage_role.id, role_name, role_desc, parent_id, role_level, role_status, manage_role.creator, manage_role.updator, manage_role.created, 
-    manage_role.updated, manage_role.enabled
-    from manage_role join manage_user on manage_role.id=manage_user.role_id
+    manage_role.updated, manage_role.enabled,manage_role.role_type
+    from manage_role right join manage_user on manage_role.id=manage_user.role_id
     where manage_user.id = #{userId} and manage_user.enabled=true and manage_role.enabled=true
   </select>
 
   <select id="getRoleByOne" resultMap="BaseResultMap">
     select id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created,
-    updated, enabled from manage_role
+    updated, enabled,role_type from manage_role
     where enabled=true
     and id!=#{roleId}
     <if test="searchValue!=null and searchValue!=''">
@@ -53,7 +54,7 @@
 
   <select id="getRoleByTwo" resultMap="BaseResultMap">
     select id, role_name, role_desc, parent_id, role_level, role_status, creator, updator, created,
-    updated, enabled from manage_role
+    updated, enabled,role_type from manage_role
     where enabled=true
     and parent_id=#{roleId}
     <if test="searchValue!=null and searchValue!=''">

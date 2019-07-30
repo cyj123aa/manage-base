@@ -214,7 +214,6 @@ public interface UserService {
      * @throws Exception
      */
     PersonalInfoBO getPersonalInfo() throws Exception;
-
     /**
      * 修改密码
      * @param updatePasswdParam
@@ -370,10 +369,12 @@ public interface UserService {
     /**
      * 缓存当前用户
      * @param user
+     * @param isMobile
+     * @param resetToken 是否需要重置token
      * @return
      * @throws Exception
      */
-    String cacheSession(User user,Boolean isMobile) throws Exception;
+    String cacheSession(User user,Boolean isMobile,Boolean resetToken) throws Exception;
 
 
     /**
@@ -383,4 +384,19 @@ public interface UserService {
      * @throws Exception
      */
     boolean checkPassword(String password) throws Exception;
+
+    /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception;
+
+    /**
+     * excel录入的时候检查所录入的角色列表是否是当前用户下的角色
+     * @return
+     * @throws Exception
+     */
+    boolean checkHasRoleList(List<Long> roleIdList) throws Exception;
 }

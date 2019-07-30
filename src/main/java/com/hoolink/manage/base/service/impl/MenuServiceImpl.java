@@ -134,8 +134,15 @@ public class MenuServiceImpl implements MenuService {
     private void fillDept(EdmResourceRepertory byType, EdmMenuTreeBO edmMenuTreeBO, List<DeptPositionBO> deptAllList) {
         List<DeptPositionBO> companyList = null;
         if(CollectionUtils.isNotEmpty(deptAllList)){
+            deptAllList=removeDuplict(deptAllList);
             companyList = deptAllList.stream().filter(deptPositionBO -> EdmDeptEnum.COMPANY.getKey().equals(deptPositionBO.getDeptType().intValue()))
                     .collect(Collectors.toList());
+            //Collections工具类的sort()方法对list集合元素排序　
+            companyList.sort((info1, info2) -> {
+                //获取中文环境
+                Comparator<Object> com = Collator.getInstance(Locale.CHINA);
+                return com.compare(info1.getDeptName(), info2.getDeptName());
+            });
         }
         if(CollectionUtils.isEmpty(companyList)){
             edmMenuTreeBO.setExistChild(false);
