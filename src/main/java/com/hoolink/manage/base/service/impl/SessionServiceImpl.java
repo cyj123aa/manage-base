@@ -78,6 +78,40 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public void cacheCurrentUserInfo(CurrentUserBO currentUserBO) {
+        try{
+            CurrentUserBO userBO = sessionOperation.get(getKey(currentUserBO.getUserId()));
+            if(userBO!=null) {
+                regroupUser(currentUserBO, userBO);
+                sessionOperation.set(getKey(currentUserBO.getUserId()), userBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+            }
+            CurrentUserBO mobileUserBO = sessionOperation.get(getMobileKey(currentUserBO.getUserId()));
+            if(mobileUserBO!=null) {
+                regroupUser(currentUserBO, mobileUserBO);
+                sessionOperation.set(getMobileKey(currentUserBO.getUserId()), mobileUserBO, SESSION_TIMEOUT_SECONDS, TimeUnit.MINUTES);
+            }
+        }catch (Exception e){
+            //redis异常
+            e.printStackTrace();
+        }
+    }
+
+    private void regroupUser(CurrentUserBO currentUserBO,CurrentUserBO userBO){
+        if(currentUserBO.getEnabled()!=null && !currentUserBO.getEnabled()){
+            userBO.setEnabled(currentUserBO.getEnabled());
+        }
+        if(currentUserBO.getStatus()!=null && !currentUserBO.getStatus()){
+            userBO.setStatus(currentUserBO.getStatus());
+        }
+        if(currentUserBO.getRoleStatus()!=null && !currentUserBO.getRoleStatus()){
+            userBO.setRoleStatus(currentUserBO.getRoleStatus());
+        }
+        if(CollectionUtils.isNotEmpty(currentUserBO.getAccessUrlSet())){
+            userBO.setAccessUrlSet(currentUserBO.getAccessUrlSet());
+        }
+    }
+
+    @Override
     public CurrentUserBO getCurrentUser(String token,boolean ismobile) {
         String decrypt = Base64Util.decode(token);
         if (decrypt == null) {
@@ -111,6 +145,23 @@ public class SessionServiceImpl implements SessionService {
             sessionOperation.getOperations().delete(mobileKey);
             return true;
         }catch (Exception e){
+            log.error("删除用户缓存信息异常，userIds为：{}",userIds);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean deleteRedisUser(Long userId){
+        if(userId==null){
+            return true;
+        }
+        try{
+            sessionOperation.getOperations().delete(getKey(userId));
+            sessionOperation.getOperations().delete(getMobileKey(userId));
+            return true;
+        }catch (Exception e){
+            log.error("删除用户缓存信息异常，userid为：{}",userId);
             e.printStackTrace();
         }
         return false;

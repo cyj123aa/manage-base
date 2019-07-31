@@ -99,9 +99,10 @@ public class ExcelServiceImpl implements ExcelService{
             if(CollectionUtils.isEmpty(userExcelList)) {
             	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
             }
-            List<Long> roleIdList = userExcelList.stream().map(ManagerUserParamBO::getRoleId).distinct().collect(Collectors.toList());
+            List<Long> roleIdList = userExcelList.stream().filter(u -> u.getRoleId() != 0).map(ManagerUserParamBO::getRoleId).distinct().collect(Collectors.toList());
+            //校验所属角色
             if (!userService.checkHasRoleList(roleIdList)){
-                throw new BusinessException(HoolinkExceptionMassageEnum.UPLOAD_FILE_ERROR);
+                throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_SELECT_ERROR);
             }
 			userExcelList.forEach(u ->{
 				if (CollectionUtils.isEmpty(u.getUserDeptPairParamList())){
@@ -132,37 +133,36 @@ public class ExcelServiceImpl implements ExcelService{
      * @return
      */
     private String getValue(Cell cell) {
-        //判断单元格的内容类型（目前的只有String或者数字）
-        DecimalFormat decimalFormat = new DecimalFormat("#");
-        SimpleDateFormat sFormat = new SimpleDateFormat("MM/dd/yyyy");
-        String value = "";
-        //目前只是支持业务判断了string类型和布尔类型以及错误和为空的值，
-        switch (cell.getCellTypeEnum()) {
-            case STRING:
-                value = String.valueOf(cell.getStringCellValue());
-                break;
-            case NUMERIC:
-                if(HSSFDateUtil.isCellDateFormatted(cell)) {
-                    double d = cell.getNumericCellValue();
-                    Date date = HSSFDateUtil.getJavaDate(d);
-                   value = sFormat.format(date);
-                }
-                else {
-                    value = decimalFormat.format((cell.getNumericCellValue()));
-                }
-                break;
-            case FORMULA:
-            	value = decimalFormat.format((cell.getNumericCellValue()));
-                break;
-            case ERROR:
-            case BLANK:
-                break;
-            case BOOLEAN:
-                break;
-            default:
-                break;
-        }
-        return value;
+		//判断单元格的内容类型（目前的只有String或者数字）
+		DecimalFormat decimalFormat = new DecimalFormat("#.#");
+		SimpleDateFormat sFormat = new SimpleDateFormat("MM/dd/yyyy");
+		String value = "";
+		//目前只是支持业务判断了string类型和布尔类型以及错误和为空的值，
+		switch (cell.getCellTypeEnum()) {
+			case STRING:
+				value = String.valueOf(cell.getStringCellValue());
+				break;
+			case NUMERIC:
+				if(HSSFDateUtil.isCellDateFormatted(cell)) {
+					double d = cell.getNumericCellValue();
+					Date date = HSSFDateUtil.getJavaDate(d);
+					value = sFormat.format(date);
+				}
+				else {
+					value = decimalFormat.format((cell.getNumericCellValue()));
+				}
+				break;
+			case FORMULA:
+				break;
+			case ERROR:
+			case BLANK:
+				break;
+			case BOOLEAN:
+				break;
+			default:
+				break;
+		}
+		return value;
     }
     
     /**
@@ -177,47 +177,65 @@ public class ExcelServiceImpl implements ExcelService{
         XSSFWorkbook wb = new XSSFWorkbook(inp);
         XSSFSheet sheet = wb.getSheet(Constant.EXCEL_SHEET1);
         
-        boolean flag = false;
         for (int rowNum = 1; rowNum < sheet.getLastRowNum(); rowNum++) {
         	XSSFRow row = sheet.getRow(rowNum);
-        	if (Objects.isNull(row)){
+        	if (Objects.isNull(row) ){
         		continue;
 			}
         	ManagerUserParamBO managerUserParam = new ManagerUserParamBO();
+        	//标记，如果为false表明是空行
+        	boolean flag = false;
             //列 获取所有单元格的数据
             for (int j = 0; j < row.getLastCellNum(); j++) {
             	XSSFCell rowCell = row.getCell(j);
-                
-                if(!sheet.isColumnHidden(j) && rowCell == null) {
-                	flag = true;
-                	break;
-                };
-                
-                if (rowCell != null) {
-                    String value = getValue(rowCell);
-                    if(StringUtils.isBlank(value)) {
-                    	throw new BusinessException(HoolinkExceptionMassageEnum.EXCEL_DATA_FORMAT_ERROR);
-                    }
-                    buildManagerUserParam(managerUserParam, j, value);
-                }
+				String value = Objects.isNull(rowCell) ? "" : getValue(rowCell);
+            	if (StringUtils.isNotBlank(value)){
+            		flag = true;
+				}
+				buildManagerUserParam(managerUserParam, j, value);
             }
-            
-            if(flag) {
-            	break;
-            }else {
-            	userExcelList.add(managerUserParam);	
-            }
+            if (flag){
+            	checkExcelData(managerUserParam);
+				userExcelList.add(managerUserParam);
+			}
         }
         return userExcelList;
 	}
-	
+
+	private void checkExcelData(ManagerUserParamBO managerUserParam) throws Exception{
+		if (StringUtils.isBlank(managerUserParam.getUserAccount())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.USER_ACCOUNT_NOT_NULL);
+		}
+		if (StringUtils.isBlank(managerUserParam.getUserNo())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.USER_NO_NOT_NULL);
+		}
+		if (StringUtils.isBlank(managerUserParam.getName())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.USER_NAME_NOT_NULL);
+		}
+		if (Objects.isNull(managerUserParam.getSex())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.USER_SEX_SELECT_NULL);
+		}
+		if (StringUtils.isBlank(managerUserParam.getPosition())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.USER_POSITION_NOT_NULL);
+		}
+		if (Objects.isNull(managerUserParam.getUserDeptPairParamList().get(0).getEncryLevelDept())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ENCRYPTED_LEVEL_SELECT_ERROR);
+		}
+		if (Objects.isNull(managerUserParam.getEncryLevelCompany())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.COMPANY_ENCRYPTED_LEVEL_SELECT_ERROR);
+		}
+		if (Objects.isNull(managerUserParam.getRoleId())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_SELECT_ERROR);
+		}
+	}
+
 	/**
 	 * 赋值
 	 * @param managerUserParam
 	 * @param j
 	 * @param value
 	 */
-	private void buildManagerUserParam(ManagerUserParamBO managerUserParam, int j, String value) {
+	private void buildManagerUserParam(ManagerUserParamBO managerUserParam, int j, String value) throws Exception{
         switch (j) {
 	        case 0:
 	        	//用户编号
@@ -276,20 +294,6 @@ public class ExcelServiceImpl implements ExcelService{
 	        	//登录账号
 	        	managerUserParam.setUserAccount(value);
 	            break;
-	        case 8:
-	        	//用户性别id
-	        	managerUserParam.setSex("1".equals(value) ? true:false);
-	        	break;
-	        case 9:
-	        	//所属角色id
-	        	managerUserParam.setRoleId(Long.parseLong(value));
-	        	break;
-	        case 10:
-	        	//部门密保等级id
-	        	break;
-	        case 11:
-	        	//资源库密保等级id
-	        	break;
 	        default:
 	            break;
 	    }
@@ -475,7 +479,7 @@ public class ExcelServiceImpl implements ExcelService{
 		List<DictPairBO<Long, String>> childrenRolePairList = new ArrayList<>();
 		rolePairForExcel.setChildrenDictPairList(childrenRolePairList);
 		CurrentUserBO user = ContextUtil.getManageCurrentUser();
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId(), null);
+		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(user.getRoleId(), true);
 		roleList.stream().forEach(r -> {
 			DictPairBO<Long, String> childRolePair = new DictPairBO<>();
 			childRolePair.setKey(r.getId());
