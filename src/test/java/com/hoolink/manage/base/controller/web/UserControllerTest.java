@@ -591,7 +591,7 @@ public class UserControllerTest extends TestController {
     @Test
     public void removeUser() throws Exception{
         Mockito.when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
-        Mockito.when(sessionService.deleteRedisUser(any())).thenReturn(true);
+        Mockito.when(sessionService.deleteRedisUser((Long) any())).thenReturn(true);
         String resultContent = postRequestMethod("{\"data\":1}", "/web/user/removeUser");
         BackVO backVO= JSONUtils.parse(resultContent, new TypeReference<BackVO>(){});
         Assert.assertEquals(true, backVO.getStatus());
@@ -600,7 +600,7 @@ public class UserControllerTest extends TestController {
     @Test
     public void enableOrDisableUser() throws Exception{
         Mockito.when(userMapper.updateByPrimaryKeySelective(any())).thenReturn(1);
-        Mockito.when(sessionService.deleteRedisUser(any())).thenReturn(true);
+        Mockito.when(sessionService.deleteRedisUser((Long) any())).thenReturn(true);
         String resultContent = postRequestMethod("{\"id\":1, \"status\":true}", "/web/user/enableOrDisableUser");
         BackVO backVO= JSONUtils.parse(resultContent, new TypeReference<BackVO>(){});
         Assert.assertEquals(true, backVO.getStatus());
