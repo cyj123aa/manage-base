@@ -182,13 +182,7 @@ public class RoleServiceImpl implements RoleService {
         if(CollectionUtils.isEmpty(list)){
             return;
         }
-        for(User user:list){
-            CurrentUserBO currentUser=new CurrentUserBO();
-            currentUser.setUserId(user.getId());
-            //设置权限url
-            currentUser.setAccessUrlSet(listAccessUrlByRoleId(user.getRoleId()));
-            sessionService.cacheCurrentUserInfo(currentUser);
-        }
+        sessionService.deleteRedisUser(list.stream().map(User::getId).collect(Collectors.toList()));
     }
 
     /**
