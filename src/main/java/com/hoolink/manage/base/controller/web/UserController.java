@@ -355,5 +355,4 @@ public class UserController {
     	OperateFileLogParamBO paramBO = CopyPropertiesUtil.copyBean(paramVO, OperateFileLogParamBO.class);
     	return BackVOUtil.operateAccess(CopyPropertiesUtil.copyPageInfo(userService.listOperateLog(paramBO), OperateFileLogVO.class));
     }
-
 }
