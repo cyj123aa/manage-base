@@ -1358,12 +1358,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateDeviceCode(String deviceCode) throws Exception {
         CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
         User user=new User();
         user.setId(userBO.getUserId());
         user.setDeviceCode(deviceCode);
+        //先删除拥有这个code的记录再更新
+        User userExample=new User();
+        user.setDeviceCode(StringUtils.EMPTY);
+        UserExample example=new UserExample();
+        example.createCriteria().andDeviceCodeEqualTo(deviceCode);
+        userMapper.updateByExampleSelective(userExample,example);
         userMapper.updateByPrimaryKeySelective(user);
+
     }
 
     @Override
