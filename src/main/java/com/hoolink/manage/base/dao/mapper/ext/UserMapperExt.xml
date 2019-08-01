@@ -73,4 +73,7 @@
             </foreach>
         </if>
   </select>
+    <update id="updateDeviceCodeEmpty">
+        update manage_user set device_code='' where device_code=#{deviceCode}
+    </update>
 </mapper>
