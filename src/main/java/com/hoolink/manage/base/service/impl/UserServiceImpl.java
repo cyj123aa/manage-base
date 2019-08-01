@@ -1366,7 +1366,7 @@ public class UserServiceImpl implements UserService {
         user.setDeviceCode(deviceCode);
         //先删除拥有这个code的记录再更新
         User userExample=new User();
-        user.setDeviceCode(StringUtils.EMPTY);
+        user.setDeviceCode(" ");
         UserExample example=new UserExample();
         example.createCriteria().andDeviceCodeEqualTo(deviceCode);
         userMapper.updateByExampleSelective(userExample,example);
