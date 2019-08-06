@@ -292,12 +292,17 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
-        User user = getUserByAccount(loginParam.getAccount());
+        Long userId=sessionService.getUserIdByToken();
+        User user=new User();
+        if(userId==null) {
+            user = getUserByAccount(loginParam.getAccount());
+            userId=user.getId();
+        }
         //重置密码,并且设置不是首次登录
-        user.setId(user.getId());
+        user.setId(userId);
         user.setPasswd(MD5Util.MD5(loginParam.getPasswd()));
         user.setUpdated(System.currentTimeMillis());
-        user.setUpdator(user.getId());
+        user.setUpdator(userId);
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
     }
