@@ -306,7 +306,7 @@ public class UserServiceImpl implements UserService {
         String oldPassword=loginParam.getOldPasswd();
         String code=loginParam.getCode();
         UserExample example=new UserExample();
-        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount());
+        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount()).andEnabledEqualTo(true);
         User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if(user!=null){
             if(StringUtils.isNotBlank(oldPassword)){
@@ -511,7 +511,7 @@ public class UserServiceImpl implements UserService {
 
     private User getUserByAccount(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.ACCOUNT_NOT_EXIST);
@@ -1487,7 +1487,7 @@ public class UserServiceImpl implements UserService {
     public SimpleDeptUserBO getUserByDeviceCode(String deviceCode) {
         UserExample example = new UserExample();
         UserExample.Criteria criteria = example.createCriteria();
-        criteria.andDeviceCodeEqualTo(deviceCode);
+        criteria.andDeviceCodeEqualTo(deviceCode).andEnabledEqualTo(true);
         List<User> userList = userMapper.selectByExample(example);
         if (CollectionUtils.isEmpty(userList)){
             return null;
