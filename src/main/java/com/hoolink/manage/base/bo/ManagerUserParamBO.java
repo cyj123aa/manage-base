@@ -64,7 +64,12 @@ public class ManagerUserParamBO {
      * 数据有效性
      */
     private Boolean enabled;
-    
+
+    /**
+     * 是否接收提醒短信
+     */
+    private Boolean receiveSms;
+
     /**
      * 用户部门关系
      */

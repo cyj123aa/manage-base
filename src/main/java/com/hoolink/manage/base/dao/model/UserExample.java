@@ -1492,6 +1492,66 @@ public class UserExample {
             addCriterion("device_code not between", value1, value2, "deviceCode");
             return (Criteria) this;
         }
+
+        public Criteria andReceiveSmsIsNull() {
+            addCriterion("receive_sms is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsIsNotNull() {
+            addCriterion("receive_sms is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsEqualTo(Boolean value) {
+            addCriterion("receive_sms =", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsNotEqualTo(Boolean value) {
+            addCriterion("receive_sms <>", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsGreaterThan(Boolean value) {
+            addCriterion("receive_sms >", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsGreaterThanOrEqualTo(Boolean value) {
+            addCriterion("receive_sms >=", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsLessThan(Boolean value) {
+            addCriterion("receive_sms <", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsLessThanOrEqualTo(Boolean value) {
+            addCriterion("receive_sms <=", value, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsIn(List<Boolean> values) {
+            addCriterion("receive_sms in", values, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsNotIn(List<Boolean> values) {
+            addCriterion("receive_sms not in", values, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsBetween(Boolean value1, Boolean value2) {
+            addCriterion("receive_sms between", value1, value2, "receiveSms");
+            return (Criteria) this;
+        }
+
+        public Criteria andReceiveSmsNotBetween(Boolean value1, Boolean value2) {
+            addCriterion("receive_sms not between", value1, value2, "receiveSms");
+            return (Criteria) this;
+        }
     }
 
     /**

@@ -45,6 +45,7 @@
     <result column="view_encry_level_permitted" jdbcType="BIT" property="viewEncryLevelPermitted" />
     <result column="dept_id" jdbcType="BIGINT" property="deptId" />
     <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+    <result column="receive_sms" jdbcType="BIT" property="receiveSms" />
   </resultMap>
 
   <select id="selectAllByDeptIds" resultMap="BaseResultMap">
@@ -59,6 +60,7 @@
         u.encry_level_company,
         u.view_encry_level_permitted,
         u.device_code,
+        u.receive_sms,
         m.dept_id AS dept_id
     FROM
         middle_user_department m
