@@ -40,4 +40,6 @@ public class UserInfoBO {
     private Byte roleLevel;
 
     private Long userId;
+
+    private Boolean receiveSms;
 }

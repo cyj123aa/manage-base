@@ -414,6 +414,7 @@ public class UserServiceImpl implements UserService {
         UserInfoBO userInfoBO = new UserInfoBO();
         userInfoBO.setPhone(user.getPhone());
         userInfoBO.setUserName(user.getName());
+        userInfoBO.setReceiveSms(user.getReceiveSms());
         //设置头像
         if (user.getImgId() != null) {
             try {
