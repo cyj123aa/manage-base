@@ -102,4 +102,9 @@ public class ManagerUserVO {
      * 用户部门关系
      */
     private List<DeptPairVO> userDeptPairList;
+
+    /**
+     * 是否接收提醒
+     */
+    private Boolean receiveSms;
 }
