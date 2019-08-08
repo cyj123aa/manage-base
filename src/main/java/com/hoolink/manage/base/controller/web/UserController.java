@@ -133,9 +133,22 @@ public class UserController {
 
     @PostMapping(value = "modifyPhoneGetCode")
     @ApiOperation(value = "修改手机号时获取手机验证码")
-    @LogAndParam(value = "修改手机验证码失败，请稍后重试")
+    @LogAndParam(value = "修改手机获取验证码失败，请稍后重试")
     public BackVO<String> modifyPhoneGetCode(@RequestBody BaseParam<String> phone)throws Exception  {
-        return BackVOUtil.operateAccess(userService.getPhoneCode(phone.getData(),true));
+        return BackVOUtil.operateAccess(userService.modifyPhoneGetCode(phone.getData()));
+    }
+
+    @PostMapping(value = "modifyPhoneVerifyCode")
+    @ApiOperation(value = "修改手机号时校验手机验证码")
+    @LogAndParam(value = "修改手机校验验证码失败，请稍后重试")
+    public BackVO<String> modifyPhoneVerifyCode(@RequestBody PhoneParamVO phoneParam)throws Exception  {
+        BackVO validateParameter = ValidatorUtil.validateParameter(phoneParam);
+        if (validateParameter != null) {
+            return validateParameter;
+        }
+        PhoneParamBO bindPhone=CopyPropertiesUtil.copyBean(phoneParam, PhoneParamBO.class);
+        userService.modifyPhoneVerifyCode(bindPhone);
+        return BackVOUtil.operateAccess();
     }
 
     @PostMapping(value = "verifyPhoneCode")

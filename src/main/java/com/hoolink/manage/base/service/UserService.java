@@ -93,11 +93,25 @@ public interface UserService {
     String bindPhoneGetCode(String phone)  throws Exception;
 
     /**
+     * 绑定手机号时发送验证码
+     * @param phone
+     * @return
+     */
+    String modifyPhoneGetCode(String phone)  throws Exception;
+
+    /**
      * 验证手机验证码
      * @param phoneParam
      * @throws Exception
      */
     void verifyPhone(PhoneParamBO phoneParam)throws Exception;
+
+    /**
+     * 修改手机号的时候验证手机验证码
+     * @param phoneParam
+     * @throws Exception
+     */
+    void modifyPhoneVerifyCode(PhoneParamBO phoneParam) throws Exception;
 
     /**
      * 绑定手机号
