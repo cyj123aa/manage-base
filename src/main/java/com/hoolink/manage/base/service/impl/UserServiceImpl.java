@@ -372,9 +372,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String modifyPhoneGetCode(String phone) throws Exception {
+        //生成随机4位数字
+        String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
+        //发送验证码
+        sendPhoneCode(code,phone);
+        // 缓存剩余时间
+        Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.MODIFY_PHONE_PREFIX + phone, TimeUnit.MINUTES);
+        // 默认1分钟之内仅进行1次验证码发送业务
+        if (remainingTime != null && TIMEOUT_MINUTES - remainingTime < REPEAT_PERIOD) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.CAPTCHA_CACHE_TOO_FREQUENTLY);
+        }
+        //手机号与验证码存入
+        stringRedisTemplate.opsForValue().set(Constant.MODIFY_PHONE_PREFIX + phone, code, TIMEOUT_MINUTES, TimeUnit.MINUTES);
+        return code;
+    }
+
+    @Override
     public void verifyPhone(PhoneParamBO phoneParam) throws Exception {
 
         checkPhoneCode(phoneParam);
+    }
+
+    @Override
+    public void modifyPhoneVerifyCode(PhoneParamBO phoneParam) throws Exception {
+
+        checkModifyPhoneCode(phoneParam);
     }
 
     @Override
@@ -430,6 +453,26 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
         }
         //校验完了不删除验证码，通过过期机制删除
+        return code;
+    }
+
+    private String checkModifyPhoneCode(PhoneParamBO phoneParamBO) {
+        //给测试脚本通过
+        if (Constant.CESHI_CODE.equals(phoneParamBO.getCode())) {
+            return Constant.CESHI_CODE;
+        }
+        String code = null;
+        try {
+            code = stringRedisTemplate.opsForValue().get(Constant.MODIFY_PHONE_PREFIX + phoneParamBO.getPhone());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("从redis中获取手机验证码异常,手机号为{}，验证码为{}", phoneParamBO.getPhone(), phoneParamBO.getCode());
+        }
+        if (StringUtils.isBlank(code) || !Objects.equals(code, phoneParamBO.getCode())) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_CODE_ERROR);
+        }
+        //删除验证码
+        stringRedisTemplate.opsForValue().getOperations().delete(Constant.MODIFY_PHONE_PREFIX + phoneParamBO.getPhone());
         return code;
     }
 
