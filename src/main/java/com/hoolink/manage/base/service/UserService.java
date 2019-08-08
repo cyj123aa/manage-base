@@ -86,6 +86,13 @@ public interface UserService {
     String getPhoneCode(String phone,Boolean flag) throws Exception;
 
     /**
+     * 绑定手机号时发送验证码
+     * @param phone
+     * @return
+     */
+    String bindPhoneGetCode(String phone)  throws Exception;
+
+    /**
      * 验证手机验证码
      * @param phoneParam
      * @throws Exception

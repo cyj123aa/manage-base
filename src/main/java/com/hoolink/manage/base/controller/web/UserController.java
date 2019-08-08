@@ -127,7 +127,7 @@ public class UserController {
     @ApiOperation(value = "绑定手机号时获取手机验证码")
     @LogAndParam(value = "获取手机验证码失败，请稍后重试")
     public BackVO<String> bindPhoneGetCode(@RequestBody BaseParam<String> phone)throws Exception  {
-    	userService.getPhoneCode(phone.getData(),true);
+    	userService.bindPhoneGetCode(phone.getData());
         return BackVOUtil.operateAccess();
     }
 
