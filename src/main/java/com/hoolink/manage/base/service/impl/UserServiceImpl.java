@@ -292,12 +292,17 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
-        User user = getUserByAccount(loginParam.getAccount());
+        Long userId=sessionService.getUserIdByToken();
+        User user=new User();
+        if(userId==null) {
+            user = getUserByAccount(loginParam.getAccount());
+            userId=user.getId();
+        }
         //重置密码,并且设置不是首次登录
-        user.setId(user.getId());
+        user.setId(userId);
         user.setPasswd(MD5Util.MD5(loginParam.getPasswd()));
         user.setUpdated(System.currentTimeMillis());
-        user.setUpdator(user.getId());
+        user.setUpdator(userId);
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
     }
@@ -306,7 +311,7 @@ public class UserServiceImpl implements UserService {
         String oldPassword=loginParam.getOldPasswd();
         String code=loginParam.getCode();
         UserExample example=new UserExample();
-        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount());
+        example.createCriteria().andUserAccountEqualTo(loginParam.getAccount()).andEnabledEqualTo(true);
         User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if(user!=null){
             if(StringUtils.isNotBlank(oldPassword)){
@@ -546,7 +551,7 @@ public class UserServiceImpl implements UserService {
 
     private User getUserByAccount(String account) {
         UserExample example = new UserExample();
-        example.createCriteria().andUserAccountEqualTo(account);
+        example.createCriteria().andUserAccountEqualTo(account).andEnabledEqualTo(true);
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
         if (user == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.ACCOUNT_NOT_EXIST);
@@ -1526,7 +1531,7 @@ public class UserServiceImpl implements UserService {
     public SimpleDeptUserBO getUserByDeviceCode(String deviceCode) {
         UserExample example = new UserExample();
         UserExample.Criteria criteria = example.createCriteria();
-        criteria.andDeviceCodeEqualTo(deviceCode);
+        criteria.andDeviceCodeEqualTo(deviceCode).andEnabledEqualTo(true);
         List<User> userList = userMapper.selectByExample(example);
         if (CollectionUtils.isEmpty(userList)){
             return null;
