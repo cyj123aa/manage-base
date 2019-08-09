@@ -75,4 +75,17 @@
             </foreach>
         </if>
   </select>
+
+    <select id="selectUserAndDeptByUserName" resultMap="BaseResultMap">
+        SELECT
+            u.*,
+            m.dept_id
+        FROM
+            manage_user u
+            LEFT JOIN middle_user_department m ON u.id = m.user_id
+        WHERE
+            user_name LIKE CONCAT( #{userName},'%')
+            AND m.lowest_level = 1
+            AND u.enabled = TRUE
+    </select>
 </mapper>
