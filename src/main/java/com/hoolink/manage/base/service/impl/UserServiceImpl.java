@@ -1507,7 +1507,7 @@ public class UserServiceImpl implements UserService {
     public List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception{
         UserExample example = new UserExample();
         Criteria criteria = example.createCriteria();
-        criteria.andEnabledEqualTo(true).andIdIn(userId);
+        criteria.andIdIn(userId);
         List<User> users = userMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(users)) {
             throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
