@@ -102,4 +102,13 @@ public class ManagerUserParamVO {
             groups = {ManagerBaseGroup.CreateUser.class}
     )
     private List<UserDeptPairParamVO> userDeptPairParamList;
+
+    /**
+     * 是否接收短信提醒
+     */
+    @NotNull(
+            message = "是否接收短信提醒不允许为空",
+            groups = {ManagerBaseGroup.CreateUser.class}
+    )
+    private Boolean receiveSms;
 }

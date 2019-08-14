@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.hoolink.sdk.enums.ManagerUserReceiveSmsEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -227,6 +228,9 @@ public class ExcelServiceImpl implements ExcelService{
 		if (Objects.isNull(managerUserParam.getRoleId())){
 			throw new BusinessException(HoolinkExceptionMassageEnum.ROLE_SELECT_ERROR);
 		}
+		if (Objects.isNull(managerUserParam.getReceiveSms())){
+			throw new BusinessException(HoolinkExceptionMassageEnum.RECEIVE_SMS_SELECT_NULL);
+		}
 	}
 
 	/**
@@ -294,6 +298,14 @@ public class ExcelServiceImpl implements ExcelService{
 	        	//登录账号
 	        	managerUserParam.setUserAccount(value);
 	            break;
+			case 8:
+				//是否接收提醒短信
+				for (ManagerUserReceiveSmsEnum smsEnum : ManagerUserReceiveSmsEnum.values()){
+					if (smsEnum.getValue().equals(value.trim())){
+						managerUserParam.setReceiveSms(smsEnum.getKey());
+					}
+				}
+				break;
 	        default:
 	            break;
 	    }
@@ -313,9 +325,9 @@ public class ExcelServiceImpl implements ExcelService{
 		XSSFWorkbook wb = new XSSFWorkbook();
 
 		//设置表头
-		//用户编号、用户姓名、用户性别、所属角色、部门密保等级、部门职位、资源库密保等级、账号
+		//用户编号、用户姓名、用户性别、所属角色、部门密保等级、部门职位、资源库密保等级、账号、是否接收提醒短信
 		String[] headerArray = {Constant.EXCEL_USER_NO, Constant.EXCEL_USER_NAME, Constant.EXCEL_USER_SEX, Constant.EXCEL_USER_ROLENAME, 
-				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_USER_ACCOUNT};
+				Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_USER_POSITION, Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_USER_ACCOUNT, Constant.EXCEL_USER_RECEIVE_SMS};
 		
 		XSSFSheet sheet1 = wb.createSheet(Constant.EXCEL_SHEET1);
 		XSSFRow row0 = sheet1.createRow(0);
@@ -332,7 +344,7 @@ public class ExcelServiceImpl implements ExcelService{
 
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_DEPT, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_ENCRY_LEVEL_COMPANY, Constant.EXCEL_ENCRY_LEVEL_LIST, HoolinkExceptionMassageEnum.EXCEL_ENCRY_LEVEL_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
-
+		formulaForExcelList.add(new FormulaForExcelBO(Constant.EXCEL_USER_RECEIVE_SMS, Constant.EXCEL_RECEIVE_SMS_LIST, HoolinkExceptionMassageEnum.EXCEL_RECEIVE_SMS_ERROR.getMassage(), ExcelDropDownTypeEnum.LEVEL_ONE));
 		for(FormulaForExcelBO formulaForExcel : formulaForExcelList) {
 			List<String> headerList = Arrays.asList(headerArray);
 			if(headerList.contains(formulaForExcel.getKey())) {
@@ -415,6 +427,8 @@ public class ExcelServiceImpl implements ExcelService{
 		deptPairListForExcel.add(getEncryLevelPairForExcel());
 		//获取性别字典值
 		deptPairListForExcel.add(getSexPairForExcel());
+		//是否接收提醒短信
+		deptPairListForExcel.add(getReceiveSmsForExcel());
 		//插入组织架构属性到隐藏的sheet
 		int rowId = 0;
 		for(DictPairForExcelBO deptPairForExcel : deptPairListForExcel) {
@@ -528,6 +542,28 @@ public class ExcelServiceImpl implements ExcelService{
 			DictPairBO<Long, String> childSexPair = new DictPairBO<>();
 			childSexPair.setKey(sexEnum.getKey()==true?1L:0L);
 			childSexPair.setValue(sexEnum.getValue());
+			childrenSexPairList.add(childSexPair);
+		}
+		return sexPairForExcel;
+	}
+
+	/**
+	 * 获取是否接收提醒短信字典值
+	 * @return
+	 */
+	private DictPairForExcelBO getReceiveSmsForExcel(){
+		DictPairForExcelBO sexPairForExcel = new DictPairForExcelBO();
+		DictPairBO<Long, String> parentSexPair = new DictPairBO<>();
+		parentSexPair.setKey(-1L);
+		parentSexPair.setValue(Constant.EXCEL_RECEIVE_SMS_LIST);
+		sexPairForExcel.setParentDictPair(parentSexPair);
+
+		List<DictPairBO<Long, String>> childrenSexPairList = new ArrayList<>();
+		sexPairForExcel.setChildrenDictPairList(childrenSexPairList);
+		for(ManagerUserReceiveSmsEnum receiveSmsEnum : ManagerUserReceiveSmsEnum.values()) {
+			DictPairBO<Long, String> childSexPair = new DictPairBO<>();
+			childSexPair.setKey(receiveSmsEnum.getKey()==true?1L:0L);
+			childSexPair.setValue(receiveSmsEnum.getValue());
 			childrenSexPairList.add(childSexPair);
 		}
 		return sexPairForExcel;

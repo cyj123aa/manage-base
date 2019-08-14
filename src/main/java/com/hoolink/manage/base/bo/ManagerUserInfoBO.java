@@ -96,4 +96,9 @@ public class ManagerUserInfoBO {
      * 用户组织关系
      */
     private List<DeptPairBO> userDeptPairList;
+
+    /**
+     * 是否接收提醒
+     */
+    private Boolean receiveSms;
 }

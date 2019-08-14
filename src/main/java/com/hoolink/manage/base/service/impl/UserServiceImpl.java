@@ -412,6 +412,7 @@ public class UserServiceImpl implements UserService {
         UserInfoBO userInfoBO = new UserInfoBO();
         userInfoBO.setPhone(user.getPhone());
         userInfoBO.setUserName(user.getName());
+        userInfoBO.setReceiveSms(user.getReceiveSms());
         //设置头像
         if (user.getImgId() != null) {
             try {
@@ -779,6 +780,9 @@ public class UserServiceImpl implements UserService {
         user.setCreated(System.currentTimeMillis());
         user.setEnabled(true);
         user.setFirstLogin(true);
+        if (Objects.isNull(user.getReceiveSms())){
+            user.setReceiveSms(false);
+        }
         //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         userMapper.insertSelective(user);
