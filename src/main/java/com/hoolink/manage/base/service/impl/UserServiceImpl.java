@@ -1113,7 +1113,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PersonalInfoBO getPersonalInfo() throws Exception{
-		User user = userMapper.selectByPrimaryKey(sessionService.getUserIdByToken());
+        Long userId=sessionService.getUserIdByToken();
+        CurrentUserBO currentUserBO=sessionService.getCurrentUser(userId);
+        if(currentUserBO==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+        }
+		User user = userMapper.selectByPrimaryKey(userId);
 		if(user == null) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
 		}
