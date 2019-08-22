@@ -45,6 +45,7 @@
     <result column="view_encry_level_permitted" jdbcType="BIT" property="viewEncryLevelPermitted" />
     <result column="dept_id" jdbcType="BIGINT" property="deptId" />
     <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+    <result column="receive_sms" jdbcType="BIT" property="receiveSms" />
   </resultMap>
 
   <select id="selectAllByDeptIds" resultMap="BaseResultMap">
@@ -59,6 +60,7 @@
         u.encry_level_company,
         u.view_encry_level_permitted,
         u.device_code,
+        u.receive_sms,
         m.dept_id AS dept_id
     FROM
         middle_user_department m
@@ -73,6 +75,19 @@
             </foreach>
         </if>
   </select>
+
+    <select id="selectUserAndDeptByUserName" resultMap="BaseResultMap">
+        SELECT
+            u.*,
+            m.dept_id
+        FROM
+            manage_user u
+            LEFT JOIN middle_user_department m ON u.id = m.user_id
+        WHERE
+            LOCATE(#{userName} ,user_name) > 0
+            AND m.lowest_level = 1
+            AND u.enabled = TRUE
+    </select>
     <update id="updateDeviceCodeEmpty">
         update manage_user set device_code='' where device_code=#{deviceCode}
     </update>

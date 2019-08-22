@@ -16,6 +16,7 @@ public interface SessionService {
     /**
      * 缓存当前用户信息，将token返回出去
      * @param currentUserBO
+     * @param isMobile
      * @return
      */
     String cacheCurrentUser(CurrentUserBO currentUserBO,Boolean isMobile);
@@ -38,8 +39,8 @@ public interface SessionService {
     /**
      * 根据传入token 获取用户最新的用户信息
      * 对于异地登录场景，传入的token会和user中的token不一致
-     *
      * @param token
+     * @param ismobile
      * @return
      */
     CurrentUserBO getCurrentUser(String token,boolean ismobile);

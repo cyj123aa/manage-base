@@ -2,15 +2,12 @@ package com.hoolink.manage.base.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
 import com.hoolink.sdk.bo.edm.*;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -30,6 +27,7 @@ import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.hoolink.manage.base.dao.model.ManageDepartment;
@@ -58,17 +56,32 @@ public class DepartmentServiceImpl implements DepartmentService{
 	@Resource
 	private MiddleUserDepartmentMapperExt middleUserDepartmentMapperExt;
 
+	@Resource
+	private UserMapperExt userMapperExt;
+
 	@Override
 	public List<ManageDepartmentBO> listByIdList(List<Long> idList) {
 		if(CollectionUtils.isEmpty(idList)) {
 			return Collections.emptyList();
 		}
+		List<ManageDepartment> deptList = getManageDepartments(idList);
+		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+	}
+
+	public List<ManageDepartment> listById(List<Long> idList) {
+		if(CollectionUtils.isEmpty(idList)) {
+			return Collections.emptyList();
+		}
+		List<ManageDepartment> deptList = getManageDepartments(idList);
+		return deptList;
+	}
+
+	private List<ManageDepartment> getManageDepartments(List<Long> idList) {
 		ManageDepartmentExample example = new ManageDepartmentExample();
 		ManageDepartmentExample.Criteria criteria = example.createCriteria();
 		criteria.andIdIn(idList);
 		criteria.andEnabledEqualTo(true);
-		List<ManageDepartment> deptList = manageDepartmentMapper.selectByExample(example);
-		return CopyPropertiesUtil.copyList(deptList, ManageDepartmentBO.class);
+		return manageDepartmentMapper.selectByExample(example);
 	}
 
 	@Override
@@ -99,20 +112,60 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}else {
 			return new ArrayList<>(0);
 		}
-		List<ManageDepartment> departmentList =  getDepartmentByCompany(belongJR, belongHL);
+		List<ManageDepartment> departmentList = null;
+		List<SimpleDeptUserBO>  userBOList = null;
+		//是否直接勾选搜索人员
+		boolean isDirectChecked = false;
+		if (StringUtils.isNotBlank(paramBO.getName())){
+			userBOList = userMapperExt.selectUserAndDeptByUserName(paramBO.getName());
+			if (CollectionUtils.isEmpty(userBOList)){
+				return new ArrayList<>();
+			}
+			Set<Long> departIds = getDepartIds(userBOList, belongJR, belongHL);
+			departmentList = listById(new ArrayList<>(departIds));
+			isDirectChecked = true;
+		}else {
+			departmentList = getDepartmentByCompany(belongJR, belongHL);
+		}
+		if (CollectionUtils.isEmpty(departmentList)){
+			return new ArrayList<>();
+		}
 		//拿到父节点
 		List<ManageDepartment> allParentList = departmentList.stream().filter(d -> Objects.isNull(d.getParentId()) || d.getParentId() == 0).collect(Collectors.toList());
 		//过滤两个list中相同的元素放到新集合中
 		List<ManageDepartment> parentList = departmentList.stream().filter(d1 -> allParentList.stream().map(ManageDepartment::getId).collect(Collectors.toList()).contains(d1.getId())).collect(Collectors.toList());
 		List<ManageDepartment> childList = departmentList.stream().filter(d -> Objects.nonNull(d.getParentId())).collect(Collectors.toList());
-		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(convertToDepartmentAndUserTree(parentList), convertToDepartmentAndUserTree(childList));
+		DeptTreeToolUtils toolUtils = new DeptTreeToolUtils(convertToDepartmentAndUserTree(parentList, isDirectChecked), convertToDepartmentAndUserTree(childList, isDirectChecked));
 		//组织架构用户map
 		Map<Long, List<SimpleDeptUserBO>> userMap = null;
 		if (paramBO.getShowUser()){
-			userMap = userService.mapUserByDeptIds(null);
+			if (StringUtils.isNotBlank(paramBO.getName())){
+				userMap = userBOList.stream().distinct().collect(Collectors.groupingBy(SimpleDeptUserBO::getDeptId));
+			}else {
+				userMap = userService.mapUserByDeptIds(null);
+			}
 		}
-		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(paramBO.getShowUser(), userMap, paramBO.getCheckedList());
+		List<DepartmentAndUserTreeBO> treeBOList = toolUtils.getTree(paramBO.getShowUser(), userMap, paramBO.getCheckedList(), isDirectChecked);
 		return treeBOList;
+	}
+
+	private Set<Long> getDepartIds(List<SimpleDeptUserBO> userBOList, boolean belongJR, boolean belongHL) {
+		List<Long> deptIds = userBOList.stream().map(SimpleDeptUserBO::getDeptId).collect(Collectors.toList());
+		ManageDepartmentExample example = new ManageDepartmentExample();
+		ManageDepartmentExample.Criteria criteria = example.createCriteria();
+		criteria.andIdIn(deptIds);
+		List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(example);
+		if (belongJR){
+			manageDepartments = manageDepartments.stream().filter(m -> m.getParentIdCode().indexOf(Constant.JR_PARENT_ID_CODE) == 0).collect(Collectors.toList());
+		}else if (belongHL){
+			manageDepartments = manageDepartments.stream().filter(m -> m.getParentIdCode().indexOf(Constant.HL_PARENT_ID_CODE) == 0).collect(Collectors.toList());
+		}
+		Set<Long> departIds = new HashSet<>();
+		for (ManageDepartment department : manageDepartments){
+			List<Long>  ids = Arrays.asList((Long[]) ConvertUtils.convert(department.getParentIdCode().split(Constant.UNDERLINE), Long.class));
+			departIds.addAll(ids);
+		}
+		return departIds;
 	}
 
 	private List<ManageDepartment> getDepartmentByCompany(Boolean belongJR, Boolean belongHL){
@@ -137,7 +190,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 		return deptList;
 	}
 
-	private List<DepartmentAndUserTreeBO> convertToDepartmentAndUserTree(List<ManageDepartment> departmentList){
+	private List<DepartmentAndUserTreeBO> convertToDepartmentAndUserTree(List<ManageDepartment> departmentList, boolean isDirectChecked){
 		List<DepartmentAndUserTreeBO> treeBOList = new ArrayList<>();
 		for (ManageDepartment department : departmentList){
 			DepartmentAndUserTreeBO departmentAndUserTreeBO = new DepartmentAndUserTreeBO();
@@ -149,7 +202,11 @@ public class DepartmentServiceImpl implements DepartmentService{
 			//默认展开组织架构
 			departmentAndUserTreeBO.setExpand(Boolean.TRUE);
 			//默认全部取消勾选
-			departmentAndUserTreeBO.setChecked(Boolean.FALSE);
+			if (isDirectChecked){
+				departmentAndUserTreeBO.setChecked(Boolean.TRUE);
+			}else {
+				departmentAndUserTreeBO.setChecked(Boolean.FALSE);
+			}
 			treeBOList.add(departmentAndUserTreeBO);
 		}
 		return treeBOList;

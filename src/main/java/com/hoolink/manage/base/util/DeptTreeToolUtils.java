@@ -29,7 +29,7 @@ public class DeptTreeToolUtils {
         this.bodyList = bodyList;
     }
 
-    public List<DepartmentAndUserTreeBO> getTree(Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList) {
+    public List<DepartmentAndUserTreeBO> getTree(Boolean flag, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList, boolean isDirectChecked) {
         //调用的方法入口
         if (bodyList != null && !bodyList.isEmpty()) {
             //声明一个map，用来过滤已操作过的数据
@@ -38,11 +38,11 @@ public class DeptTreeToolUtils {
             //顶层节点用户
             List<DepartmentAndUserTreeBO> rootUserList = new ArrayList<>();
             rootList.forEach(beanTree -> {
-                getChild(beanTree, map, hasAddUser, userMap, checkedList);
+                getChild(beanTree, map, hasAddUser, userMap, checkedList, isDirectChecked);
                 if (hasAddUser){
                     List<SimpleDeptUserBO> userBOList = userMap.get(beanTree.getKey());
                     if (CollectionUtils.isNotEmpty(userBOList)){
-                        buildUserList(rootUserList, beanTree, userBOList, checkedList);
+                        buildUserList(rootUserList, beanTree, userBOList, checkedList, isDirectChecked);
                         List<DepartmentAndUserTreeBO> root = beanTree.getChildren();
                         root.addAll(rootUserList);
                         beanTree.setChildren(root);
@@ -54,7 +54,7 @@ public class DeptTreeToolUtils {
         return null;
     }
 
-    private void buildUserList(List<DepartmentAndUserTreeBO> rootUserList, DepartmentAndUserTreeBO beanTree, List<SimpleDeptUserBO> userBOList, List<CheckedParamBO> checkedUserList) {
+    private void buildUserList(List<DepartmentAndUserTreeBO> rootUserList, DepartmentAndUserTreeBO beanTree, List<SimpleDeptUserBO> userBOList, List<CheckedParamBO> checkedUserList , boolean isDirectChecked) {
         for (SimpleDeptUserBO userBO : userBOList) {
             DepartmentAndUserTreeBO treeBO = new DepartmentAndUserTreeBO();
             treeBO.setKey(userBO.getId());
@@ -62,7 +62,9 @@ public class DeptTreeToolUtils {
             treeBO.setValue(userBO.getId());
             treeBO.setType(Constant.USER);
             treeBO.setDepartId(beanTree.getKey());
-            treeBO.setChecked(Boolean.FALSE);
+            if (isDirectChecked){
+                treeBO.setChecked(Boolean.TRUE);
+            }
             treeBO.setExpand(Boolean.FALSE);
             if (CollectionUtils.isNotEmpty(checkedUserList)){
                 for (CheckedParamBO userParamBO : checkedUserList){
@@ -75,7 +77,7 @@ public class DeptTreeToolUtils {
         }
     }
 
-    public void getChild(DepartmentAndUserTreeBO treeDto, Map<Long, Long> map, Boolean hasAddUser, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList) {
+    public void getChild(DepartmentAndUserTreeBO treeDto, Map<Long, Long> map, Boolean hasAddUser, Map<Long, List<SimpleDeptUserBO>> userMap, List<CheckedParamBO> checkedList, boolean isDirectChecked) {
         List<DepartmentAndUserTreeBO> childList = Lists.newArrayList();
         bodyList.stream()
                 .filter(c -> !map.containsKey(c.getKey()))
@@ -83,12 +85,12 @@ public class DeptTreeToolUtils {
                 .forEach(c -> {
                     map.put(c.getKey(), c.getParentId());
                     //子集
-                    getChild(c, map, hasAddUser, userMap, checkedList);
+                    getChild(c, map, hasAddUser, userMap, checkedList, isDirectChecked);
                     List<DepartmentAndUserTreeBO> children = new ArrayList<>();
                     if (hasAddUser) {
                         if (CollectionUtils.isNotEmpty(userMap.get(c.getKey()))) {
                             //封装员工数据
-                            buildUserList(children, c, userMap.get(c.getKey()), checkedList);
+                            buildUserList(children, c, userMap.get(c.getKey()), checkedList, isDirectChecked);
                             List<DepartmentAndUserTreeBO> root = c.getChildren();
                             root.addAll(children);
                             c.setChildren(root);

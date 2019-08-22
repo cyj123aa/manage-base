@@ -43,6 +43,7 @@ public class Constant {
     public static final String EXCEL_USER_STATUS = "账号状态";
     public static final String EXCEL_USER_LAST_TIME = "末次登陆时间";
     public static final String EXCEL_USER_CREATED = "创建时间";
+    public static final String EXCEL_USER_RECEIVE_SMS = "是否接收提醒短信";
 
     public static final String EXCEL_USER_DEPT = "所属部门";
     public static final String EXCEL_USER_TEAM = "所属team";
@@ -99,6 +100,7 @@ public class Constant {
     public static final String EXCEL_ENCRY_LEVEL_LIST = "encryLevelList";
     public static final String EXCEL_VIEW_ENCRY_PERMITTED_LIST = "viewEncryLevelPermittedList";
     public static final String EXCEL_SEX_LIST = "sexList";
+    public static final String EXCEL_RECEIVE_SMS_LIST = "receiveSmsList";
     public static final String EXCEL_DEPT_FORMULA = "INDIRECT($D1)";
     public static final String EXCEL_TEAM_FORMULA = "INDIRECT($E1)";
 

@@ -45,6 +45,7 @@ public interface UserService {
     /**
      * 用户登录
      * @param loginParam
+     * @param isMobile
      * @return
      * @throws Exception
      */

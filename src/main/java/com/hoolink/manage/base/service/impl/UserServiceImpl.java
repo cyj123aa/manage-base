@@ -61,6 +61,7 @@ import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.utils.MD5Util;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,15 +70,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -497,6 +495,7 @@ public class UserServiceImpl implements UserService {
         UserInfoBO userInfoBO = new UserInfoBO();
         userInfoBO.setPhone(user.getPhone());
         userInfoBO.setUserName(user.getName());
+        userInfoBO.setReceiveSms(user.getReceiveSms());
         //设置头像
         if (user.getImgId() != null) {
             try {
@@ -557,6 +556,7 @@ public class UserServiceImpl implements UserService {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
+        currentUserBO.setUserName(URLEncoder.encode(user.getName(), "utf-8"));
         //设置角色id
         currentUserBO.setRoleId(user.getRoleId());
         //设置角色层级
@@ -863,6 +863,9 @@ public class UserServiceImpl implements UserService {
         user.setCreated(System.currentTimeMillis());
         user.setEnabled(true);
         user.setFirstLogin(true);
+        if (Objects.isNull(user.getReceiveSms())){
+            user.setReceiveSms(false);
+        }
         //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
         user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
         userMapper.insertSelective(user);
@@ -1193,7 +1196,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public PersonalInfoBO getPersonalInfo() throws Exception{
-		User user = userMapper.selectByPrimaryKey(sessionService.getUserIdByToken());
+        Long userId=sessionService.getUserIdByToken();
+        CurrentUserBO currentUserBO=sessionService.getCurrentUser(userId);
+        if(currentUserBO==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+        }
+		User user = userMapper.selectByPrimaryKey(userId);
 		if(user == null) {
 			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
 		}

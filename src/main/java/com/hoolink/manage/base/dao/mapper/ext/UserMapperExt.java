@@ -31,6 +31,13 @@ public interface UserMapperExt {
     List<SimpleDeptUserBO> selectAllByDeptIds(@Param("idList") List<Long> idList);
 
     /**
+     * 根据用户名模糊搜索
+     * @param userName
+     * @return
+     */
+    List<SimpleDeptUserBO> selectUserAndDeptByUserName(@Param("userName")String userName);
+
+    /**
      * 更新设备的code为空
      * @param deviceCode
      * @return

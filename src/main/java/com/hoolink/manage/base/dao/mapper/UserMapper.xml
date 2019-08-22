@@ -26,6 +26,7 @@
     <result column="updated" jdbcType="BIGINT" property="updated" />
     <result column="enabled" jdbcType="BIT" property="enabled" />
     <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+    <result column="receive_sms" jdbcType="BIT" property="receiveSms" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -97,7 +98,7 @@
     -->
     id, user_no, user_account, user_name, sex, role_id, passwd, img_id, phone, position, 
     encry_level_company, first_login, last_time, user_status, view_encry_level_permitted, 
-    creator, updator, created, updated, enabled, device_code
+    creator, updator, created, updated, enabled, device_code, receive_sms
   </sql>
   <select id="selectByExample" parameterType="com.hoolink.manage.base.dao.model.UserExample" resultMap="BaseResultMap">
     <!--
@@ -151,14 +152,14 @@
       first_login, last_time, user_status, 
       view_encry_level_permitted, creator, updator, 
       created, updated, enabled, 
-      device_code)
+      device_code, receive_sms)
     values (#{userNo,jdbcType=VARCHAR}, #{userAccount,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{sex,jdbcType=BIT}, #{roleId,jdbcType=BIGINT}, #{passwd,jdbcType=VARCHAR}, #{imgId,jdbcType=BIGINT}, 
       #{phone,jdbcType=VARCHAR}, #{position,jdbcType=VARCHAR}, #{encryLevelCompany,jdbcType=INTEGER}, 
       #{firstLogin,jdbcType=BIT}, #{lastTime,jdbcType=BIGINT}, #{status,jdbcType=BIT}, 
       #{viewEncryLevelPermitted,jdbcType=BIT}, #{creator,jdbcType=BIGINT}, #{updator,jdbcType=BIGINT}, 
       #{created,jdbcType=BIGINT}, #{updated,jdbcType=BIGINT}, #{enabled,jdbcType=BIT}, 
-      #{deviceCode,jdbcType=VARCHAR})
+      #{deviceCode,jdbcType=VARCHAR}, #{receiveSms,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" keyProperty="id" parameterType="com.hoolink.manage.base.dao.model.User" useGeneratedKeys="true">
     <!--
@@ -226,6 +227,9 @@
       <if test="deviceCode != null">
         device_code,
       </if>
+      <if test="receiveSms != null">
+        receive_sms,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userNo != null">
@@ -287,6 +291,9 @@
       </if>
       <if test="deviceCode != null">
         #{deviceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receiveSms != null">
+        #{receiveSms,jdbcType=BIT},
       </if>
     </trim>
   </insert>
@@ -368,6 +375,9 @@
       <if test="record.deviceCode != null">
         device_code = #{record.deviceCode,jdbcType=VARCHAR},
       </if>
+      <if test="record.receiveSms != null">
+        receive_sms = #{record.receiveSms,jdbcType=BIT},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -398,7 +408,8 @@
       created = #{record.created,jdbcType=BIGINT},
       updated = #{record.updated,jdbcType=BIGINT},
       enabled = #{record.enabled,jdbcType=BIT},
-      device_code = #{record.deviceCode,jdbcType=VARCHAR}
+      device_code = #{record.deviceCode,jdbcType=VARCHAR},
+      receive_sms = #{record.receiveSms,jdbcType=BIT}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -469,6 +480,9 @@
       <if test="deviceCode != null">
         device_code = #{deviceCode,jdbcType=VARCHAR},
       </if>
+      <if test="receiveSms != null">
+        receive_sms = #{receiveSms,jdbcType=BIT},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -496,7 +510,8 @@
       created = #{created,jdbcType=BIGINT},
       updated = #{updated,jdbcType=BIGINT},
       enabled = #{enabled,jdbcType=BIT},
-      device_code = #{deviceCode,jdbcType=VARCHAR}
+      device_code = #{deviceCode,jdbcType=VARCHAR},
+      receive_sms = #{receiveSms,jdbcType=BIT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>
