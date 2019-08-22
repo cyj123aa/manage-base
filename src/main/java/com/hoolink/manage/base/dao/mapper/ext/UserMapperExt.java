@@ -37,4 +37,11 @@ public interface UserMapperExt {
      */
     List<SimpleDeptUserBO> selectUserAndDeptByUserName(@Param("userName")String userName);
 
+    /**
+     * 更新设备的code为空
+     * @param deviceCode
+     * @return
+     */
+    int updateDeviceCodeEmpty(@Param("deviceCode") String deviceCode);
+
 }
