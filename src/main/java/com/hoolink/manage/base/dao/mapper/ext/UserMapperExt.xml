@@ -88,4 +88,7 @@
             AND m.lowest_level = 1
             AND u.enabled = TRUE
     </select>
+    <update id="updateDeviceCodeEmpty">
+        update manage_user set device_code='' where device_code=#{deviceCode}
+    </update>
 </mapper>
