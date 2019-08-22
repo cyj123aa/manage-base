@@ -125,6 +125,7 @@ public class UserControllerTest extends TestController {
         User user=new User();
         user.setId(1L);
         user.setUserAccount("1");
+        user.setName("test");
         user.setFirstLogin(false);
         user.setPhone("18596898523");
         user.setStatus(true);
