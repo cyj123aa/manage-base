@@ -349,6 +349,9 @@ public class MenuServiceImpl implements MenuService {
             return edmMenuTreeBOS;
         }
         ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(strId);
+        if(manageDepartment==null){
+            throw new BusinessException(HoolinkExceptionMassageEnum.NAV_NOT_EXIST);
+        }
         //查询下级
         ManageDepartmentExample example = new ManageDepartmentExample();
         example.createCriteria().andEnabledEqualTo(true).andParentIdEqualTo(strId);
@@ -357,29 +360,27 @@ public class MenuServiceImpl implements MenuService {
         if(CollectionUtils.isNotEmpty(manageDepartments)){
             flag=false;
         }
-        final Boolean enableUpdate=flag;
-        if(manageDepartment!=null){
-            String parentIdCode = manageDepartment.getParentIdCode();
-            String[] split = parentIdCode.split(Constant.UNDERLINE);
-            if(split.length==Constant.LEVEL){
-                //一级组织架构
-                edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment,ManageDepartmentBO.class),paramBO.getRepertoryType(),enableUpdate));
-                return edmMenuTreeBOS;
-            }
-            String[] split1 = new String[split.length-1];
-            System.arraycopy(split, 1, split1, 0, split1.length);
-            List<String> ids = Arrays.asList(split1);
-            List<Long> collect = ids.stream().map(Long::parseLong).collect(Collectors.toList());
-            List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
-            if(CollectionUtils.isNotEmpty(manageDepartmentBOS)){
-                manageDepartmentBOS.forEach(manageDepartmentBO -> {
-                    if(manageDepartmentBO.getId().toString().equals(paramBO.getBelongId())){
-                        edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),enableUpdate));
-                    }else{
-                        edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO,paramBO.getRepertoryType(),false));
-                    }
-                });
-            }
+        final Boolean enableUpdate = flag;
+        String parentIdCode = manageDepartment.getParentIdCode();
+        String[] split = parentIdCode.split(Constant.UNDERLINE);
+        if (split.length == Constant.LEVEL) {
+            //一级组织架构
+            edmMenuTreeBOS.add(getEdmMenuTreeBO(CopyPropertiesUtil.copyBean(manageDepartment, ManageDepartmentBO.class), paramBO.getRepertoryType(), enableUpdate));
+            return edmMenuTreeBOS;
+        }
+        String[] split1 = new String[split.length - 1];
+        System.arraycopy(split, 1, split1, 0, split1.length);
+        List<String> ids = Arrays.asList(split1);
+        List<Long> collect = ids.stream().map(Long::parseLong).collect(Collectors.toList());
+        List<ManageDepartmentBO> manageDepartmentBOS = manageDepartmentMapperExt.listByIdOrder(collect);
+        if (CollectionUtils.isNotEmpty(manageDepartmentBOS)) {
+            manageDepartmentBOS.forEach(manageDepartmentBO -> {
+                if (manageDepartmentBO.getId().toString().equals(paramBO.getBelongId())) {
+                    edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO, paramBO.getRepertoryType(), enableUpdate));
+                } else {
+                    edmMenuTreeBOS.add(getEdmMenuTreeBO(manageDepartmentBO, paramBO.getRepertoryType(), false));
+                }
+            });
         }
         return edmMenuTreeBOS;
     }

@@ -1079,9 +1079,14 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
-        //更新一下当前用户
-        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),false,false);
-        cacheSession(userMapper.selectByPrimaryKey(userBO.getId()),true,false);
+        if(CollectionUtils.isNotEmpty(deptPairList)){
+            //更新了组织架构，就退出登录
+            sessionService.deleteSession(userBO.getId());
+        }else {
+            //更新一下当前用户
+            cacheSession(userMapper.selectByPrimaryKey(userBO.getId()), false, false);
+            cacheSession(userMapper.selectByPrimaryKey(userBO.getId()), true, false);
+        }
     }
 
     @Override
