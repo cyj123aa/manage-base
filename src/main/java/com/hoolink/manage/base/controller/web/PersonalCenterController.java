@@ -1,22 +1,18 @@
 package com.hoolink.manage.base.controller.web;
 
-import org.apache.servicecomb.provider.rest.common.RestSchema;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.hoolink.manage.base.service.UserService;
-import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
 import com.hoolink.manage.base.vo.res.PersonalInfoVO;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
-
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 /**
  * 个人中心
  * @author lijunling
@@ -25,7 +21,6 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(value = "/web/personalCenter/")
-@RestSchema(schemaId = "personalCenterController")
 public class PersonalCenterController {
     @Autowired
     private UserService userService;

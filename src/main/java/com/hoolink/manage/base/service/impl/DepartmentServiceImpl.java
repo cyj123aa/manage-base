@@ -2,39 +2,33 @@ package com.hoolink.manage.base.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.sdk.bo.edm.*;
-import com.hoolink.sdk.bo.manager.*;
-import com.hoolink.sdk.enums.edm.EdmDeptEnum;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
 import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.constant.Constant;
-import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
-import com.hoolink.sdk.bo.manager.ManageDepartmentTreeBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmetTreeParamBO;
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
+import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
+import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
+import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
+import com.hoolink.manage.base.dao.model.ManageDepartment;
+import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
+import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.DeptTreeToolUtils;
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.edm.DeptVisibleCacheBO;
+import com.hoolink.sdk.bo.edm.TreeParamBO;
+import com.hoolink.sdk.bo.manager.*;
+import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
 import com.hoolink.sdk.utils.ContextUtil;
-import org.apache.commons.beanutils.ConvertUtils;
+import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
-import com.hoolink.manage.base.service.DepartmentService;
-import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.manage.base.dao.mapper.ManageDepartmentMapper;
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author lijunling
@@ -112,7 +106,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}else {
 			return new ArrayList<>(0);
 		}
-		List<ManageDepartment> departmentList = null;
+		List<ManageDepartment> departmentList ;
 		List<SimpleDeptUserBO>  userBOList = null;
 		//是否直接勾选搜索人员
 		boolean isDirectChecked = false;
@@ -162,7 +156,7 @@ public class DepartmentServiceImpl implements DepartmentService{
 		}
 		Set<Long> departIds = new HashSet<>();
 		for (ManageDepartment department : manageDepartments){
-			List<Long>  ids = Arrays.asList((Long[]) ConvertUtils.convert(department.getParentIdCode().split(Constant.UNDERLINE), Long.class));
+			List<Long> ids = Arrays.stream(department.getParentIdCode().split(Constant.UNDERLINE)).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
 			departIds.addAll(ids);
 		}
 		return departIds;
@@ -386,7 +380,7 @@ public class DepartmentServiceImpl implements DepartmentService{
             Long key = entry.getKey();
             String value = entry.getValue();
             ReadFileOrgInfoBO readFileOrgInfoBO = new ReadFileOrgInfoBO();
-            List<Long>  id = Arrays.asList((Long[]) ConvertUtils.convert(value.split(Constant.UNDERLINE), Long.class));
+			List<Long> id = Arrays.stream(value.split(Constant.UNDERLINE)).map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
             List<ManageDepartment> deptParentIdList = getDeptList(id);
             List<String> companyName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 1).map(ManageDepartment::getName).collect(Collectors.toList());
             List<String> deptName = deptParentIdList.stream().filter(a -> a.getDeptType().intValue() == 2).map(ManageDepartment::getName).collect(Collectors.toList());

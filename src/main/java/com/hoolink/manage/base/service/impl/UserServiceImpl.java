@@ -13,20 +13,10 @@ import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
-import com.hoolink.manage.base.dao.model.ManageRole;
-import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
-import com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample;
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.dao.model.UserExample.Criteria;
 import com.hoolink.manage.base.dict.AbstractDict;
-import com.hoolink.manage.base.service.DepartmentService;
-import com.hoolink.manage.base.service.MiddleUserDepartmentService;
-import com.hoolink.manage.base.service.RoleService;
-import com.hoolink.manage.base.service.SessionService;
-import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.RegexUtil;
 import com.hoolink.manage.base.util.SpringUtils;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
@@ -39,16 +29,7 @@ import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.edm.RepertoryBO;
-import com.hoolink.sdk.bo.manager.DeptPairBO;
-import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
-import com.hoolink.sdk.bo.manager.ManageUserDeptBO;
-import com.hoolink.sdk.bo.manager.ManageUserInfoBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
-import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.constants.ContextConstant;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -61,24 +42,6 @@ import com.hoolink.sdk.utils.ArrayUtil;
 import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.utils.MD5Util;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -88,10 +51,23 @@ import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.Resource;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author: xuli
@@ -1573,10 +1549,48 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String uploadImage(MultipartFile multipartFile) {
-		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
+		BackBO<ObsBO> obsBo = uploadManager(multipartFile);
 		updateImage(obsBo.getData().getId());
         return obsBo.getData().getObjectUrl();
 	}
+
+	private BackBO<ObsBO> uploadManager(MultipartFile multipartFile){
+        InputStream in = null;
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        try {
+            in = multipartFile.getInputStream();
+            byte[] buff = new byte[1024];
+            int bytesRead = 0;
+            while ((bytesRead = in.read(buff)) != -1) {
+                bao.write(buff, 0, bytesRead);
+            }
+            ByteArrayResource arrayResource = new ByteArrayResource(bao.toByteArray()){
+                @Override
+                public String getFilename() throws IllegalStateException {
+                    return multipartFile.getOriginalFilename();
+                }
+            };
+            Map<String, Object> map = new HashMap<>(1);
+            map.put("file", arrayResource);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<Map<String, Object>> entry = new HttpEntity<>(map, headers);
+            return abilityClient.uploadManager(entry);
+        } catch (IOException e) {
+            log.error("调用OBS上传文件失败");
+            throw new BusinessException("调用OBS上传文件失败");
+        }finally {
+            try {
+                if(in != null) {
+                    in.close();
+                }
+                bao.close();
+            } catch (IOException e) {
+                log.error("调用OBS上传文件失败");
+                throw new BusinessException("调用OBS上传文件失败");
+            }
+        }
+    }
 
 	@Override
 	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {

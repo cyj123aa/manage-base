@@ -1,15 +1,14 @@
 package com.hoolink.manage.base.controller.mobile;
 
-import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.manage.base.vo.req.DepartmentTreeParamVO;
 import com.hoolink.manage.base.vo.res.ManageDepartmentTreeVO;
 import com.hoolink.sdk.annotation.LogAndParam;
+import com.hoolink.sdk.bo.manager.DepartmentTreeParamBO;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/mobile/department/")
-@RestSchema(schemaId = "mobileDepartmentController")
 public class MobileDepartmentController {
 
     @Resource

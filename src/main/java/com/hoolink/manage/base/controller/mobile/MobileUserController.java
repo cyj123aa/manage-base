@@ -9,7 +9,6 @@ import com.hoolink.manage.base.vo.ManagerBaseGroup;
 import com.hoolink.manage.base.vo.req.*;
 import com.hoolink.manage.base.vo.res.*;
 import com.hoolink.sdk.annotation.LogAndParam;
-import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
@@ -19,7 +18,6 @@ import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +36,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/mobile/user/")
-@RestSchema(schemaId = "mobileUserController")
 public class MobileUserController {
 
     @Autowired

@@ -6,15 +6,16 @@ import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.edm.EdmMenuTreeBO;
 import com.hoolink.sdk.bo.edm.MenuParamBO;
 import com.hoolink.sdk.bo.edm.ResourceParamBO;
-import com.hoolink.sdk.bo.manager.InitMenuBO;
 import com.hoolink.sdk.bo.manager.RoleMenuBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -25,7 +26,6 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping(value = "/menu/")
-@RestSchema(schemaId = "menuController")
 public class MenuController {
 
     @Autowired

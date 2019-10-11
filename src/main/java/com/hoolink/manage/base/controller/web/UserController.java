@@ -1,67 +1,34 @@
 package com.hoolink.manage.base.controller.web;
 
-import com.hoolink.manage.base.bo.PhoneParamBO;
-import com.hoolink.manage.base.bo.UpdatePasswdParamBO;
-import com.hoolink.manage.base.bo.UserExcelDataBO;
-import com.hoolink.manage.base.bo.ManagerUserPageParamBO;
-import com.hoolink.manage.base.bo.ManagerUserParamBO;
-import com.hoolink.manage.base.bo.ManagerUserInfoParamBO;
 import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DictParamBO;
-import com.hoolink.manage.base.bo.LoginParamBO;
+import com.hoolink.manage.base.bo.*;
+import com.hoolink.manage.base.service.ExcelService;
 import com.hoolink.manage.base.service.UserService;
 import com.hoolink.manage.base.util.ValidatorUtil;
 import com.hoolink.manage.base.vo.ManagerBaseGroup;
-import com.hoolink.manage.base.vo.req.PhoneParamVO;
-import com.hoolink.manage.base.vo.req.UpdatePasswdParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserPageParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserParamVO;
-import com.hoolink.manage.base.vo.req.OperateFileLogParamVO;
-import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
-import com.hoolink.manage.base.vo.req.DictParamVO;
-import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
-import com.hoolink.manage.base.vo.req.GetDeptTreeParamVO;
-import com.hoolink.manage.base.vo.req.LoginParamVO;
-import com.hoolink.manage.base.vo.res.DeptTreeVO;
-import com.hoolink.manage.base.vo.res.DictInfoVO;
-import com.hoolink.manage.base.vo.res.LoginResultVO;
-import com.hoolink.manage.base.vo.res.ManagerUserInfoVO;
-import com.hoolink.manage.base.vo.res.ManagerUserVO;
-import com.hoolink.manage.base.vo.res.OperateFileLogVO;
-import com.hoolink.manage.base.vo.res.UserExcelDataVO;
-import com.hoolink.manage.base.vo.res.UserInfoVO;
+import com.hoolink.manage.base.vo.req.*;
+import com.hoolink.manage.base.vo.res.*;
 import com.hoolink.sdk.annotation.LogAndParam;
-import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
-import com.hoolink.sdk.utils.BackBOUtil;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import com.hoolink.manage.base.service.ExcelService;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.MediaType;
 
 /**
  * @Author: xuli
@@ -69,7 +36,6 @@ import javax.ws.rs.core.MediaType;
  */
 @RestController
 @RequestMapping(value = "/web/user/")
-@RestSchema(schemaId = "userController")
 public class UserController {
 
     @Autowired

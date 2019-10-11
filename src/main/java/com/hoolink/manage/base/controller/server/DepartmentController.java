@@ -1,16 +1,15 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.github.pagehelper.PageInfo;
-import com.hoolink.manage.base.bo.DeptPositionBO;
 import com.hoolink.manage.base.service.DepartmentService;
 import com.hoolink.sdk.annotation.LogAndParam;
 import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.edm.*;
+import com.hoolink.sdk.bo.edm.DepartmentAndUserTreeBO;
+import com.hoolink.sdk.bo.edm.DeptVisibleCacheBO;
+import com.hoolink.sdk.bo.edm.TreeParamBO;
 import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.utils.BackBOUtil;
 import io.swagger.annotations.ApiOperation;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,6 @@ import java.util.List;
  */
 @RestController(value = "server.departmentController")
 @RequestMapping(value = "/department/")
-@RestSchema(schemaId = "server.departmentController")
 public class DepartmentController {
 
     @Resource

@@ -1,32 +1,21 @@
 package com.hoolink.manage.base.controller.server;
 
-import com.hoolink.manage.base.bo.PersonalInfoBO;
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.manage.base.vo.req.ManagerUserInfoParamVO;
-import com.hoolink.manage.base.vo.res.PersonalInfoVO;
+import com.hoolink.manage.base.service.UserService;
+import com.hoolink.sdk.annotation.LogAndParam;
+import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.manager.*;
-
-import com.hoolink.sdk.utils.BackVOUtil;
-import java.util.List;
-import java.util.Map;
-
 import com.hoolink.sdk.param.BaseParam;
+import com.hoolink.sdk.utils.BackBOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hoolink.manage.base.service.UserService;
-import com.hoolink.sdk.annotation.LogAndParam;
-import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.utils.BackBOUtil;
-import io.swagger.annotations.ApiOperation;
-
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 
@@ -36,7 +25,6 @@ import javax.validation.constraints.NotNull;
  */
 @RestController(value = "server.userController")
 @RequestMapping(value = "/user/")
-@RestSchema(schemaId = "server.userController")
 public class UserController {
 
     @Autowired

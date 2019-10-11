@@ -5,22 +5,18 @@ import com.hoolink.manage.base.bo.*;
 import com.hoolink.manage.base.constant.Constant;
 import com.hoolink.manage.base.service.RoleService;
 import com.hoolink.manage.base.vo.req.MenuParamVO;
-import com.hoolink.manage.base.vo.req.PageParamVO;
 import com.hoolink.manage.base.vo.req.RoleParamVO;
 import com.hoolink.manage.base.vo.req.SearchPageParamVO;
 import com.hoolink.manage.base.vo.res.BackRoleVO;
 import com.hoolink.manage.base.vo.res.ManageMenuTreeVO;
 import com.hoolink.manage.base.vo.res.RoleMenuVO;
 import com.hoolink.sdk.annotation.LogAndParam;
-import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.enums.CheckEnum;
 import com.hoolink.sdk.param.BaseParam;
-import com.hoolink.sdk.utils.BackBOUtil;
 import com.hoolink.sdk.utils.BackVOUtil;
 import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
-import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +33,6 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping(value = "/web/role/")
-@RestSchema(schemaId = "roleController")
 public class RoleController {
 
     @Autowired
