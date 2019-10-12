@@ -280,28 +280,27 @@ public class DepartmentServiceImpl implements DepartmentService{
 	public OrganizationDeptBO getOrganization(OrganizationDeptParamBO paramBO) throws Exception {
       OrganizationDeptBO organizationDeptBO = new OrganizationDeptBO();
       ManageDepartment manageDepartment = manageDepartmentMapper.selectByPrimaryKey(paramBO.getDeptId());
-      if(manageDepartment != null){
-         if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
-             organizationDeptBO.setGroupName(manageDepartment.getName());
-              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
+		  String parentIdCode = manageDepartment.getParentIdCode();
+		  String [] parentIds = parentIdCode.split("_");
+      List<String> list = Arrays.asList(parentIds);
+      List<Long> ids = list.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
+      ManageDepartmentExample example = new ManageDepartmentExample();
+      example.createCriteria().andIdIn(ids);
+      List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(example);
+      for (ManageDepartment department:manageDepartments) {
+          if(Constant.COMPANY_LEVEL.equals(department.getDeptType())){
+              organizationDeptBO.setCompanyName(department.getName());
+              organizationDeptBO.setDeptId(department.getId());
           }
-          if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
-              organizationDeptBO.setDeptName(manageDepartment.getName());
-              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
-						  getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
+          if(Constant.DEPT_LEVEL.equals(department.getDeptType())){
+              organizationDeptBO.setDeptName(department.getName());
           }
-
-          if(EdmDeptEnum.SYSTEM_CENTER.getKey().byteValue() == manageDepartment.getDeptType()){
-              organizationDeptBO.setSystemCenterName(manageDepartment.getName());
-              getParentOrganization(manageDepartment.getParentId(),organizationDeptBO);
-              getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
+          if(Constant.POSITION_LEVEL.equals(department.getDeptType())){
+              organizationDeptBO.setGroupName(department.getName());
           }
-
-				if(EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()){
-					organizationDeptBO.setCompanyName(manageDepartment.getName());
-					organizationDeptBO.setDeptId(manageDepartment.getId());
-				}
-
+          if(Constant.SYSTEM_CENTER_LEVEL.equals(department.getDeptType())){
+              organizationDeptBO.setSystemCenterName(department.getName());
+          }
       }
       return organizationDeptBO;
 	}
@@ -419,46 +418,6 @@ public class DepartmentServiceImpl implements DepartmentService{
      return manageDepartmentMapper.selectByExample(departmentExample);
   }
 
-	private void getParentOrganization(Long parentId, OrganizationDeptBO organizationDeptBO) {
-		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
-		criteria.andIdEqualTo(parentId).andEnabledEqualTo(true);
-		List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
-		if (CollectionUtils.isNotEmpty(manageDepartments)) {
-			ManageDepartment manageDepartment = manageDepartments.get(0);
-			if (EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()) {
-				organizationDeptBO.setDeptName(manageDepartment.getName());
-			}
-			if (EdmDeptEnum.COMPANY.getKey().byteValue() == manageDepartment.getDeptType()) {
-				organizationDeptBO.setCompanyName(manageDepartment.getName());
-				organizationDeptBO.setDeptId(manageDepartment.getId());
-			}
-			if (EdmDeptEnum.SYSTEM_CENTER.getKey().byteValue() == manageDepartment.getDeptType()) {
-				organizationDeptBO.setSystemCenterName(manageDepartment.getName());
-			}
-			if (manageDepartment.getParentId() != null) {
-				getParentOrganization(manageDepartment.getParentId(), organizationDeptBO);
-			}
-
-		}
-	}
-
-	private void getChildrenOrganization(Long id, OrganizationDeptBO organizationDeptBO){
-		ManageDepartmentExample departmentExample = new ManageDepartmentExample();
-		ManageDepartmentExample.Criteria criteria = departmentExample.createCriteria();
-		criteria.andParentIdEqualTo(id).andEnabledEqualTo(true);
-		List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
-		if(CollectionUtils.isNotEmpty(manageDepartments)){
-			ManageDepartment manageDepartment = manageDepartments.get(0);
-			if(EdmDeptEnum.POSITION.getKey().byteValue() == manageDepartment.getDeptType()){
-				organizationDeptBO.setGroupName(manageDepartment.getName());
-			}
-			if(EdmDeptEnum.DEPT.getKey().byteValue() == manageDepartment.getDeptType()){
-            organizationDeptBO.setDeptName(manageDepartment.getName());
-            getChildrenOrganization(manageDepartment.getId(),organizationDeptBO);
-        }
-		}
-	}
 
 	/**
 	 * 传入idList是因为一个人可能属于多个部门
