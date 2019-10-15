@@ -13,22 +13,13 @@ import com.hoolink.manage.base.dao.mapper.UserMapper;
 import com.hoolink.manage.base.dao.mapper.ext.ManageDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.MiddleUserDepartmentMapperExt;
 import com.hoolink.manage.base.dao.mapper.ext.UserMapperExt;
-import com.hoolink.manage.base.dao.model.ManageDepartment;
-import com.hoolink.manage.base.dao.model.ManageDepartmentExample;
-import com.hoolink.manage.base.dao.model.ManageRole;
-import com.hoolink.manage.base.dao.model.MiddleUserDepartment;
-import com.hoolink.manage.base.dao.model.MiddleUserDepartmentExample;
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.manage.base.dao.model.UserExample;
+import com.hoolink.manage.base.dao.model.*;
 import com.hoolink.manage.base.dao.model.UserExample.Criteria;
 import com.hoolink.manage.base.dict.AbstractDict;
-import com.hoolink.manage.base.service.DepartmentService;
-import com.hoolink.manage.base.service.MiddleUserDepartmentService;
-import com.hoolink.manage.base.service.RoleService;
-import com.hoolink.manage.base.service.SessionService;
-import com.hoolink.manage.base.service.UserService;
+import com.hoolink.manage.base.service.*;
 import com.hoolink.manage.base.util.RegexUtil;
 import com.hoolink.manage.base.util.SpringUtils;
+import com.hoolink.manage.base.util.UserUtil;
 import com.hoolink.manage.base.vo.req.EnableOrDisableUserParamVO;
 import com.hoolink.sdk.bo.BackBO;
 import com.hoolink.sdk.bo.ability.ObsBO;
@@ -39,16 +30,7 @@ import com.hoolink.sdk.bo.edm.MobileFileBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogBO;
 import com.hoolink.sdk.bo.edm.OperateFileLogParamBO;
 import com.hoolink.sdk.bo.edm.RepertoryBO;
-import com.hoolink.sdk.bo.manager.DeptPairBO;
-import com.hoolink.sdk.bo.manager.DeptSecurityRepertoryBO;
-import com.hoolink.sdk.bo.manager.ManageDepartmentBO;
-import com.hoolink.sdk.bo.manager.ManageUserDeptBO;
-import com.hoolink.sdk.bo.manager.ManageUserInfoBO;
-import com.hoolink.sdk.bo.manager.ManagerUserBO;
-import com.hoolink.sdk.bo.manager.OrganizationInfoParamBO;
-import com.hoolink.sdk.bo.manager.SimpleDeptUserBO;
-import com.hoolink.sdk.bo.manager.UserDeptAssociationBO;
-import com.hoolink.sdk.bo.manager.UserDeptInfoBO;
+import com.hoolink.sdk.bo.manager.*;
 import com.hoolink.sdk.constants.ContextConstant;
 import com.hoolink.sdk.enums.DeptTypeEnum;
 import com.hoolink.sdk.enums.EncryLevelEnum;
@@ -57,28 +39,7 @@ import com.hoolink.sdk.enums.StatusEnum;
 import com.hoolink.sdk.enums.edm.EdmDeptEnum;
 import com.hoolink.sdk.exception.BusinessException;
 import com.hoolink.sdk.exception.HoolinkExceptionMassageEnum;
-import com.hoolink.sdk.utils.ArrayUtil;
-import com.hoolink.sdk.utils.ContextUtil;
-import com.hoolink.sdk.utils.CopyPropertiesUtil;
-import com.hoolink.sdk.utils.MD5Util;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import com.hoolink.sdk.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -92,6 +53,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.Resource;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author: xuli
@@ -141,13 +109,12 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private ManageRoleMapper manageRoleMapper;
-    
+
     @Autowired
     private EdmClient edmClient;
 
     @Autowired
     private RegexUtil regexUtil;
-
 
     /*** 验证码超时时间，10分钟 */
     private static final long TIMEOUT_MINUTES = 10;
@@ -155,7 +122,7 @@ public class UserServiceImpl implements UserService {
     private static final long REPEAT_PERIOD = 1;
 
     @Override
-    public LoginResultBO login(LoginParamBO loginParam,Boolean isMobile) throws Exception {
+    public LoginResultBO login(LoginParamBO loginParam, Boolean isMobile) throws Exception {
         /*
          * 1.校验：1).检查用户及密码能否关联到用户  2).检查客户被禁用  3).检查用户是否被禁用  4).检查用户所属角色是否被禁用
          * 2.返回Token，是否第一次登录（用于用户协议确认），密码是否被重置（用于强制修改密码），最后一次项目
@@ -163,13 +130,13 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(loginParam.getAccount())
-                .andPasswdEqualTo(MD5Util.MD5(loginParam.getPasswd()));
+                .andPasswdEqualTo(UserUtil.getMD5Password(loginParam.getPasswd()));
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
 
         // 检查用户密码错误,用户是否被禁用，角色是否被禁用
         checkAccount(user);
         // 缓存当前用户
-        String token = cacheSession(user,isMobile,true);
+        String token = cacheSession(user, isMobile, true);
 
         //设置登陆时间
         User toUpdateUser = new User();
@@ -178,7 +145,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateByPrimaryKeySelective(toUpdateUser);
 
         //查询角色
-        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
+        ManageRole manageRole = manageRoleMapper.selectByPrimaryKey(user.getRoleId());
 
         LoginResultBO loginResult = new LoginResultBO();
         loginResult.setToken(token);
@@ -212,49 +179,47 @@ public class UserServiceImpl implements UserService {
         } else {
             loginResult.setAccessHoolink(false);
         }
-        addRepertory(roleMenuPermissionList,loginResult,null);
+        addRepertory(roleMenuPermissionList, loginResult, null);
         return loginResult;
     }
 
-    private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList,LoginResultBO loginResult,UserInfoBO userInfoBO){
-        List<RepertoryBO> edmRepertory=new ArrayList<>();
-        List<RepertoryBO> repertory=new ArrayList<>();
-        if(roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            RepertoryBO repertoryBO=new RepertoryBO();
+    private void addRepertory(List<RoleMenuPermissionBO> roleMenuPermissionList, LoginResultBO loginResult, UserInfoBO userInfoBO) {
+        List<RepertoryBO> edmRepertory = new ArrayList<>();
+        List<RepertoryBO> repertory = new ArrayList<>();
+        if (roleMenuPermissionList.stream().filter(rmp -> Constant.DEPT_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()) {
+            RepertoryBO repertoryBO = new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_ONE);
             repertoryBO.setName(Constant.REPERTORY_ONE_NAME);
             repertory.add(repertoryBO);
             edmRepertory.add(repertoryBO);
         }
-        if(roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            RepertoryBO repertoryBO=new RepertoryBO();
+        if (roleMenuPermissionList.stream().filter(rmp -> Constant.CACHE_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()) {
+            RepertoryBO repertoryBO = new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_TWO);
             repertoryBO.setName(Constant.REPERTORY_TWO_NAME);
             edmRepertory.add(repertoryBO);
         }
-        if(roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()){
-            RepertoryBO repertoryBO=new RepertoryBO();
+        if (roleMenuPermissionList.stream().filter(rmp -> Constant.COMPANY_REPERTORY.equals(rmp.getMenuCode())).findFirst().isPresent()) {
+            RepertoryBO repertoryBO = new RepertoryBO();
             repertoryBO.setType(Constant.REPERTORY_THREE);
             repertoryBO.setName(Constant.REPERTORY_THREE_NAME);
             repertory.add(repertoryBO);
             edmRepertory.add(repertoryBO);
         }
-        if(loginResult!=null) {
+        if (loginResult != null) {
             loginResult.setEdmRepertory(edmRepertory);
             loginResult.setRepertoryList(repertory);
         }
-        if(userInfoBO!=null){
+        if (userInfoBO != null) {
             userInfoBO.setEdmRepertory(edmRepertory);
         }
     }
-
-
 
     @Override
     public void logout() {
         CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByToken());
         InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.TOKEN);
+        String token = context.getContext(ContextConstant.TOKEN);
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
             sessionService.deleteSession(currentUser.getUserId());
@@ -265,7 +230,7 @@ public class UserServiceImpl implements UserService {
     public void mobileLogout() {
         CurrentUserBO currentUser = sessionService.getMobileCurrentUser(sessionService.getUserIdByMobileToken());
         InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.MOBILE_TOKEN);
+        String token = context.getContext(ContextConstant.MOBILE_TOKEN);
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getMobileToken(), token)) {
             sessionService.deleteMobileSession(currentUser.getUserId());
@@ -273,14 +238,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CurrentUserBO getSessionUser(String token,boolean ismobile) {
+    public CurrentUserBO getSessionUser(String token, boolean ismobile) {
         // 获取当前 session 中的用户
-        CurrentUserBO currentUser = sessionService.getCurrentUser(token,ismobile);
+        CurrentUserBO currentUser = sessionService.getCurrentUser(token, ismobile);
         if (currentUser == null) {
             return null;
         }
         // 刷新 session 失效时间
-        if (!sessionService.refreshSession(currentUser.getUserId(),ismobile)) {
+        if (!sessionService.refreshSession(currentUser.getUserId(), ismobile)) {
             return null;
         }
         return currentUser;
@@ -290,40 +255,40 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(LoginParamBO loginParam) throws Exception {
         verifyOldPasswdOrCode(loginParam);
-        Long userId=sessionService.getUserIdByToken();
-        User user=new User();
-        if(userId==null) {
+        Long userId = sessionService.getUserIdByToken();
+        User user = new User();
+        if (userId == null) {
             user = getUserByAccount(loginParam.getAccount());
-            userId=user.getId();
+            userId = user.getId();
         }
         //重置密码,并且设置不是首次登录
         user.setId(userId);
-        user.setPasswd(MD5Util.MD5(loginParam.getPasswd()));
+        user.setPasswd(UserUtil.getMD5Password(loginParam.getPasswd()));
         user.setUpdated(System.currentTimeMillis());
         user.setUpdator(userId);
         user.setFirstLogin(false);
         userMapper.updateByPrimaryKeySelective(user);
     }
 
-    private void verifyOldPasswdOrCode(LoginParamBO loginParam){
-        String oldPassword=loginParam.getOldPasswd();
-        String code=loginParam.getCode();
-        UserExample example=new UserExample();
+    private void verifyOldPasswdOrCode(LoginParamBO loginParam) {
+        String oldPassword = loginParam.getOldPasswd();
+        String code = loginParam.getCode();
+        UserExample example = new UserExample();
         example.createCriteria().andUserAccountEqualTo(loginParam.getAccount()).andEnabledEqualTo(true);
-        User user=userMapper.selectByExample(example).stream().findFirst().orElse(null);
-        if(user!=null){
-            if(StringUtils.isNotBlank(oldPassword)){
-                if(!Objects.equals(MD5Util.MD5(oldPassword),user.getPasswd())){
+        User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
+        if (user != null) {
+            if (StringUtils.isNotBlank(oldPassword)) {
+                if (!Objects.equals(UserUtil.getMD5Password(oldPassword), user.getPasswd())) {
                     throw new BusinessException(HoolinkExceptionMassageEnum.RESET_PASSWORD_ERROR);
                 }
             }
-            if(StringUtils.isNotBlank(code)){
-                PhoneParamBO phoneParamBO=new PhoneParamBO();
+            if (StringUtils.isNotBlank(code)) {
+                PhoneParamBO phoneParamBO = new PhoneParamBO();
                 phoneParamBO.setCode(code);
                 phoneParamBO.setPhone(user.getPhone());
                 checkPhoneCode(phoneParamBO);
             }
-            if(StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)){
+            if (StringUtils.isBlank(oldPassword) && StringUtils.isBlank(code)) {
                 throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
             }
         }
@@ -338,7 +303,7 @@ public class UserServiceImpl implements UserService {
         //生成随机4位数字
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //发送手机验证码
-        sendPhoneCode(code,phone);
+        sendPhoneCode(code, phone);
         // 缓存剩余时间
         Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.PHONE_CODE_PREFIX + phone, TimeUnit.MINUTES);
         // 默认1分钟之内仅进行1次验证码发送业务
@@ -357,7 +322,7 @@ public class UserServiceImpl implements UserService {
         //生成随机4位数字
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //发送验证码
-        sendPhoneCode(code,phone);
+        sendPhoneCode(code, phone);
         // 缓存剩余时间
         Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.BIND_PHONE_PREFIX + phone, TimeUnit.MINUTES);
         // 默认1分钟之内仅进行1次验证码发送业务
@@ -374,7 +339,7 @@ public class UserServiceImpl implements UserService {
         //生成随机4位数字
         String code = RandomStringUtils.randomNumeric(Constant.PHONE_COED_LENGTH);
         //发送验证码
-        sendPhoneCode(code,phone);
+        sendPhoneCode(code, phone);
         // 缓存剩余时间
         Long remainingTime = stringRedisTemplate.opsForValue().getOperations().getExpire(Constant.MODIFY_PHONE_PREFIX + phone, TimeUnit.MINUTES);
         // 默认1分钟之内仅进行1次验证码发送业务
@@ -506,9 +471,9 @@ public class UserServiceImpl implements UserService {
             }
         }
         List<RoleMenuPermissionBO> roleMenuPermissionList = roleService.listMenuAccessByRoleId(user.getRoleId());
-        addRepertory(roleMenuPermissionList,null,userInfoBO);
+        addRepertory(roleMenuPermissionList, null, userInfoBO);
         //查询角色
-        ManageRole manageRole=manageRoleMapper.selectByPrimaryKey(user.getRoleId());
+        ManageRole manageRole = manageRoleMapper.selectByPrimaryKey(user.getRoleId());
         userInfoBO.setRoleName(manageRole.getRoleName());
         userInfoBO.setRoleLevel(manageRole.getRoleLevel());
         userInfoBO.setUserId(userId);
@@ -544,15 +509,15 @@ public class UserServiceImpl implements UserService {
         if (user.getStatus() == null || !user.getStatus()) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_FORBIDDEN);
         }
-        Long roleId=user.getRoleId();
-        ManageRole role=manageRoleMapper.selectByPrimaryKey(roleId);
-        if(role!=null && !role.getRoleStatus()){
+        Long roleId = user.getRoleId();
+        ManageRole role = manageRoleMapper.selectByPrimaryKey(roleId);
+        if (role != null && !role.getRoleStatus()) {
             throw new BusinessException(HoolinkExceptionMassageEnum.USER_ROLE_DISABLED);
         }
     }
 
     @Override
-    public String cacheSession(User user,Boolean isMobile,Boolean resetToken) throws Exception {
+    public String cacheSession(User user, Boolean isMobile, Boolean resetToken) throws Exception {
         CurrentUserBO currentUserBO = new CurrentUserBO();
         currentUserBO.setUserId(user.getId());
         currentUserBO.setAccount(user.getUserAccount());
@@ -574,12 +539,12 @@ public class UserServiceImpl implements UserService {
         currentUserBO.setAccessUrlSet(roleService.listAccessUrlByRoleId(user.getRoleId()));
         //设置角色类型
         currentUserBO.setRoleType(role.getRoleType());
-        if(resetToken){
+        if (resetToken) {
             //更新token
-            return sessionService.cacheCurrentUser(currentUserBO,isMobile);
-        }else{
+            return sessionService.cacheCurrentUser(currentUserBO, isMobile);
+        } else {
             //维持用户原token
-            return sessionService.cacheCurrentUserInfo(currentUserBO,isMobile);
+            return sessionService.cacheCurrentUserInfo(currentUserBO, isMobile);
         }
     }
 
@@ -619,12 +584,12 @@ public class UserServiceImpl implements UserService {
         if (userPageParamBO.getPageNo() == null || userPageParamBO.getPageSize() == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PARAM_ERROR);
         }
-        
-		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
-		if(CollectionUtils.isEmpty(roleList)) {
-			return new PageInfo<ManagerUserBO>();
-		}
+
+        //只能看见当前用户对应角色的所有子角色用户
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleList)) {
+            return new PageInfo<ManagerUserBO>();
+        }
         UserExample example = buildUserCriteria(userPageParamBO);
         PageInfo<User> userPageInfo = PageHelper
                 .startPage(userPageParamBO.getPageNo(), userPageParamBO.getPageSize())
@@ -647,11 +612,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<ManagerUserBO> listWithOutPage(ManagerUserPageParamBO userPageParamBO) throws Exception {
-		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
-		if(CollectionUtils.isEmpty(roleList)) {
-			return Collections.emptyList();
-		}
+        //只能看见当前用户对应角色的所有子角色用户
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        if (CollectionUtils.isEmpty(roleList)) {
+            return Collections.emptyList();
+        }
         UserExample example = buildUserCriteria(userPageParamBO);
         return buildUserBOList(userMapper.selectByExample(example));
     }
@@ -661,9 +626,9 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andEnabledEqualTo(true)
                 .andUserAccountEqualTo(ContextUtil.getManageCurrentUser().getAccount())
-                .andPasswdEqualTo(MD5Util.MD5(password));
+                .andPasswdEqualTo(UserUtil.getMD5Password(password));
         User user = userMapper.selectByExample(example).stream().findFirst().orElse(null);
-        if(user!=null){
+        if (user != null) {
             return true;
         }
         return false;
@@ -684,107 +649,108 @@ public class UserServiceImpl implements UserService {
         Map<Long, List<MiddleUserDeptWithMoreBO>> middleUserDepartmentMap = middleUserDepartmentBOList.stream()
                 .collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getUserId));
 
-		//查询用户对应角色
-		List<Long> roleIdList = userList.stream().map(user -> user.getRoleId()).collect(Collectors.toList());
-		List<ManageRoleBO> roleList = roleService.listByIdList(roleIdList);
-		
-		List<ManagerUserBO> userBoList = new ArrayList<>();
-		userList.stream().forEach(user -> {
-			//封装结果
-			ManagerUserBO userBO = new ManagerUserBO();
-			userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
-			userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-			ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
-					.orElseGet(ManageRoleBO::new);
-			userBO.setRoleName(role.getRoleName());
-			
-			List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
-			
-			if(CollectionUtils.isNotEmpty(userDepartmentList)) {
-				// 用户组织关系
-				Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+        //查询用户对应角色
+        List<Long> roleIdList = userList.stream().map(user -> user.getRoleId()).collect(Collectors.toList());
+        List<ManageRoleBO> roleList = roleService.listByIdList(roleIdList);
 
-				List<DeptPairBO> deptPairList = new ArrayList<>();
-				for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
-					List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
-					DeptPairBO deptPair = new DeptPairBO();
-					deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
-					deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
+        List<ManagerUserBO> userBoList = new ArrayList<>();
+        userList.stream().forEach(user -> {
+            //封装结果
+            ManagerUserBO userBO = new ManagerUserBO();
+            userBO.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+            userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+            ManageRoleBO role = roleList.stream().filter(r -> r.getId().equals(user.getRoleId())).findFirst()
+                    .orElseGet(ManageRoleBO::new);
+            userBO.setRoleName(role.getRoleName());
 
-					if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
-						deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
-						deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
-					}
-					deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "":deptPair.getEncryLevelDeptName()).toString());
-					deptPairList.add(deptPair);
-				}
-				userBO.setUserDeptPairList(deptPairList);
+            List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
 
-				Set<String> companySet = new HashSet<>();
-				userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
-						.forEach(ud -> companySet.add(ud.getDeptName()));
-				userBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
-			}
-			
-			BeanUtils.copyProperties(user, userBO);
-			userBoList.add(userBO);
-		});
-		return userBoList;
-	}
+            if (CollectionUtils.isNotEmpty(userDepartmentList)) {
+                // 用户组织关系
+                Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
-	/**
-	 * 用户列表查询条件
-	 * @param userPageParamBO
-	 * @return
-	 */
-	private UserExample buildUserCriteria(ManagerUserPageParamBO userPageParamBO) {
-		UserExample userExample = new UserExample();
-		UserExample.Criteria criteria = userExample.createCriteria();
-		//姓名、职位、手机号、账号
-		if(StringUtils.isNotBlank(userPageParamBO.getGroupParam())) {
-			andCriteria(criteria, userPageParamBO);
-			criteria.andNameLike("%" + userPageParamBO.getGroupParam() + "%");
+                List<DeptPairBO> deptPairList = new ArrayList<>();
+                for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
+                    List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
+                    DeptPairBO deptPair = new DeptPairBO();
+                    deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
+                    deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
 
-			UserExample.Criteria groupCriteria1 = userExample.createCriteria();
-			andCriteria(groupCriteria1, userPageParamBO);
-			groupCriteria1.andPositionLike("%" + userPageParamBO.getGroupParam() + "%");
-			userExample.or(groupCriteria1);
+                    if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
+                        deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
+                        deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
+                    }
+                    deptPair.setDeptNameEncryLevelPair(new StringBuilder(StringUtils.join(deptPair.getDeptNameList(), Constant.RUNG)).append(Constant.BACKSLASH).append(StringUtils.isEmpty(deptPair.getEncryLevelDeptName()) ? "" : deptPair.getEncryLevelDeptName()).toString());
+                    deptPairList.add(deptPair);
+                }
+                userBO.setUserDeptPairList(deptPairList);
 
-			UserExample.Criteria groupCriteria2 = userExample.createCriteria();
-			andCriteria(groupCriteria2, userPageParamBO);
-			groupCriteria2.andPhoneLike("%" + userPageParamBO.getGroupParam() + "%");
-			userExample.or(groupCriteria2);
+                Set<String> companySet = new HashSet<>();
+                userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType()))
+                        .forEach(ud -> companySet.add(ud.getDeptName()));
+                userBO.setCompany(StringUtils.join(companySet, Constant.COMMA));
+            }
 
-			UserExample.Criteria groupCriteria3 = userExample.createCriteria();
-			andCriteria(groupCriteria3, userPageParamBO);
-			groupCriteria3.andUserAccountLike("%" + userPageParamBO.getGroupParam() + "%");
-			userExample.or(groupCriteria3);
-		}else {
-			andCriteria(criteria, userPageParamBO);
-		}
-		userExample.setOrderByClause(" created desc ");
-		return userExample;
-	}
+            BeanUtils.copyProperties(user, userBO);
+            userBoList.add(userBO);
+        });
+        return userBoList;
+    }
 
-	private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
-		if(CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
-			List<Long> deptIdList = userPageParamBO.getDeptId();
-			transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size()-1)));
-		}
-		if(userPageParamBO.getRoleId() != null) {
-			criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
-		}
-		if(userPageParamBO.getStatus() != null) {
-			criteria.andStatusEqualTo(userPageParamBO.getStatus());
-		}
-		//只能看见当前用户对应角色的所有子角色用户
-		List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
-		criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
+    /**
+     * 用户列表查询条件
+     *
+     * @param userPageParamBO
+     * @return
+     */
+    private UserExample buildUserCriteria(ManagerUserPageParamBO userPageParamBO) {
+        UserExample userExample = new UserExample();
+        UserExample.Criteria criteria = userExample.createCriteria();
+        //姓名、职位、手机号、账号
+        if (StringUtils.isNotBlank(userPageParamBO.getGroupParam())) {
+            andCriteria(criteria, userPageParamBO);
+            criteria.andNameLike("%" + userPageParamBO.getGroupParam() + "%");
 
-		criteria.andEnabledEqualTo(true);
-		//登录用户本身应该过滤掉，不可以看到
-		criteria.andIdNotEqualTo(getCurrentUserId());
-	}
+            UserExample.Criteria groupCriteria1 = userExample.createCriteria();
+            andCriteria(groupCriteria1, userPageParamBO);
+            groupCriteria1.andPositionLike("%" + userPageParamBO.getGroupParam() + "%");
+            userExample.or(groupCriteria1);
+
+            UserExample.Criteria groupCriteria2 = userExample.createCriteria();
+            andCriteria(groupCriteria2, userPageParamBO);
+            groupCriteria2.andPhoneLike("%" + userPageParamBO.getGroupParam() + "%");
+            userExample.or(groupCriteria2);
+
+            UserExample.Criteria groupCriteria3 = userExample.createCriteria();
+            andCriteria(groupCriteria3, userPageParamBO);
+            groupCriteria3.andUserAccountLike("%" + userPageParamBO.getGroupParam() + "%");
+            userExample.or(groupCriteria3);
+        } else {
+            andCriteria(criteria, userPageParamBO);
+        }
+        userExample.setOrderByClause(" created desc ");
+        return userExample;
+    }
+
+    private void andCriteria(UserExample.Criteria criteria, ManagerUserPageParamBO userPageParamBO) {
+        if (CollectionUtils.isNotEmpty(userPageParamBO.getDeptId())) {
+            List<Long> deptIdList = userPageParamBO.getDeptId();
+            transformDeptQueryToUserIdQuery(criteria, Arrays.asList(deptIdList.get(deptIdList.size() - 1)));
+        }
+        if (userPageParamBO.getRoleId() != null) {
+            criteria.andRoleIdEqualTo(userPageParamBO.getRoleId());
+        }
+        if (userPageParamBO.getStatus() != null) {
+            criteria.andStatusEqualTo(userPageParamBO.getStatus());
+        }
+        //只能看见当前用户对应角色的所有子角色用户
+        List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
+        criteria.andRoleIdIn(roleList.stream().map(r -> r.getId()).collect(Collectors.toList()));
+
+        criteria.andEnabledEqualTo(true);
+        //登录用户本身应该过滤掉，不可以看到
+        criteria.andIdNotEqualTo(getCurrentUserId());
+    }
 
     /**
      * 将组织相关的查询条件转换为id条件
@@ -863,11 +829,11 @@ public class UserServiceImpl implements UserService {
         user.setCreated(System.currentTimeMillis());
         user.setEnabled(true);
         user.setFirstLogin(true);
-        if (Objects.isNull(user.getReceiveSms())){
+        if (Objects.isNull(user.getReceiveSms())) {
             user.setReceiveSms(false);
         }
-        //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
-        user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
+        // --- 初始化密码
+        user.setPasswd(UserUtil.getDefaultPassword());
         userMapper.insertSelective(user);
 
         //新增用户组织对应关系
@@ -1022,16 +988,16 @@ public class UserServiceImpl implements UserService {
         deptPairList.stream().forEach(dp -> {
             String diffDeptGroup = generateRandom();
             List<Long> deptIdList = dp.getDeptIdList();
-            for(int i=0; i<deptIdList.size(); i++) {
-            	Long deptId = deptIdList.get(i);
+            for (int i = 0; i < deptIdList.size(); i++) {
+                Long deptId = deptIdList.get(i);
                 MiddleUserDepartmentBO middleUserDept = new MiddleUserDepartmentBO();
                 middleUserDept.setDeptId(deptId);
                 middleUserDept.setUserId(userId);
                 middleUserDept.setEncryLevelDept(dp.getEncryLevelDept());
                 middleUserDept.setDiffDeptGroup(diffDeptGroup);
                 middleUserDept.setLowestLevel(false);
-                if(i == deptIdList.size()-1) {
-                	middleUserDept.setLowestLevel(true);	
+                if (i == deptIdList.size() - 1) {
+                    middleUserDept.setLowestLevel(true);
                 }
                 middleUserDeptList.add(middleUserDept);
             }
@@ -1079,10 +1045,10 @@ public class UserServiceImpl implements UserService {
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         user.setUpdated(System.currentTimeMillis());
         userMapper.updateByPrimaryKeySelective(user);
-        if(CollectionUtils.isNotEmpty(deptPairList)){
+        if (CollectionUtils.isNotEmpty(deptPairList)) {
             //更新了组织架构，就退出登录
             sessionService.deleteSession(userBO.getId());
-        }else {
+        } else {
             //更新一下当前用户
             cacheSession(userMapper.selectByPrimaryKey(userBO.getId()), false, false);
             cacheSession(userMapper.selectByPrimaryKey(userBO.getId()), true, false);
@@ -1112,16 +1078,16 @@ public class UserServiceImpl implements UserService {
             manageUserInfoBO.setCompanyId(userCompany.stream().map(UserDeptBO::getDeptId).collect(Collectors.toList()));
         }
         List<UserDeptBO> userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.POSITION.getKey().longValue());
-        if(CollectionUtils.isEmpty(userDept)){
+        if (CollectionUtils.isEmpty(userDept)) {
             userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.DEPT.getKey().longValue());
-            if(CollectionUtils.isEmpty(userDept)){
+            if (CollectionUtils.isEmpty(userDept)) {
                 userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.SYSTEM_CENTER.getKey().longValue());
-                if(CollectionUtils.isEmpty(userDept)){
+                if (CollectionUtils.isEmpty(userDept)) {
                     userDept = middleUserDepartmentMapperExt.getUserDept(id, EdmDeptEnum.COMPANY.getKey().longValue());
                 }
             }
         }
-        manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept,ManageUserDeptBO.class));
+        manageUserInfoBO.setUserDeptPairList(CopyPropertiesUtil.copyList(userDept, ManageUserDeptBO.class));
         return manageUserInfoBO;
     }
 
@@ -1164,8 +1130,8 @@ public class UserServiceImpl implements UserService {
     public boolean removeUser(Long id) {
         User user = buildUserToUpdate(id);
         user.setEnabled(false);
-        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        CurrentUserBO currentUser=new CurrentUserBO();
+        boolean flag = userMapper.updateByPrimaryKeySelective(user) == 1;
+        CurrentUserBO currentUser = new CurrentUserBO();
         currentUser.setUserId(user.getId());
         currentUser.setEnabled(false);
         sessionService.cacheCurrentUserInfo(currentUser);
@@ -1177,8 +1143,8 @@ public class UserServiceImpl implements UserService {
     public boolean enableOrDisableUser(EnableOrDisableUserParamVO param) {
         User user = buildUserToUpdate(param.getId());
         user.setStatus(param.getStatus());
-        boolean flag=userMapper.updateByPrimaryKeySelective(user) == 1;
-        CurrentUserBO currentUser=new CurrentUserBO();
+        boolean flag = userMapper.updateByPrimaryKeySelective(user) == 1;
+        CurrentUserBO currentUser = new CurrentUserBO();
         currentUser.setUserId(user.getId());
         currentUser.setStatus(param.getStatus());
         sessionService.cacheCurrentUserInfo(currentUser);
@@ -1199,52 +1165,52 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-	@Override
-	public PersonalInfoBO getPersonalInfo() throws Exception{
-        Long userId=sessionService.getUserIdByToken();
-        CurrentUserBO currentUserBO=sessionService.getCurrentUser(userId);
-        if(currentUserBO==null){
+    @Override
+    public PersonalInfoBO getPersonalInfo() throws Exception {
+        Long userId = sessionService.getUserIdByToken();
+        CurrentUserBO currentUserBO = sessionService.getCurrentUser(userId);
+        if (currentUserBO == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
         }
-		User user = userMapper.selectByPrimaryKey(userId);
-		if(user == null) {
-			throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
-		}
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (user == null) {
+            throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
+        }
 
-		PersonalInfoBO personalInfo = new PersonalInfoBO();
-		BeanUtils.copyProperties(user, personalInfo);
-		if(user.getImgId() != null) {
-			//调用obs服务获取用户头像
-			BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
-			if(obsBackBo.getData() != null) {
-				personalInfo.setImgUrl(obsBackBo.getData().getObjectUrl());
-			}
-		}
+        PersonalInfoBO personalInfo = new PersonalInfoBO();
+        BeanUtils.copyProperties(user, personalInfo);
+        if (user.getImgId() != null) {
+            //调用obs服务获取用户头像
+            BackBO<ObsBO> obsBackBo = abilityClient.getObs(user.getImgId());
+            if (obsBackBo.getData() != null) {
+                personalInfo.setImgUrl(obsBackBo.getData().getObjectUrl());
+            }
+        }
 
-		List<ManageRoleBO> roleList = roleService.listByIdList(Arrays.asList(user.getRoleId()));
-		if(CollectionUtils.isNotEmpty(roleList)) {
-			personalInfo.setRoleName(roleList.get(0).getRoleName());
-		}
-		personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
-		personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
-		personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
+        List<ManageRoleBO> roleList = roleService.listByIdList(Arrays.asList(user.getRoleId()));
+        if (CollectionUtils.isNotEmpty(roleList)) {
+            personalInfo.setRoleName(roleList.get(0).getRoleName());
+        }
+        personalInfo.setEncryLevelCompanyName(EncryLevelEnum.getValue(user.getEncryLevelCompany()));
+        personalInfo.setStatusDesc(StatusEnum.getValue(user.getStatus()));
+        personalInfo.setSexDesc(ManagerUserSexEnum.getValue(user.getSex()));
 
-		// 获取组织树
-		List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
-				.listWithMoreByUserIdList(Arrays.asList(user.getId()));
-		Set<String> companySet = new HashSet<>();
-		userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
-			companySet.add(ud.getDeptName());
-		});
-		personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
-		// 用户组织关系
-		Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
+        // 获取组织树
+        List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentService
+                .listWithMoreByUserIdList(Arrays.asList(user.getId()));
+        Set<String> companySet = new HashSet<>();
+        userDepartmentList.stream().filter(ud -> DeptTypeEnum.COMPANY.getKey().equals(ud.getDeptType())).forEach(ud -> {
+            companySet.add(ud.getDeptName());
+        });
+        personalInfo.setCompany(StringUtils.join(companySet, Constant.COMMA));
+        // 用户组织关系
+        Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
 
-		List<DeptPairBO> deptPairList = new ArrayList<>();
-		fillDeptPairList(byDiffDeptGroupMap,deptPairList);
-		personalInfo.setUserDeptPairList(deptPairList);
-		return personalInfo;
-	}
+        List<DeptPairBO> deptPairList = new ArrayList<>();
+        fillDeptPairList(byDiffDeptGroupMap, deptPairList);
+        personalInfo.setUserDeptPairList(deptPairList);
+        return personalInfo;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -1253,7 +1219,7 @@ public class UserServiceImpl implements UserService {
         checkPhoneCode(updatePasswdParam.getPhoneParam());
         Long userId = getCurrentUserId();
         User user = buildUserToUpdate(userId);
-        user.setPasswd(MD5Util.MD5(updatePasswdParam.getPasswd()));
+        user.setPasswd(UserUtil.getMD5Password(updatePasswdParam.getPasswd()));
         userMapper.updateByPrimaryKeySelective(user);
         sessionService.deleteRedisUser(userId);
     }
@@ -1262,13 +1228,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void updateMobilePassword(MobileUpdateParamBO mobileUpdateParamBO) {
         Long userId = getCurrentUserId();
-        User user=userMapper.selectByPrimaryKey(userId);
-        if(!Objects.equals(MD5Util.MD5(mobileUpdateParamBO.getOldPassword()),user.getPasswd())){
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (!Objects.equals(UserUtil.getMD5Password(mobileUpdateParamBO.getOldPassword()), user.getPasswd())) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PASSWORD_ERROR);
         }
         user.setUpdator(ContextUtil.getManageCurrentUser().getUserId());
         user.setUpdated(System.currentTimeMillis());
-        user.setPasswd(MD5Util.MD5(mobileUpdateParamBO.getNewPassword()));
+        user.setPasswd(UserUtil.getMD5Password(mobileUpdateParamBO.getNewPassword()));
         userMapper.updateByPrimaryKeySelective(user);
         sessionService.deleteRedisUser(userId);
     }
@@ -1292,7 +1258,7 @@ public class UserServiceImpl implements UserService {
     public void resetPasswd(Long userId) {
         User user = buildUserToUpdate(userId);
         //MD5加密，和前端保持一致，"e+iot"拼接密码，加密两次,再后端加密MD5Util.MD5()
-        user.setPasswd(MD5Util.MD5(MD5Util.encode(MD5Util.encode(Constant.ENCODE_PASSWORD_PREFIX + Constant.INITIAL_PASSWORD))));
+        user.setPasswd(UserUtil.getDefaultPassword());
         user.setFirstLogin(true);
         userMapper.updateByPrimaryKeySelective(user);
         sessionService.deleteRedisUser(userId);
@@ -1336,16 +1302,17 @@ public class UserServiceImpl implements UserService {
         user.setUpdated(System.currentTimeMillis());
         return userMapper.updateByPrimaryKeySelective(user) == 1;
     }
+
     @Override
-    public UserDeptInfoBO getUserSecurity(Long userId) throws Exception{
+    public UserDeptInfoBO getUserSecurity(Long userId) throws Exception {
         UserSecurityBO userSecurity = middleUserDepartmentMapperExt.getUserSecurity(userId);
-        if(userSecurity==null){
+        if (userSecurity == null) {
             throw new BusinessException(HoolinkExceptionMassageEnum.DEPARTMENT_ENCRY_LEVEL_DEFAULT_NULL);
         }
         UserDeptInfoBO userDeptInfoBO = CopyPropertiesUtil.copyBean(userSecurity, UserDeptInfoBO.class);
         //组织架构都可与用户关联
         List<DeptSecurityBO> list = userSecurity.getList();
-        if(CollectionUtils.isNotEmpty(list)){
+        if (CollectionUtils.isNotEmpty(list)) {
             List<Long> positionList = new ArrayList<>();
             //key positionId
             Map<String, Integer> map = new HashMap<>(list.size());
@@ -1353,27 +1320,27 @@ public class UserServiceImpl implements UserService {
             Map<Long, Integer> dept = new HashMap<>(list.size());
             list.forEach(deptSecurityBO -> {
                 positionList.add(deptSecurityBO.getId());
-                if(!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getLowestLevel()){
-                    dept.put(deptSecurityBO.getId(),deptSecurityBO.getEncryLevelDept());
-                } else if(EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
-                        && deptSecurityBO.getLowestLevel()){
+                if (!EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getLowestLevel()) {
+                    dept.put(deptSecurityBO.getId(), deptSecurityBO.getEncryLevelDept());
+                } else if (EdmDeptEnum.POSITION.getKey().equals(deptSecurityBO.getDeptType().intValue())
+                        && deptSecurityBO.getLowestLevel()) {
                     //小组密保等级
-                    map.put(deptSecurityBO.getId().toString(),deptSecurityBO.getEncryLevelDept());
+                    map.put(deptSecurityBO.getId().toString(), deptSecurityBO.getEncryLevelDept());
                 }
             });
-            if(!org.springframework.util.CollectionUtils.isEmpty(dept)){
+            if (!org.springframework.util.CollectionUtils.isEmpty(dept)) {
                 List<Long> deptList = new ArrayList<>(dept.keySet());
                 //本身List也会被查出来
                 List<DeptPositionBO> deptPositionBOS = manageDepartmentMapperExt.listByParentIdCode(deptList);
-                if(CollectionUtils.isNotEmpty(deptPositionBOS)){
+                if (CollectionUtils.isNotEmpty(deptPositionBOS)) {
                     deptPositionBOS.forEach(deptPositionBO -> {
                         String parentIdCode = deptPositionBO.getParentIdCode();
                         String[] split = parentIdCode.split(Constant.UNDERLINE);
-                        for (int i=0;i<split.length;i++){
+                        for (int i = 0; i < split.length; i++) {
                             boolean flag = dept.containsKey(Long.parseLong(split[i]));
-                            if(flag){
-                                map.put(deptPositionBO.getId().toString(),dept.get(Long.parseLong(split[i])));
+                            if (flag) {
+                                map.put(deptPositionBO.getId().toString(), dept.get(Long.parseLong(split[i])));
                                 break;
                             }
                         }
@@ -1407,9 +1374,9 @@ public class UserServiceImpl implements UserService {
         // 根据用户id获取所在公司或者部门信息
         List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
         // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
-        if(Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())){
+        if (Constant.COMPANY_LEVEL.equals(paramBO.getDeptType())) {
             deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.COMPANY_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
-        }else if(Constant.DEPT_LEVEL.equals(paramBO.getDeptType())){
+        } else if (Constant.DEPT_LEVEL.equals(paramBO.getDeptType())) {
             deptIdList = userDeptInfoBOList.stream().filter(data -> Constant.DEPT_LEVEL.equals(data.getDeptType())).map(UserDeptAssociationBO::getDeptId).collect(Collectors.toList());
         }
         return deptIdList;
@@ -1430,12 +1397,12 @@ public class UserServiceImpl implements UserService {
         List<UserDeptAssociationBO> userDeptAssociationBOS = new ArrayList<>();
         // 根据用户id获取所在公司或者部门信息
         List<UserDeptAssociationBO> userDeptInfoBOList = middleUserDepartmentMapperExt.getOrganizationInfo(paramBO.getUserId());
-        if(CollectionUtils.isEmpty(userDeptInfoBOList)){
+        if (CollectionUtils.isEmpty(userDeptInfoBOList)) {
             throw new BusinessException(HoolinkExceptionMassageEnum.ORG_LIST_TREE_ERROR);
         }
         // 根据使用场景不同根据不同组织架构type过滤需要的deptId     1-公司 2-部门 3-小组
-        for(UserDeptAssociationBO userDeptAssociationBO : userDeptInfoBOList){
-            if(paramBO.getDeptType().equals(userDeptAssociationBO.getDeptType())){
+        for (UserDeptAssociationBO userDeptAssociationBO : userDeptInfoBOList) {
+            if (paramBO.getDeptType().equals(userDeptAssociationBO.getDeptType())) {
                 userDeptAssociationBOS.add(userDeptAssociationBO);
             }
         }
@@ -1444,20 +1411,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getUserNameByIds(List<Long> ids) {
-        if(CollectionUtils.isEmpty(ids)){
+        if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
-        UserExample example=new UserExample();
+        UserExample example = new UserExample();
         example.createCriteria().andIdIn(ids);
-        List<User> list=userMapper.selectByExample(example);
+        List<User> list = userMapper.selectByExample(example);
         return list;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDeviceCode(String deviceCode) throws Exception {
-        CurrentUserBO userBO=ContextUtil.getManageCurrentUser();
-        User user=new User();
+        CurrentUserBO userBO = ContextUtil.getManageCurrentUser();
+        User user = new User();
         user.setId(userBO.getUserId());
         user.setDeviceCode(deviceCode);
         //先删除拥有这个code的记录再更新
@@ -1468,22 +1435,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<MobileFileBO> getCompanyById(Long id) throws Exception {
-        if(id==null){
+        if (id == null) {
             return null;
         }
-        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
+        MiddleUserDepartmentExample example = new MiddleUserDepartmentExample();
         example.createCriteria().andUserIdEqualTo(id);
         //根据用户id获取所有的所属组织架构id
-        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
-        List<Long> departmentIds=list.stream().map(d -> d.getDeptId()).collect(Collectors.toList());
-        ManageDepartmentExample departmentExample=new ManageDepartmentExample();
+        List<MiddleUserDepartment> list = middleUserDepartmentMapper.selectByExample(example);
+        List<Long> departmentIds = list.stream().map(d -> d.getDeptId()).collect(Collectors.toList());
+        ManageDepartmentExample departmentExample = new ManageDepartmentExample();
         departmentExample.createCriteria().andIdIn(departmentIds);
         //根据他所属的所有组织架构id查询出公司层次的组织架构
-        List<ManageDepartment> manageDepartments=manageDepartmentMapper.selectByExample(departmentExample);
-        List<ManageDepartment> manageDepartment= manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(manageDepartment)){
-            List<MobileFileBO> mobileFiles=new ArrayList<>();
-            for(ManageDepartment department:manageDepartment) {
+        List<ManageDepartment> manageDepartments = manageDepartmentMapper.selectByExample(departmentExample);
+        List<ManageDepartment> manageDepartment = manageDepartments.stream().filter(m -> Constant.COMPANY_LEVEL.equals(m.getDeptType())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(manageDepartment)) {
+            List<MobileFileBO> mobileFiles = new ArrayList<>();
+            for (ManageDepartment department : manageDepartment) {
                 MobileFileBO mobileFileBO = new MobileFileBO();
                 mobileFileBO.setId(department.getId());
                 mobileFileBO.setName(department.getName());
@@ -1497,50 +1464,50 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<MobileFileBO> getDeptByParentId(Long id) throws Exception {
-        if(id==null){
+        if (id == null) {
             return null;
         }
         //查询下层的时候需要通过人的权限进行过滤
-        CurrentUserBO currentUserBO=ContextUtil.getManageCurrentUser();
-        List<DeptSecurityRepertoryBO> userList=userMapperExt.getDeptByUser(currentUserBO.getUserId());
+        CurrentUserBO currentUserBO = ContextUtil.getManageCurrentUser();
+        List<DeptSecurityRepertoryBO> userList = userMapperExt.getDeptByUser(currentUserBO.getUserId());
         //查询所选组织架构最底层的父级
-        MiddleUserDepartmentExample departmentExample=new MiddleUserDepartmentExample();
+        MiddleUserDepartmentExample departmentExample = new MiddleUserDepartmentExample();
         departmentExample.createCriteria().andUserIdEqualTo(currentUserBO.getUserId());
-        List<MiddleUserDepartment> middleUserDepartments=middleUserDepartmentMapper.selectByExample(departmentExample);
-        List<Long> deptId=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(middleUserDepartments)){
+        List<MiddleUserDepartment> middleUserDepartments = middleUserDepartmentMapper.selectByExample(departmentExample);
+        List<Long> deptId = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(middleUserDepartments)) {
             deptId.addAll(middleUserDepartments.stream().map(MiddleUserDepartment::getDeptId).collect(Collectors.toList()));
         }
-        for(DeptSecurityRepertoryBO deptSecurity:userList){
+        for (DeptSecurityRepertoryBO deptSecurity : userList) {
             deptId.add(deptSecurity.getDeptId());
-            List<DeptSecurityRepertoryBO> childs=deptSecurity.getChilds();
-            if(!CollectionUtils.isEmpty(childs)){
-                recursionUserDeptId(childs,deptId);
+            List<DeptSecurityRepertoryBO> childs = deptSecurity.getChilds();
+            if (!CollectionUtils.isEmpty(childs)) {
+                recursionUserDeptId(childs, deptId);
             }
         }
-        ManageDepartmentExample example=new ManageDepartmentExample();
+        ManageDepartmentExample example = new ManageDepartmentExample();
         example.createCriteria().andParentIdEqualTo(id).andIdIn(deptId);
         example.setOrderByClause(" convert(dept_name using gbk) collate gbk_chinese_ci asc ");
-        List<ManageDepartment> list=manageDepartmentMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(list)){
+        List<ManageDepartment> list = manageDepartmentMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) {
             return null;
         }
         //找出该级别下级的所有
-        List<Long> ids=list.stream().map(ManageDepartment::getId).collect(Collectors.toList());
+        List<Long> ids = list.stream().map(ManageDepartment::getId).collect(Collectors.toList());
         example.clear();
         example.createCriteria().andParentIdIn(ids);
-        List<ManageDepartment> childList=manageDepartmentMapper.selectByExample(example);
-        Map<Long,Long> childMap=childList.stream().collect(Collectors.toMap(ManageDepartment::getParentId,ManageDepartment::getId,(key1,key2)->key2));
-        List<MobileFileBO> mobileFile=new ArrayList<>();
-        list.stream().forEach(m ->{
-            MobileFileBO mobileFileBO=new MobileFileBO();
+        List<ManageDepartment> childList = manageDepartmentMapper.selectByExample(example);
+        Map<Long, Long> childMap = childList.stream().collect(Collectors.toMap(ManageDepartment::getParentId, ManageDepartment::getId, (key1, key2) -> key2));
+        List<MobileFileBO> mobileFile = new ArrayList<>();
+        list.stream().forEach(m -> {
+            MobileFileBO mobileFileBO = new MobileFileBO();
             mobileFileBO.setId(m.getId());
             mobileFileBO.setName(m.getName());
             mobileFileBO.setIfDepartment(true);
             //如果是小组类型就设置为是最下一级组织架构层级
-            if(childMap.get(m.getId())!=null){
+            if (childMap.get(m.getId()) != null) {
                 mobileFileBO.setIfLastDepartment(false);
-            }else{
+            } else {
                 mobileFileBO.setIfLastDepartment(true);
             }
             mobileFile.add(mobileFileBO);
@@ -1548,20 +1515,20 @@ public class UserServiceImpl implements UserService {
         return mobileFile;
     }
 
-    private void recursionUserDeptId(List<DeptSecurityRepertoryBO> deptSecurity,List<Long> deptids){
-        for(DeptSecurityRepertoryBO deptSecurityRepertory:deptSecurity){
+    private void recursionUserDeptId(List<DeptSecurityRepertoryBO> deptSecurity, List<Long> deptids) {
+        for (DeptSecurityRepertoryBO deptSecurityRepertory : deptSecurity) {
             deptids.add(deptSecurityRepertory.getDeptId());
-            if(!org.springframework.util.CollectionUtils.isEmpty(deptSecurityRepertory.getChilds())){
-                List<DeptSecurityRepertoryBO> list=deptSecurityRepertory.getChilds();
-                if(!org.springframework.util.CollectionUtils.isEmpty(list)){
-                    recursionUserDeptId(list,deptids);
+            if (!org.springframework.util.CollectionUtils.isEmpty(deptSecurityRepertory.getChilds())) {
+                List<DeptSecurityRepertoryBO> list = deptSecurityRepertory.getChilds();
+                if (!org.springframework.util.CollectionUtils.isEmpty(list)) {
+                    recursionUserDeptId(list, deptids);
                 }
             }
         }
     }
 
     @Override
-    public List<DeptSecurityRepertoryBO> getDeptByUser(Long id){
+    public List<DeptSecurityRepertoryBO> getDeptByUser(Long id) {
         return userMapperExt.getDeptByUser(id);
     }
 
@@ -1571,17 +1538,17 @@ public class UserServiceImpl implements UserService {
         return userBOList;
     }
 
-	@Override
-	public String uploadImage(MultipartFile multipartFile) {
-		BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
-		updateImage(obsBo.getData().getId());
+    @Override
+    public String uploadImage(MultipartFile multipartFile) {
+        BackBO<ObsBO> obsBo = abilityClient.uploadManager(multipartFile);
+        updateImage(obsBo.getData().getId());
         return obsBo.getData().getObjectUrl();
-	}
+    }
 
-	@Override
-	public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
-		return edmClient.listOperateLog(paramBO).getData();
-	}
+    @Override
+    public PageInfo<OperateFileLogBO> listOperateLog(OperateFileLogParamBO paramBO) throws Exception {
+        return edmClient.listOperateLog(paramBO).getData();
+    }
 
     @Override
     public SimpleDeptUserBO getUserByDeviceCode(String deviceCode) {
@@ -1589,19 +1556,20 @@ public class UserServiceImpl implements UserService {
         UserExample.Criteria criteria = example.createCriteria();
         criteria.andDeviceCodeEqualTo(deviceCode).andEnabledEqualTo(true);
         List<User> userList = userMapper.selectByExample(example);
-        if (CollectionUtils.isEmpty(userList)){
+        if (CollectionUtils.isEmpty(userList)) {
             return null;
         }
         SimpleDeptUserBO userBO = CopyPropertiesUtil.copyBean(userList.get(0), SimpleDeptUserBO.class);
         return userBO;
     }
+
     @Override
-    public List<ManagerUserBO> getPeopleInfo(List<Long>  userId) throws Exception{
+    public List<ManagerUserBO> getPeopleInfo(List<Long> userId) throws Exception {
         UserExample example = new UserExample();
         Criteria criteria = example.createCriteria();
         criteria.andIdIn(userId);
         List<User> users = userMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(users)) {
+        if (CollectionUtils.isEmpty(users)) {
             throw new BusinessException(HoolinkExceptionMassageEnum.MANAGER_USER_NOT_EXIST_ERROR);
         }
         // 获取组织树
@@ -1616,11 +1584,11 @@ public class UserServiceImpl implements UserService {
             userBO.setStatusDesc(StatusEnum.getValue(user.getStatus()));
             List<MiddleUserDeptWithMoreBO> userDepartmentList = middleUserDepartmentMap.get(user.getId());
 
-            if(CollectionUtils.isNotEmpty(userDepartmentList)) {
+            if (CollectionUtils.isNotEmpty(userDepartmentList)) {
                 // 用户组织关系
                 Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap = userDepartmentList.stream().collect(Collectors.groupingBy(MiddleUserDeptWithMoreBO::getDiffDeptGroup));
                 List<DeptPairBO> deptPairList = new ArrayList<>();
-                fillDeptPairList(byDiffDeptGroupMap,deptPairList);
+                fillDeptPairList(byDiffDeptGroupMap, deptPairList);
                 userBO.setUserDeptPairList(deptPairList);
             }
             BeanUtils.copyProperties(user, userBO);
@@ -1629,13 +1597,13 @@ public class UserServiceImpl implements UserService {
         return userBoList;
     }
 
-    private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList){
+    private void fillDeptPairList(Map<String, List<MiddleUserDeptWithMoreBO>> byDiffDeptGroupMap, List<DeptPairBO> deptPairList) {
         for (Map.Entry<String, List<MiddleUserDeptWithMoreBO>> entry : byDiffDeptGroupMap.entrySet()) {
             List<MiddleUserDeptWithMoreBO> deptWithMoreList = entry.getValue();
             DeptPairBO deptPair = new DeptPairBO();
             deptPair.setDeptIdList(deptWithMoreList.stream().map(dwm -> dwm.getDeptId()).collect(Collectors.toList()));
             deptPair.setDeptNameList(deptWithMoreList.stream().map(dwm -> dwm.getDeptName()).collect(Collectors.toList()));
-            if(CollectionUtils.isNotEmpty(deptWithMoreList)) {
+            if (CollectionUtils.isNotEmpty(deptWithMoreList)) {
                 deptPair.setEncryLevelDept(deptWithMoreList.get(0).getEncryLevelDept());
                 deptPair.setEncryLevelDeptName(EncryLevelEnum.getValue(deptWithMoreList.get(0).getEncryLevelDept()));
             }
@@ -1646,10 +1614,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Long> getParentDeptByUserId(Long userId) {
-        MiddleUserDepartmentExample example=new MiddleUserDepartmentExample();
+        MiddleUserDepartmentExample example = new MiddleUserDepartmentExample();
         example.createCriteria().andUserIdEqualTo(userId);
-        List<MiddleUserDepartment> list=middleUserDepartmentMapper.selectByExample(example);
-        if(CollectionUtils.isEmpty(list)){
+        List<MiddleUserDepartment> list = middleUserDepartmentMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) {
             return null;
         }
         return list.stream().map(m -> m.getDeptId()).collect(Collectors.toList());
@@ -1659,20 +1627,20 @@ public class UserServiceImpl implements UserService {
     public boolean checkHasRoleList(List<Long> roleIdList) throws Exception {
         //拿到当前用户下的所有角色对比
         List<ManageRoleBO> roleList = roleService.listChildrenRoleByRoleId(ContextUtil.getManageCurrentUser().getRoleId(), null);
-        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)){
+        if (CollectionUtils.isEmpty(roleIdList) || CollectionUtils.isEmpty(roleList)) {
             return false;
         }
         List<Long> myRoleIdList = roleList.stream().map(ManageRoleBO::getId).distinct().collect(Collectors.toList());
         return myRoleIdList.containsAll(roleIdList);
     }
 
-    private void matchPhone(String phone){
-        if(!regexUtil.matchPhone(phone)){
+    private void matchPhone(String phone) {
+        if (!regexUtil.matchPhone(phone)) {
             throw new BusinessException(HoolinkExceptionMassageEnum.PHONE_FORMAT_ERROR);
         }
     }
 
-    private void sendPhoneCode(String code,String phone){
+    private void sendPhoneCode(String code, String phone) {
         //调用ability发送验证码
         SmsBO smsBO = new SmsBO();
         smsBO.setContent(code);
