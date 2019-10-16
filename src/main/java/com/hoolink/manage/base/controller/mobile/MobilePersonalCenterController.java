@@ -10,10 +10,11 @@ import com.hoolink.sdk.utils.CopyPropertiesUtil;
 import com.hoolink.sdk.vo.BackVO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.ws.rs.core.MediaType;
+
 
 /**
  * 个人中心
@@ -43,7 +44,7 @@ public class MobilePersonalCenterController {
     	return BackVOUtil.operateAccess();
     }
     
-    @PostMapping(value = "uploadImage", consumes = MediaType.MULTIPART_FORM_DATA)
+    @PostMapping(value = "uploadImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(value = "个人中心保存头像")
     @LogAndParam(value = "个人中心保存头像失败")
     public BackVO<String> uploadImage(@RequestPart("file") MultipartFile multipartFile) throws Exception{

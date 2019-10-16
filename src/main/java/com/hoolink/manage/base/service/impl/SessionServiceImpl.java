@@ -6,10 +6,11 @@ import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.Base64Util;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.constants.ContextConstant;
+import com.hoolink.sdk.utils.ContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
-import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
+
+import org.springframework.boot.actuate.endpoint.InvocationContext;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author zhangxin
@@ -170,15 +170,13 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public Long getUserIdByToken() {
-        InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.TOKEN);
+        String token = ContextUtil.getManageCurrentUser().getToken();
         return getUserIdByToken(token);
     }
 
     @Override
     public Long getUserIdByMobileToken() {
-        InvocationContext context = ContextUtils.getInvocationContext();
-        String token =context.getContext(ContextConstant.MOBILE_TOKEN);
+        String token = ContextUtil.getManageCurrentUser().getToken();
         return getUserIdByToken(token);
     }
 

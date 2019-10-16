@@ -20,12 +20,13 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.ws.rs.core.MediaType;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -294,7 +295,7 @@ public class MobileUserController {
         return BackVOUtil.operateAccess();
     }
     
-    @PostMapping(value = "uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA)
+    @PostMapping(value = "uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(value = "excel上传")
     @LogAndParam(value = "excel上传失败")
     public BackVO<UserExcelDataVO> uploadExcel(@RequestPart("file") MultipartFile multipartFile, String deptIdList) throws Exception {

@@ -41,7 +41,7 @@ public class UserUtil {
      * 是否超级管理员用户
      */
     public static boolean isSuperAdmin() {
-        return CommonConstants.DEFAULT_USER_ID.equals(ContextUtil.getCurrentUser().getUserId());
+        return CommonConstants.DEFAULT_USER_ID.equals(ContextUtil.getManageCurrentUser().getUserId());
     }
 
     /**
@@ -55,7 +55,7 @@ public class UserUtil {
      * 是否管理员
      */
     public static boolean isAdmin() {
-        return UserConstant.USER_TYPE_ADMIN == ContextUtil.getCurrentUser().getUserType();
+        return UserConstant.USER_TYPE_ADMIN == ContextUtil.getManageCurrentUser().getUserType();
     }
 
     /**

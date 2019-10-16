@@ -2,12 +2,13 @@ package com.hoolink.manage.base.controller;
 
 import com.hoolink.manage.base.ManagerApplication;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.hoolink.sdk.utils.ContextUtil;
 import com.hoolink.sdk.utils.JSONUtils;
-import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
-import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
+
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.actuate.endpoint.InvocationContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -52,8 +53,7 @@ public abstract class TestController {
         baseUserBO.setUserId(9L);
         baseUserBO.setRoleId(1L);
         baseUserBO.setAccount("admin");
-        ContextUtils.setInvocationContext(invocationContext);
-        invocationContext.addContext("manageCurrentUser", JSONUtils.toJSONString(baseUserBO));
+        ContextUtil.setManageCurrentUser(baseUserBO);
     }
 
     /**

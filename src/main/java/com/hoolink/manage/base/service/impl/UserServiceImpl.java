@@ -47,10 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.servicecomb.swagger.invocation.context.ContextUtils;
-import org.apache.servicecomb.swagger.invocation.context.InvocationContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.InvocationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -224,8 +223,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void logout() {
         CurrentUserBO currentUser = sessionService.getCurrentUser(sessionService.getUserIdByToken());
-        InvocationContext context = ContextUtils.getInvocationContext();
-        String token = context.getContext(ContextConstant.TOKEN);
+//        InvocationContext context = ContextUtils.getInvocationContext();
+//        String token = context.getContext(ContextConstant.TOKEN);
+        String token = null;
         // 避免导致异地登录账号退出
         if (currentUser != null && Objects.equals(currentUser.getToken(), token)) {
             sessionService.deleteSession(currentUser.getUserId());
@@ -235,9 +235,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void mobileLogout() {
         CurrentUserBO currentUser = sessionService.getMobileCurrentUser(sessionService.getUserIdByMobileToken());
-        InvocationContext context = ContextUtils.getInvocationContext();
-        String token = context.getContext(ContextConstant.MOBILE_TOKEN);
+//        InvocationContext context = ContextUtils.getInvocationContext();
+//        String token = context.getContext(ContextConstant.MOBILE_TOKEN);
         // 避免导致异地登录账号退出
+        String token = null;
         if (currentUser != null && Objects.equals(currentUser.getMobileToken(), token)) {
             sessionService.deleteMobileSession(currentUser.getUserId());
         }
