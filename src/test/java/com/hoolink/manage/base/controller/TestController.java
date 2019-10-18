@@ -3,15 +3,11 @@ package com.hoolink.manage.base.controller;
 import com.hoolink.manage.base.ManagerApplication;
 import com.hoolink.sdk.bo.base.CurrentUserBO;
 import com.hoolink.sdk.utils.ContextUtil;
-import com.hoolink.sdk.utils.JSONUtils;
-
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.actuate.endpoint.InvocationContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -35,9 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class TestController {
 
     protected MockMvc mockMvc;
-
-    @SpyBean
-    protected InvocationContext invocationContext;
 
     @Before
     public void setUp(){
