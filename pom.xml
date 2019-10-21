@@ -140,7 +140,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
-
+    <!--logstash-->
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <version>4.11</version>
+    </dependency>
     <!--分布式链路追踪-->
     <!--<dependency>-->
       <!--<groupId>org.springframework.cloud</groupId>-->
