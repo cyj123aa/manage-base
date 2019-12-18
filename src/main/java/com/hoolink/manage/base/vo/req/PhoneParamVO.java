@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.vo.req;
 
-import com.hoolink.manage.base.vo.ManagerBaseGroup;
-import com.hoolink.sdk.annotation.valid.Mobile;
+import com.jw.sdk.annotation.valid.Mobile;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;

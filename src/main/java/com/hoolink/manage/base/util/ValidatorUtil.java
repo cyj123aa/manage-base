@@ -1,7 +1,7 @@
 package com.hoolink.manage.base.util;
 
-import com.hoolink.sdk.utils.BackVOUtil;
-import com.hoolink.sdk.vo.BackVO;
+import com.jw.sdk.utils.BackVOUtil;
+import com.jw.sdk.vo.BackVO;
 import org.apache.commons.collections4.CollectionUtils;
 
 import javax.validation.ConstraintViolation;

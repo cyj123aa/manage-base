@@ -4,13 +4,11 @@ package com.hoolink.manage.base.service.impl;
 import com.hoolink.manage.base.constant.RedisConstant;
 import com.hoolink.manage.base.service.SessionService;
 import com.hoolink.manage.base.util.Base64Util;
-import com.hoolink.sdk.bo.base.CurrentUserBO;
-import com.hoolink.sdk.constants.ContextConstant;
-import com.hoolink.sdk.utils.ContextUtil;
+import com.jw.sdk.bo.base.CurrentUserBO;
+import com.jw.sdk.utils.ContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
-import org.springframework.boot.actuate.endpoint.InvocationContext;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 

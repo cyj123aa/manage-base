@@ -1,6 +1,6 @@
 package com.hoolink.manage.base.vo.req;
 
-import com.hoolink.sdk.param.PageParam;
+import com.jw.sdk.param.PageParam;
 
 import lombok.Data;
 

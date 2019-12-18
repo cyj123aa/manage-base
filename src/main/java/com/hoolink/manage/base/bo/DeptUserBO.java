@@ -1,6 +1,5 @@
 package com.hoolink.manage.base.bo;
 
-import com.hoolink.manage.base.dao.model.User;
 import com.hoolink.sdk.bo.base.UserBO;
 import lombok.Data;
 

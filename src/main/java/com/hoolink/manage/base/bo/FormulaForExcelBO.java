@@ -1,7 +1,5 @@
 package com.hoolink.manage.base.bo;
 
-import com.hoolink.sdk.enums.ExcelDropDownTypeEnum;
-
 import lombok.Data;
 
 /**

@@ -1,7 +1,6 @@
 package com.hoolink.manage.base.service;
 
-import com.hoolink.manage.base.dao.model.User;
-import com.hoolink.sdk.bo.base.CurrentUserBO;
+import com.jw.sdk.bo.base.CurrentUserBO;
 
 import java.util.List;
 

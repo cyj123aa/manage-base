@@ -1,18 +1,17 @@
 package com.hoolink.manage.base.consumer.ability;
 
 import com.hoolink.manage.base.consumer.ability.feignback.AbilityFeignFallBack;
-import com.hoolink.sdk.annotation.ClientException;
-import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.ability.BucketBO;
-import com.hoolink.sdk.bo.ability.ObsBO;
-import com.hoolink.sdk.bo.ability.SmsBO;
+import com.jw.sdk.annotation.ClientException;
+import com.jw.sdk.bo.BackBO;
+import com.jw.sdk.bo.ability.BucketBO;
+import com.jw.sdk.bo.ability.ObsBO;
+import com.jw.sdk.bo.ability.SmsBO;
+import java.util.Map;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Map;
 
 /**
  * @Author : lys

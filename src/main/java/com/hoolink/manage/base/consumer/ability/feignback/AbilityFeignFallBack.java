@@ -1,10 +1,11 @@
 package com.hoolink.manage.base.consumer.ability.feignback;
 
 import com.hoolink.manage.base.consumer.ability.AbilityClient;
-import com.hoolink.sdk.bo.BackBO;
-import com.hoolink.sdk.bo.ability.BucketBO;
-import com.hoolink.sdk.bo.ability.ObsBO;
-import com.hoolink.sdk.bo.ability.SmsBO;
+import com.jw.sdk.bo.BackBO;
+
+import com.jw.sdk.bo.ability.BucketBO;
+import com.jw.sdk.bo.ability.ObsBO;
+import com.jw.sdk.bo.ability.SmsBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;

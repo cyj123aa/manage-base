@@ -1,9 +1,9 @@
 package com.hoolink.manage.base.util;
 
-import com.hoolink.sdk.constants.CommonConstants;
-import com.hoolink.sdk.constants.UserConstant;
-import com.hoolink.sdk.utils.ContextUtil;
-import com.hoolink.sdk.utils.PasswordUtil;
+import com.jw.sdk.constants.CommonConstants;
+import com.jw.sdk.constants.UserConstant;
+import com.jw.sdk.utils.ContextUtil;
+import com.jw.sdk.utils.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.DigestUtils;
 

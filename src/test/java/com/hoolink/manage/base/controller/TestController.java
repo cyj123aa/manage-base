@@ -1,8 +1,8 @@
 package com.hoolink.manage.base.controller;
 
 import com.hoolink.manage.base.ManagerApplication;
-import com.hoolink.sdk.bo.base.CurrentUserBO;
-import com.hoolink.sdk.utils.ContextUtil;
+import com.jw.sdk.bo.base.CurrentUserBO;
+import com.jw.sdk.utils.ContextUtil;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
